@@ -1,0 +1,71 @@
+name: ${COMPOSE_PROJECT_NAME:-daily-career-dev}
+services:
+  postgres:
+    image: postgres:17.11-alpine3.23@sha256:5a1b083da321ba67c86c3169d22778c561fa0935f17acbff7bbc0537f1e50dd6
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME:-daily_career}
+      POSTGRES_USER: ${DATABASE_USER:-daily_career}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:?Set DATABASE_PASSWORD in .env}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: jdbc:postgresql://postgres:5432/${DATABASE_NAME:-daily_career}
+      DATABASE_USER: ${DATABASE_USER:-daily_career}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:?Set DATABASE_PASSWORD in .env}
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-true}
+      SPRING_PROFILES_ACTIVE: ${APP_PROFILES:-dev}
+    healthcheck:
+      test: ["CMD", "java", "-cp", "/app/probe", "dev.dailycareer.infrastructure.HealthProbe"]
+      interval: 10s
+      timeout: 8s
+      start_period: 60s
+      retries: 12
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+  frontend:
+    build: ./frontend
+    environment:
+      BACKEND_HEALTH_URL: http://backend:9090/actuator/health
+      NGINX_ORIGIN: http://nginx
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "scripts/healthcheck.mjs"]
+      interval: 10s
+      timeout: 8s
+      retries: 12
+    restart: unless-stopped
+  nginx:
+    image: nginx:1.28-alpine@sha256:a8b39bd9cf0f83869a2162827a0caf6137ddf759d50a171451b335cecc87d236
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:-localhost}
+      NGINX_ENVSUBST_FILTER: ^APP_DOMAIN$
+    ports:
+      - "${HTTP_BIND_ADDRESS:-127.0.0.1}:${HTTP_PORT:-8080}:80"
+    volumes:
+      - ./infra/nginx/default.conf:/etc/nginx/templates/default.conf.template:ro
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+volumes:
+  postgres-data:
+    name: ${DB_VOLUME_NAME:-daily-career-dev-postgres}

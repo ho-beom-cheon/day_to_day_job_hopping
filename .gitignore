@@ -1,0 +1,16 @@
+.idea/
+.env
+.env.*
+!.env.example
+.tools/
+backend/target/
+frontend/node_modules/
+frontend/.next/
+frontend/coverage/
+frontend/tsconfig.tsbuildinfo
+*.log
+# Local database artifacts are never shared through Git.
+*.dump
+*.backup
+/backups/
+/pgdata/

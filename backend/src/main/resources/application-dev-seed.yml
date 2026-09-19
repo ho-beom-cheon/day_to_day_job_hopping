@@ -1,0 +1,4 @@
+# Never activate on production. Add only approved deterministic development fixtures.
+spring:
+  flyway:
+    locations: classpath:db/migration,classpath:db/dev-seed

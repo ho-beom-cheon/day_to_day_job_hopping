@@ -1,0 +1,170 @@
+[
+  {
+    "path": "00_START_HERE/PACKAGE_STATUS.md",
+    "match": true
+  },
+  {
+    "path": "00_START_HERE/README.md",
+    "match": true
+  },
+  {
+    "path": "01_design_docs/00_통합/IMPLEMENTATION_BASELINE_20260919.md",
+    "match": true
+  },
+  {
+    "path": "01_design_docs/00_통합/README.md",
+    "match": true
+  },
+  {
+    "path": "01_design_docs/01_기능설계/데일리_이직_기능설계_최종기준.md",
+    "match": true
+  },
+  {
+    "path": "01_design_docs/02_제작스펙/데일리_이직_프로젝트_제작스펙_v1.1_최종기준.md",
+    "match": true
+  },
+  {
+    "path": "01_design_docs/03_UIUX/데일리_이직_UIUX_v0.3_최종기준.md",
+    "match": true
+  },
+  {
+    "path": "01_design_docs/03_UIUX/핵심시안_10종_완료목록.md",
+    "match": true
+  },
+  {
+    "path": "01_design_docs/04_DB_ERD/데일리_이직_DB_ERD_v0.2_복원_최종기준.md",
+    "match": true
+  },
+  {
+    "path": "01_design_docs/05_API/API_인터페이스_v1.2.1_최종기준.md",
+    "match": true
+  },
+  {
+    "path": "01_design_docs/05_API/정적_검증_보고서_v1.2.1.md",
+    "match": true
+  },
+  {
+    "path": "01_design_docs/06_Backend/Backend_DTO_Controller_최종기준_복원본.md",
+    "match": true
+  },
+  {
+    "path": "01_design_docs/07_Frontend/front_ts_api_client_detailed_design_v1.0_20260918_복원본.md",
+    "match": true
+  },
+  {
+    "path": "01_design_docs/08_Notion/Notion_연동_최종기준_복원본.md",
+    "match": true
+  },
+  {
+    "path": "01_design_docs/09_Slack_WebPush/Slack_WebPush_연동_최종기준_복원본.md",
+    "match": true
+  },
+  {
+    "path": "01_design_docs/10_캐릭터/공식_캐릭터_디자인_기준.md",
+    "match": true
+  },
+  {
+    "path": "01_design_docs/99_원본현황/ORIGINAL_FILE_STATUS.md",
+    "match": true
+  },
+  {
+    "path": "01_design_docs/CHECKSUMS.sha256",
+    "match": true
+  },
+  {
+    "path": "02_assets/images/IMAGE_ASSET_MANIFEST.md",
+    "match": true
+  },
+  {
+    "path": "02_assets/images/IMAGE_ASSET_MAPPING_STAGING.md",
+    "match": true
+  },
+  {
+    "path": "02_assets/images/README.md",
+    "match": true
+  },
+  {
+    "path": "02_assets/images/character/character_hobeom_master_sheet.png",
+    "match": true
+  },
+  {
+    "path": "02_assets/images/ui_mockups/core/01_today_home_dashboard.png",
+    "match": true
+  },
+  {
+    "path": "02_assets/images/ui_mockups/core/02_six_month_curriculum_roadmap.png",
+    "match": true
+  },
+  {
+    "path": "02_assets/images/ui_mockups/core/03_today_learning_detail.png",
+    "match": true
+  },
+  {
+    "path": "02_assets/images/ui_mockups/core/04_practice_question.png",
+    "match": true
+  },
+  {
+    "path": "02_assets/images/ui_mockups/core/05_exam_status.png",
+    "match": true
+  },
+  {
+    "path": "02_assets/images/ui_mockups/core/06_exam_session.png",
+    "match": true
+  },
+  {
+    "path": "02_assets/images/ui_mockups/core/07_exam_result.png",
+    "match": true
+  },
+  {
+    "path": "02_assets/images/ui_mockups/core/07b_wrong_answer_notebook.png",
+    "match": true
+  },
+  {
+    "path": "02_assets/images/ui_mockups/core/08_progress_growth_analysis.png",
+    "match": true
+  },
+  {
+    "path": "02_assets/images/ui_mockups/core/09_rest_day_schedule_change.png",
+    "match": true
+  },
+  {
+    "path": "02_assets/images/ui_mockups/core/10_ai_learning_assistant_feedback.png",
+    "match": true
+  },
+  {
+    "path": "02_assets/images/ui_mockups/extra/extra_calendar.png",
+    "match": true
+  },
+  {
+    "path": "02_assets/images/ui_mockups/extra/extra_integration_settings.png",
+    "match": true
+  },
+  {
+    "path": "02_assets/images/ui_mockups/extra/extra_rest_day_state.png",
+    "match": true
+  },
+  {
+    "path": "03_codex/ACCEPTANCE_CHECKLIST.md",
+    "match": true
+  },
+  {
+    "path": "03_codex/CODEX_MASTER_IMPLEMENTATION_PROMPT.md",
+    "match": true
+  },
+  {
+    "path": "03_codex/CODEX_START_PROMPT_SHORT.md",
+    "match": true
+  },
+  {
+    "path": "03_codex/IMPLEMENTATION_PHASES.md",
+    "match": true
+  },
+  {
+    "path": "04_runtime/ENVIRONMENT_TEMPLATE.md",
+    "match": true
+  },
+  {
+    "path": "CHECKSUMS.sha256",
+    "match": false
+  }
+]

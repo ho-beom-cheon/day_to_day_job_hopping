@@ -1,0 +1,63 @@
+name: Verify foundation
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21.0.12+8'
+          cache: maven
+      - name: Unit, security and clean PostgreSQL/Flyway tests
+        working-directory: backend
+        run: sh mvnw -B -ntp -Ppostgres-it verify
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.22.0'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+  compose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure disposable CI environment
+        run: |
+          echo "DATABASE_PASSWORD=$(openssl rand -hex 24)" >> "$GITHUB_ENV"
+          echo "COMPOSE_PROJECT_NAME=daily-career-ci" >> "$GITHUB_ENV"
+          echo "DB_VOLUME_NAME=daily-career-ci-postgres" >> "$GITHUB_ENV"
+      - name: Start all four containers and wait for health
+        run: docker compose up -d --build --wait --wait-timeout 240
+      - name: Verify health, proxy, migration and volume retention
+        run: |
+          docker compose exec -T frontend node scripts/smoke.mjs
+          docker compose exec -T postgres sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Atc "SELECT installed_on FROM flyway_schema_history WHERE success ORDER BY installed_rank;"' > /tmp/migrations-before.txt
+          test -s /tmp/migrations-before.txt
+          docker compose down
+          docker compose up -d --wait --wait-timeout 240
+          docker compose exec -T postgres sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Atc "SELECT installed_on FROM flyway_schema_history WHERE success ORDER BY installed_rank;"' > /tmp/migrations-after.txt
+          diff /tmp/migrations-before.txt /tmp/migrations-after.txt
+          docker compose exec -T frontend node scripts/smoke.mjs
+      - name: Status on failure
+        if: failure()
+        run: docker compose ps -a
+      - name: Remove disposable CI environment
+        if: always()
+        run: docker compose down --volumes

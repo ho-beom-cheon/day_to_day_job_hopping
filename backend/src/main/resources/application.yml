@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: daily-career
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://postgres:5432/daily_career}
+    username: ${DATABASE_USER:daily_career}
+    password: ${DATABASE_PASSWORD}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    clean-disabled: true
+  session:
+    jdbc:
+      initialize-schema: never
+server:
+  forward-headers-strategy: framework
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        secure: ${SESSION_COOKIE_SECURE:true}
+        same-site: lax
+management:
+  server:
+    port: 9090
+  endpoints:
+    enabled-by-default: false
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      enabled: true
+      show-details: never
+      show-components: never
+  health:
+    defaults:
+      enabled: false
+    db:
+      enabled: true
+logging:
+  pattern:
+    level: '%5p [traceId=%X{traceId}]'
