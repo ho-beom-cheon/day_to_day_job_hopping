@@ -15,10 +15,13 @@ export function errorKind(status: number): ErrorKind {
 
 export class ApiError extends Error {
   readonly kind: ErrorKind;
+  readonly error: ApiErrorPayload | null;
   constructor(readonly status: number, readonly payload: unknown, readonly traceId: string | null) {
-    super(`API request failed (${status})`);
+    const decoded = decodeErrorPayload(payload);
+    super(decoded?.message ?? `API request failed (${status})`);
     this.name = "ApiError";
     this.kind = errorKind(status);
+    this.error = decoded;
   }
 }
 
@@ -72,3 +75,4 @@ export function createMutationAction<T>(payload: T, key: string = crypto.randomU
     getPayload: (): T => JSON.parse(snapshot) as T,
   });
 }
+import { decodeErrorPayload, type ApiErrorPayload } from "./contract";

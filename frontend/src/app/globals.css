@@ -1,7 +1,10 @@
 @import "tailwindcss";
 
 :root { color-scheme: light; }
-body { margin: 0; background: #f6f9ff; color: #17233c; font-family: Arial, "Malgun Gothic", sans-serif; }
+* { box-sizing: border-box; }
+html { min-width: 320px; background: #f8fafc; }
+body { margin: 0; background: #f6f9ff; color: #17233c; font-family: Arial, "Malgun Gothic", sans-serif; text-rendering: optimizeLegibility; }
 button, a { -webkit-tap-highlight-color: transparent; }
+button, input, textarea, select { font: inherit; }
 ::selection { background: #dbeafe; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
