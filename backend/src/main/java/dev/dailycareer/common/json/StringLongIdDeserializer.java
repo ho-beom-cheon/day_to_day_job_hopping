@@ -13,9 +13,9 @@ public final class StringLongIdDeserializer extends JsonDeserializer<Long> {
             return (Long) context.handleUnexpectedToken(Long.class, parser);
         }
         try {
-            return Long.valueOf(parser.getText());
-        } catch (NumberFormatException exception) {
-            return (Long) context.handleWeirdStringValue(Long.class, parser.getText(), "Expected a bigint ID string");
+            return Ids.parse(parser.getText());
+        } catch (dev.dailycareer.common.api.ApiException exception) {
+            return (Long) context.handleWeirdStringValue(Long.class, parser.getText(), "Expected a positive bigint ID string");
         }
     }
 }

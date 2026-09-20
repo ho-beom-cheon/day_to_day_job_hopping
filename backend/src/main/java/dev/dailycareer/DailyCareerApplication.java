@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 
-// Public controllers and error response shape require the original OpenAPI (GAP-001).
+// API errors use the canonical advice/security writers; do not expose Boot's generic /error payload.
 @SpringBootApplication(exclude = {ErrorMvcAutoConfiguration.class, UserDetailsServiceAutoConfiguration.class})
 public class DailyCareerApplication {
     public static void main(String[] args) {

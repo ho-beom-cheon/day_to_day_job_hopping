@@ -22,6 +22,10 @@ services:
       DATABASE_PASSWORD: ${DATABASE_PASSWORD:?Set DATABASE_PASSWORD in .env}
       SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-true}
       SPRING_PROFILES_ACTIVE: ${APP_PROFILES:-dev}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_ALLOWED_EMAILS: ${GOOGLE_ALLOWED_EMAILS:-}
+      APP_ORIGIN: ${APP_ORIGIN:-http://localhost:8080}
     healthcheck:
       test: ["CMD", "java", "-cp", "/app/probe", "dev.dailycareer.infrastructure.HealthProbe"]
       interval: 10s

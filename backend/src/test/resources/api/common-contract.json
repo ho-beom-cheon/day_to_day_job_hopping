@@ -1,0 +1,134 @@
+{
+  "source": "design-package/supplemental-20260920/openapi.yaml",
+  "sha256": "6c9d02efda9e093d9385ba676168e71dd7786e46d9f55d680963979ec90a22c5",
+  "schemas": {
+    "Meta": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "traceId": {
+          "type": "string",
+          "description": "서버가 발급한 요청 추적 ID. 신뢰할 수 없는 클라이언트 값을 그대로 사용하지 않는다.",
+          "minLength": 32,
+          "maxLength": 32,
+          "pattern": "^[a-f0-9]{32}$"
+        },
+        "serverTime": {
+          "type": "string",
+          "description": "RFC 3339 시각. 서버 응답은 +09:00 오프셋으로 통일",
+          "minLength": 20,
+          "maxLength": 35,
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "traceId",
+        "serverTime"
+      ],
+      "additionalProperties": false
+    },
+    "Error": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "기계 판독용 오류 코드",
+          "minLength": 1,
+          "maxLength": 80,
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "message": {
+          "type": "string",
+          "description": "사용자 안내용 오류 설명",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "details": {
+          "type": "array",
+          "description": "필드 검증 오류. 없으면 빈 배열",
+          "items": {
+            "$ref": "#/components/schemas/ValidationDetail"
+          },
+          "minItems": 0,
+          "maxItems": 100
+        },
+        "retryable": {
+          "type": "boolean",
+          "description": "사용자 또는 클라이언트의 재시도 가능 여부"
+        },
+        "retryAfterSeconds": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "description": "재시도 전 대기 초",
+              "minimum": 0,
+              "maximum": 86400
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "재시도 전 대기 초"
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "details",
+        "retryable",
+        "retryAfterSeconds"
+      ],
+      "additionalProperties": false
+    },
+    "ValidationDetail": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "field": {
+          "type": "string",
+          "description": "JSON 경로 또는 파라미터명",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "message": {
+          "type": "string",
+          "description": "검증 실패 설명",
+          "minLength": 1,
+          "maxLength": 500
+        }
+      },
+      "required": [
+        "field",
+        "message"
+      ],
+      "additionalProperties": false
+    },
+    "ErrorEnvelope": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "const": false
+        },
+        "data": {
+          "type": "null"
+        },
+        "error": {
+          "$ref": "#/components/schemas/Error"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        }
+      },
+      "required": [
+        "success",
+        "data",
+        "error",
+        "meta"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

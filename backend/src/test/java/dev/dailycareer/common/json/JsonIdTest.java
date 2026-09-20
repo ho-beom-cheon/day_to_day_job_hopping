@@ -26,4 +26,12 @@ class JsonIdTest {
         assertThat(mapper.readValue("{\"id\":null}", Sample.class).id()).isNull();
         assertThat(mapper.writeValueAsString(new Sample(null, 0, 0))).contains("\"id\":null");
     }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings = {"0", "-1", "+1", "01", " 1", "1 ", "1.0", "1e3", "", "99999999999999999999"})
+    void rejectsNonCanonicalOrOutOfRangeIds(String id) {
+        assertThatThrownBy(() -> mapper.readValue("{\"id\":\"" + id + "\"}", Sample.class))
+                .isInstanceOf(com.fasterxml.jackson.databind.JsonMappingException.class);
+        assertThatThrownBy(() -> Ids.parse(id)).isInstanceOf(dev.dailycareer.common.api.ApiException.class);
+    }
 }

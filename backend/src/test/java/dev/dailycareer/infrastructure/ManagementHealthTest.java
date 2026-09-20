@@ -1,6 +1,7 @@
 package dev.dailycareer.infrastructure;
 
 import dev.dailycareer.infrastructure.security.SecurityConfiguration;
+import dev.dailycareer.common.api.ApiErrorWriter;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,7 @@ class ManagementHealthTest {
     @Configuration(proxyBeanMethods = false)
     @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class,
             FlywayAutoConfiguration.class, SessionAutoConfiguration.class, UserDetailsServiceAutoConfiguration.class})
-    @Import(SecurityConfiguration.class)
+    @Import({SecurityConfiguration.class, ApiErrorWriter.class})
     static class TestApplication {
         @Bean AtomicReference<Status> databaseStatus() { return new AtomicReference<>(Status.UP); }
         @Bean HealthIndicator dbHealthIndicator(AtomicReference<Status> databaseStatus) {

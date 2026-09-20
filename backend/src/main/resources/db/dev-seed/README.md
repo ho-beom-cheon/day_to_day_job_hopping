@@ -1,7 +1,9 @@
 # Development seed boundary
 
-No business fixtures are defined yet: the canonical business DDL and curriculum
-content are missing (GAP-002 / GAP-006). Do not create guessed tables or real user data.
+The business schema is implemented by V2–V5. At stage 6 the user chose to keep
+operational curriculum content empty and verify with test-only fixtures. Those
+fixtures live under src/test and are never packaged or applied to this database.
+Do not create guessed operational content or real user data.
 
 Once approved data exists, add deterministic Flyway migrations here and activate
 `APP_PROFILES=dev,dev-seed` in the local `.env`. Use globally unique version numbers

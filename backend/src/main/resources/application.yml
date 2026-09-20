@@ -12,6 +12,8 @@ spring:
   flyway:
     enabled: true
     clean-disabled: true
+    # The database role is also named daily_career. Pin history before creating that schema.
+    default-schema: public
   session:
     jdbc:
       initialize-schema: never

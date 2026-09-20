@@ -16,7 +16,23 @@ class TraceIdFilterTest {
             assertThat(MDC.get("traceId")).isEqualTo(response.getHeader("X-Trace-Id"));
             throw new ServletException("test");
         })).isInstanceOf(ServletException.class);
-        assertThat(response.getHeader("X-Trace-Id")).matches("[a-f0-9-]{36}");
+        assertThat(response.getHeader("X-Trace-Id")).matches("[a-f0-9]{32}");
         assertThat(MDC.get("traceId")).isNull();
+    }
+
+    @Test void redispatchKeepsRequestTraceAndRestoresOuterMdc() throws Exception {
+        var request = new MockHttpServletRequest("GET", "/api/v1/test");
+        var first = new MockHttpServletResponse();
+        var second = new MockHttpServletResponse();
+        var filter = new TraceIdFilter();
+        MDC.put("traceId", "outer");
+        try {
+            filter.doFilter(request, first, (req, res) -> {});
+            request.setDispatcherType(jakarta.servlet.DispatcherType.ASYNC);
+            filter.doFilter(request, second, (req, res) -> assertThat(MDC.get("traceId")).isEqualTo(first.getHeader("X-Trace-Id")));
+            assertThat(second.getHeader("X-Trace-Id")).isEqualTo(first.getHeader("X-Trace-Id"));
+            assertThat(second.getHeader("Cache-Control")).isEqualTo("no-store");
+            assertThat(MDC.get("traceId")).isEqualTo("outer");
+        } finally { MDC.remove("traceId"); }
     }
 }
