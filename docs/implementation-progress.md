@@ -1,5 +1,79 @@
 # 구현 진행
 
+## 최신 진행 — 작업 9 완료 (2026-09-21)
+
+- Next.js 공통 기반으로 OpenAPI 성공/오류 Envelope와 현재 사용자·CSRF runtime decoder를 구현했다. 64-bit ID는 문자열로 유지한다.
+- `/workspace`가 CSRF와 현재 사용자를 복원하고 loading/미로그인/error/인증 상태를 구분한다. 인증된 화면은 DTO→ViewModel을 거쳐 데스크톱 좌측·모바일 하단 탐색을 렌더링하며 후속 route는 준비 중으로 비활성화했다.
+- Docker build에서 typecheck, ESLint, Vitest **34개**, Next production build가 모두 통과했다. Chromium 1440×900과 375×812를 확인했고 모바일 가로 넘침은 없었다. [완료 보고서](frontend-stage9-verification-20260921.md), [계약 대조](contracts/frontend-stage9-alignment.md).
+- 원격 이슈는 GitHub CLI 부재로 조회하지 못해 [이슈 초안](frontend-stage9-issue-draft.md)을 남겼다. 커밋·푸시·PR은 진행하지 않았다. 다음은 작업 10 로그인·온보딩 UI다.
+
+## 최신 진행 — 작업 8 완료 (2026-09-21)
+
+- [이슈 #7](https://github.com/ho-beom-cheon/day_to_day_job_hopping/issues/7)로 PROBLEM-001/002, ATTEMPT-001/002, WRONG-001~005의 문제·제출·채점·신고·오답 복습 API 9개를 구현했다.
+- 외부 기본 문제 ID와 내부 불변 버전을 분리하고, 첫 풀이/재시도와 여러 버전의 오답을 기본 문제 단위로 집계한다. 메모 ETag, 수동/정답 근거 해결, 재개 복습 작업을 지원한다.
+- V6를 clean/순차 migration과 기존 개발 DB에 적용했다. 57테이블·631컬럼·123FK이며 기존 cluster ID/체크섬을 보존했다. 일반 38개 + 실제 PostgreSQL IT 52개, 합계 **90개 전부 통과**했고 4서비스 healthy와 smoke를 확인했다. [완료 보고서](problem-stage8-verification-20260921.md), [계약 대조](contracts/problem-stage8-alignment.md).
+- 운영 콘텐츠는 사용자 결정대로 적재하지 않았고 테스트 fixture만 사용했다. 사용자 결정으로 작업 1–8은 유지하고 9단계 이후를 Backend/UI 사용자 흐름 중심으로 재구성했다. 다음은 작업 9 Next.js 공통 기반이며, 이후 10–13단계는 공통 기반과 각 API 계약을 선행 조건으로 분리해 진행할 수 있다. 커밋/푸시/PR은 진행하지 않았다.
+
+## 최신 진행 — 작업 7 완료 (2026-09-21)
+
+- [이슈 #6](https://github.com/ho-beom-cheon/day_to_day_job_hopping/issues/6)으로 일정 변경 preview/confirm과 휴식일 추가·해제 API 4개를 구현했다.
+- 미래 미시작 학습만 이동하며 시작·완료 학습과 생성된 시험 응시를 고정한다. 학습일·세션·콘텐츠 ID와 완료 이력, 특정 날짜 휴식 예외를 유지한다.
+- 일반 38개 + 실제 PostgreSQL IT 49개, 합계 **87개 전부 통과**했다. 동시 확정, stale ETag, preview 만료·소비·불일치, 소유권, rollback과 재시도를 확인했다.
+- 기존 V2/V3 테이블을 사용해 신규 migration은 없다. [완료 보고서](schedule-stage7-verification-20260921.md), [계약 대조](contracts/schedule-stage7-alignment.md).
+- 다음은 사용자 요청 시 작업 8 문제·문제풀이이다. 작업 8, 커밋/푸시/PR은 진행하지 않았다.
+
+## 최신 진행 — 작업 6 완료 (2026-09-21)
+
+- [이슈 #5](https://github.com/ho-beom-cheon/day_to_day_job_hopping/issues/5)로 발행 템플릿 검증·배정, 과정/월차/주차/학습일 조회, 세션 시작·콘텐츠/세션 완료 API 18개를 연결했다.
+- 운영 콘텐츠는 적재하지 않고 테스트 전용 콘텐츠로 검증한다는 사용자 결정을 반영했다. 일반 38개 + 실제 PostgreSQL IT 44개, **82개 전부 통과**했다. 동시 요청의 외래키/행 잠금 교착을 재현·수정했고 중복 완료와 rollback을 확인했다.
+- 기존 DB에 V5를 적용해 56테이블·618컬럼·119FK가 됐다. V1–V4, cluster ID, 계정을 보존했고 운영 템플릿/배정 콘텐츠는 0건이다. smoke·4서비스 healthy를 확인했다.
+- 실제 Google 계정으로 템플릿 []·현재 과정 null·오늘 학습 null·기간 학습 []와 no-store를 확인했다. 로그아웃 후 현재 과정은 401이다. [완료 보고서](curriculum-stage6-verification-20260921.md), [운영 절차](curriculum-catalog-operations.md).
+- 다음은 사용자 요청 시 작업 7 휴식·일정 변경이다. 작업 7, 커밋/푸시/PR은 진행하지 않았다.
+
+## 이전 진행 — 작업 5 완료 (2026-09-20)
+
+- [이슈 #4](https://github.com/ho-beom-cheon/day_to_day_job_hopping/issues/4)로 허용 Google OIDC, issuer+subject 고정, 세션·CSRF 교체, 내 정보/닉네임 수정/로그아웃을 구현했다.
+- 일반 38개 + 실제 PostgreSQL IT 30개, 합계 68개 모두 통과했다. 서명된 모의 공급자 인증 흐름, 오류 거절, 동시 콜백·수정 및 사용자 격리를 확인했다.
+- V4를 기존 개발 DB에 적용했다. 48테이블·571컬럼·107FK이며 V1–V3 체크섬과 cluster ID를 보존했다. 실제 Nginx 응답·smoke·4서비스 healthy를 확인했다.
+- 사용자 승인으로 Google 프로젝트·테스트 앱·웹 클라이언트를 설정하고 인증값을 추적 제외 `.env`에 저장했다. Chrome에서 실제 Google 로그인 후 내 정보·CSRF·닉네임 무변경 PATCH·로그아웃·로그아웃 후 401을 모두 확인했다. **작업 5 전체 완료**. [검증 결과](auth-stage5-verification-20260920.md), [설정 안내](google-login-local-setup.md).
+- 다음은 사용자 요청 시 작업 6 커리큘럼·학습 운영이다. 작업 6, 커밋/푸시/PR은 진행하지 않았다.
+
+## 이전 진행 — 작업 4 완료 (2026-09-20)
+
+- [이슈 #3](https://github.com/ho-beom-cheon/day_to_day_job_hopping/issues/3)로 OpenAPI 공통 응답·오류, 32자리 trace/+09:00/no-store, 엄격한 JSON/ID/validation, ETag/revision과 DB 멱등성 기반을 구현했다.
+- 일반·계약 테스트 36개 + PostgreSQL IT 15개, 합계 51개가 모두 통과했다. 실제 경합에서 중복 실행과 stale 갱신을 막고 업무/outbox/키 rollback을 확인했다.
+- 개발 Backend 반영 및 Nginx 경유 401/403 ErrorEnvelope, smoke·4서비스 healthy를 확인했다. DB catalog와 V1–V3는 그대로다.
+- [완료 보고서](backend-stage4-completion-20260920.md), [공통 계약·사용법](contracts/backend-stage4-alignment.md). 업무 API 연결·OIDC/CSRF 발급·Frontend decoder·정기 TTL 정리 worker는 각각 후속 범위다.
+- 이번에는 4번에서 종료한다. 다음은 5번 인증·회원이며 커밋/푸시/PR은 수행하지 않았다.
+
+## 이전 진행 — 작업 3 완료 (2026-09-20)
+
+- [이슈 #2](https://github.com/ho-beom-cheon/day_to_day_job_hopping/issues/2) 기반으로 V2 업무 기준선 및 V3 일정 preview/FINAL 보완을 구현했다. 실제 업무 DB는 47테이블·567컬럼·107FK다.
+- 실제 PostgreSQL에서 일반 테스트 11개 + IT 8개 전부 통과했다. 원본 catalog 전수 비교, V1 업그레이드/세션 보존, 제약 위반 거부, 답안·재채점·outbox·멱등성 저장 구조를 검증했다.
+- 기존 개발 DB에 적용하고 Backend 재시작, 4서비스 healthy, 연결 smoke를 통과했다. cluster ID와 V1 체크섬을 유지했다.
+- [완료 보고서](database-stage3-completion-20260920.md), [설계 채택/차이](contracts/database-stage3-alignment.md). 설정/알림/프로필의 후속 migration 및 서비스 검증 책임은 남아 있다.
+- 이번에는 3번에서 종료한다. 다음은 4번 Spring Boot 공통 기반이며 커밋/푸시/PR은 수행하지 않았다.
+
+## 이전 진행 — 작업 2 완료 (2026-09-20)
+
+- 사용자 승인으로 [이슈 #1](https://github.com/ho-beom-cheon/day_to_day_job_hopping/issues/1)을 등록한 뒤 `SessionMigrationIT`의 고정 9090 호출을 실제 관리 포트 주입으로 수정했다.
+- 수정 전 오류를 재현했고 수정 후 일반 테스트 11개 + 실제 PostgreSQL IT 2개를 모두 통과했다. 실패·오류·skip은 0개다.
+- Compose config, 4서비스 healthy, Frontend smoke를 통과했다. 기존 개발 DB cluster ID와 Flyway 이력은 유지됐다.
+- 애플리케이션 설정·Compose·업무 DB·Frontend는 변경하지 않았다. 상세 명령과 범위는 [작업 2 완료 보고서](docker-stage2-completion-20260920.md)에 기록했다.
+- 커밋/푸시/PR은 수행하지 않았다. 이번에는 2번에서 종료하고 다음 대상은 3번 DB 스키마·마이그레이션이다.
+
+## 이전 진행 — 26단계 계획의 작업 1 완료 (2026-09-20)
+
+사용자는 세부 작업을 하나씩 진행하기로 했으며 이번 범위는 프로젝트·설계 현황 정리였다. 기존 Phase 구분과 26단계 번호는 [실행 계획](implementation-plan.md)의 대응표를 따른다.
+
+- Downloads에서 OpenAPI v1.2.1과 DB HTML v0.1을 찾아 저장소에 원본 그대로 보관하고 SHA-256 일치를 확인했다.
+- 직접 집계한 API는 91개 인터페이스·217스키마·1,036참조이며 참조 대상 누락은 0개다. DB는 46테이블·557컬럼·105FK다. v0.2 요약의 558컬럼과 차이는 기록했다.
+- 현재 Docker config와 4서비스 running/healthy를 확인했다. IT 수정·재실행은 아직 수행하지 않았다.
+- API/DB/현재 코드의 주요 차이와 채택 기준을 [작업 1 결과](project-stage1-assessment-20260920.md), [계약 자료 안내](contracts/README.md), [정적 집계](audit/design-baseline-20260920.json)에 정리했다.
+- 애플리케이션·테스트·Compose·DB는 변경하지 않았다. 사용자 요청에 따라 1번에서 종료하며 다음 대상은 2번 Docker 개발환경 보완이다.
+
+아래 Phase 기록은 당시 결과를 보존한 이력이다. 특히 '원본 없음'과 'Docker 환경 없음'은 최신 현황이 아니며 위 결과와 [미해결 목록](implementation-gap-log.md)의 최신 표를 우선한다.
+
 ## Phase 0 — 완료
 
 저장소·패키지 문서 및 실제 이미지 전체 감사, 계획/gap 작성 완료. 기존 코드나 테스트가 없어 이 단계의 코드 빌드 대상은 없다. 패키지 체크섬 결과는 `audit/package-checksums.json`에 기록했다. 원본 문서는 변경하지 않는다.

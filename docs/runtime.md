@@ -1,5 +1,17 @@
 # 실행 및 검증
 
+## 커리큘럼·학습 운영 (작업 6)
+
+로그인 후 `/api/v1/curriculum-templates`에서 발행된 템플릿을 조회하고 `/api/v1/curriculums`에 Idempotency-Key/CSRF와 선택한 templateId·시작일·휴식 정책을 보낸다. 세션 시작과 콘텐츠 완료는 본문 없는 POST, 세션 완료는 actualMinutes와 Idempotency-Key/CSRF를 사용한다. [API/DB 기준](contracts/curriculum-stage6-alignment.md)을 따른다.
+
+현재 사용자 결정대로 운영 콘텐츠가 없어 템플릿 목록은 [], 현재 과정/오늘 학습은 null이다. 가짜 과정을 자동 생성하지 않는다. 검토한 자료의 발행은 [템플릿 운영 절차](curriculum-catalog-operations.md)를 사용한다. 테스트 82개와 실제 서버 검증은 [작업 6 결과](curriculum-stage6-verification-20260921.md)에 기록했다.
+
+## Google 로그인 (작업 5)
+
+[콘솔/.env 설정 안내](google-login-local-setup.md)를 따른다. Google 인증 변수 3개를 모두 설정하고 Backend를 재생성하면 `/oauth2/authorization/google`에서 시작할 수 있다. callback은 APP_ORIGIN + `/login/oauth2/code/google`다. 로컬은 localhost:8080 주소를 일관되게 사용한다.
+
+실제 PostgreSQL을 사용한 인증 포함 자동 테스트 68개와 개발 Nginx 확인은 통과했다. 현재 로컬 `.env`와 Google 테스트 앱 설정도 완료했으며, Chrome에서 실제 로그인·내 정보·CSRF·닉네임 무변경 PATCH·로그아웃·401을 확인했다. [검증 결과](auth-stage5-verification-20260920.md)를 따른다.
+
 ## IntelliJ IDEA: 한 번에 빌드/실행 (Windows)
 
 프로젝트 루트를 열면 `.run/`의 공유 설정이 **Run → Edit Configurations**에 표시된다.
@@ -68,7 +80,7 @@ cd backend
 
 Linux에서는 `sh mvnw -B -ntp verify`와 `sh mvnw -B -ntp -Ppostgres-it verify`.
 일반 verify는 11개 단위/MVC/health 테스트와 실행 JAR 빌드, postgres-it은 실제
-PostgreSQL 17의 clean Flyway migration, 애플리케이션 기동, JDBC 세션 저장/조회/삭제를 검사한다.
+PostgreSQL 17.11의 clean Flyway migration, V1 업그레이드와 세션 보존, 업무 catalog 전수 비교, 제약·답안/채점·outbox·멱등성 저장 구조, 애플리케이션 기동 및 JDBC 세션 저장/조회/삭제를 검사한다. 작업 4에서는 공통 계약과 실제 멱등성/동시 갱신 검증을 더해 일반·계약 36개 + PostgreSQL IT 15개가 통과했다. [최신 재현 및 검증 보고서](backend-stage4-completion-20260920.md), [DB 기준선 검증](database-stage3-completion-20260920.md).
 Docker가 없으면 통합 프로필은 실패한다. `skip`을 성공처럼 처리하지 않는다.
 
 ## Docker Compose / 단일 VM
@@ -92,7 +104,7 @@ OIDC redirect/login/logout 및 CSRF 토큰 경로는 OpenAPI 원본 확인 후 N
 ## 미완료 게이트
 
 ErrorEnvelope/공개 DTO와 OIDC/로그아웃/CSRF 경로: GAP-001.
-업무 DB migration: GAP-002. Docker 환경: GAP-005.
+업무 DB 기준선은 작업 3의 V2/V3로 구현했고 Docker 환경 검증도 완료했다. 설정/알림 등 후속 저장 보완과 서비스 동작 범위는 [DB 채택 기준](contracts/database-stage3-alignment.md)을 따른다. Flyway 이력은 public, 업무 schema는 daily_career로 분리한다.
 현재 로컬 결과와 수정 이력은 implementation-progress.md 참고.
 
 ## 추가: 회사/집 재현 기준과 Phase 1 실행 게이트

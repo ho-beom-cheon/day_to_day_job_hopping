@@ -1,10 +1,90 @@
 # 집에서 이어서 작업하기 — 2026-09-20
 
+## 최신 인수인계 — 작업 9 완료 (2026-09-21)
+
+Next.js 공통 기반을 완성했다. OpenAPI Envelope·현재 사용자·CSRF를 런타임에서 검증하고 문자열 ID를 보존한다. `/workspace`는 CSRF → 현재 사용자 순서로 세션을 복원하고 loading/401/error/인증 화면을 구분한다. 인증 화면은 DTO→ViewModel 경계를 거쳐 데스크톱 좌측 탐색과 모바일 하단 탐색을 사용한다.
+
+Docker build에서 typecheck·lint·Vitest 34개·production build가 모두 통과했다. 실제 미로그인 흐름과 Chromium 1440×900/375×812 렌더링을 확인했고 모바일 가로 넘침은 없다. [완료 보고서](docs/frontend-stage9-verification-20260921.md), [채택 기준](docs/contracts/frontend-stage9-alignment.md).
+
+원격 이슈는 GitHub CLI 부재로 확인하지 못해 [이슈 초안](docs/frontend-stage9-issue-draft.md)을 남겼다. **다음은 작업 10 로그인·온보딩 UI**다. Google 로그인 성공·거부·만료와 과정 배정, 새로고침 복원을 이번 공통 기반 위에 구현한다. 커밋·푸시·PR은 수행하지 않았다.
+
+## 최신 인수인계 — 작업 8 완료 (2026-09-21)
+
+[이슈 #7](https://github.com/ho-beom-cheon/day_to_day_job_hopping/issues/7)로 문제 조회·제출·즉시 규칙 채점·신고와 오답 목록·상세·메모·해결·재개 API 9개를 구현했다. 외부에는 안정적인 기본 문제 ID를 사용하고, 채점과 과거 이력은 제출 당시 불변 문제 버전에 고정한다. 여러 버전의 오답도 사용자+기본 문제 하나로 집계한다.
+
+V6로 TRUE_FALSE 제약, 문제 신고, 오답 복습 횟수와 해결 근거 저장을 보완했다. 실제 개발 DB는 V6/57테이블·631컬럼·123FK이며 기존 cluster ID와 V1–V5 체크섬을 보존했다. 일반 38개 + 실제 PostgreSQL IT 52개 = **90개 모두 통과**했고 4서비스 healthy와 smoke도 확인했다. [완료 보고서](docs/problem-stage8-verification-20260921.md), [채택 기준](docs/contracts/problem-stage8-alignment.md).
+
+사용자 결정대로 운영 콘텐츠는 적재하지 않았고 테스트 fixture만 사용했다. 작업 1–8의 번호와 범위는 유지하고, 작업 9 이후는 Backend/UI를 사용자 흐름별로 완성하도록 재구성했다. AI 기능은 새 작업 18, 문제 화면은 새 작업 13이다. **다음은 작업 9 Next.js 공통 기반**이다. 작업 8은 커밋·푸시·PR하지 않았다.
+
+## 최신 인수인계 — 작업 7 완료 (2026-09-21)
+
+[이슈 #6](https://github.com/ho-beom-cheon/day_to_day_job_hopping/issues/6)으로 CURR-009/007, REST-001/002를 구현했다. 일정 변경은 10분 preview 뒤 1회 확정하며, 휴식일 추가·해제, 현재 과정 정책 교체, 밀린 일정 당기기를 지원한다. 시작·완료 학습과 생성된 시험 응시는 고정하고 미래 미시작 학습만 dayNo 순서로 옮긴다. 학습일·세션·콘텐츠 ID와 완료 이력은 유지한다.
+
+V2/V3의 schedule_policy, schedule_change, schedule_preview 구조가 충분해 새 migration은 없다. 일반 38개 + 실제 PostgreSQL IT 49개 = **87개 모두 통과**했다. 동시 확정, 만료·소비·불일치 preview, stale ETag, 다른 사용자 접근, 감사 이력 실패 rollback과 같은 키 재시도를 검증했다. [완료 보고서](docs/schedule-stage7-verification-20260921.md), [채택 기준](docs/contracts/schedule-stage7-alignment.md).
+
+**다음은 사용자 요청 시 작업 8 문제·문제풀이**다. 작업 7은 커밋·푸시·PR하지 않았다. 운영 콘텐츠와 학습 화면도 아직 없다.
+
+## 최신 인수인계 — 작업 6 완료 (2026-09-21)
+
+[이슈 #5](https://github.com/ho-beom-cheon/day_to_day_job_hopping/issues/5)로 커리큘럼·학습 운영 API 18개를 구현·적용했다. 발행 템플릿의 개인 배정, 교육 모듈/날짜 조회, 세션 시작, 콘텐츠 조건 확인 및 자기보고 시간으로 완료하는 기능이다. 일반 38개 + PostgreSQL IT 44개 = **82개 모두 통과**했다. [완료 보고서](docs/curriculum-stage6-verification-20260921.md).
+
+실제 DB는 V5/56테이블·618컬럼·119FK이며 V1–V4 체크섬과 cluster ID 및 기존 계정을 보존했다. 사용자 결정대로 운영 콘텐츠는 적재하지 않았다. 테스트 fixture는 운영 JAR에 없으며, 실제 Google 로그인 후 템플릿 []·현재 과정/오늘 학습 null·기간 조회 []와 로그아웃 후 401을 확인했다. 임시 검증 페이지는 제거했다. 4서비스 healthy와 smoke도 통과했다.
+
+**다음은 사용자 요청 시 작업 7 휴식·일정 변경**이다. [작업 6 API/DB 채택](docs/contracts/curriculum-stage6-alignment.md)을 먼저 읽는다. API sessionId는 시간 측정 learning_session이 아닌 learning_day_item.id다. 고정 학습일·세션·콘텐츠 인스턴스 ID와 완료 이력, 필수 분모를 보존하며 preview/confirm을 구현해야 한다. 사용자 잠금은 외래키 KEY SHARE와 양립하는 FOR NO KEY UPDATE를 사용한다.
+
+[교육 템플릿 운영](docs/curriculum-catalog-operations.md)에 검토된 DRAFT 자료의 검증/발행 명령을 기록했다. 운영 콘텐츠 작성, 후속 UI, 작업 7 및 커밋/푸시/PR은 수행하지 않았다. 아래는 이전 상태의 이력이다.
+
+## 이전 인수인계 — 작업 5 완료
+
+[이슈 #4](https://github.com/ho-beom-cheon/day_to_day_job_hopping/issues/4)로 인증·회원 구현과 자동 검증, 개발 서버 적용을 마쳤다. 일반 38개 + PostgreSQL IT 30개 = 68개 모두 통과했다. 실제 DB는 V4/48테이블·571컬럼이며 기존 V1–V3/cluster ID를 보존했다. [검증 결과](docs/auth-stage5-verification-20260920.md).
+
+사용자 승인으로 Google 프로젝트 `Daily Career` (`daily-career-509214`)와 웹 클라이언트 `Daily Career Local`을 생성했다. 외부/테스트 앱이며 승인 계정 1개를 테스트 사용자와 서버 허용 계정에 등록했다. 로컬 `.env`에 GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET/GOOGLE_ALLOWED_EMAILS를 저장하고 Backend에 적용했다. 자격증명·개인 이메일은 문서나 Git에 기록하지 않는다. callback은 `http://localhost:8080/login/oauth2/code/google`다. 새 PC 설정은 [Google 콘솔 설정 안내](docs/google-login-local-setup.md)를 따른다.
+
+Chrome에서 실제 Google 기본 프로필 동의 후 로그인 성공과 내 정보 200·CSRF 200·닉네임 무변경 PATCH 200·로그아웃 200·로그아웃 후 내 정보 401을 확인했다. 임시 검증 페이지는 제거했으며 앱 세션은 로그아웃 상태다. 4서비스 healthy와 smoke도 통과했다. **다음은 사용자 요청 시 작업 6 커리큘럼·학습 운영**이다. 작업 6과 커밋/푸시/PR은 진행하지 않았다. 아래는 이전 상태의 이력이다.
+
+## 이전 인수인계 — 작업 4 완료
+
+[이슈 #3](https://github.com/ho-beom-cheon/day_to_day_job_hopping/issues/3)로 공통 Envelope/Error, trace/time/no-store, JSON/ID/validation, ETag/revision과 DB 멱등성 기반을 구현했다. 일반·계약 36개 + PostgreSQL IT 15개, 합계 51개가 모두 통과했고 개발 Backend 적용·실제 401/403 응답·smoke·4서비스 healthy를 확인했다. DB catalog와 V1–V3는 그대로다. [완료 보고서](docs/backend-stage4-completion-20260920.md).
+
+**다음은 사용자 요청 시 5번 인증·회원**이다. Google OIDC/허용 계정/세션·내 정보/CSRF 발급/로그아웃, Nginx OAuth 두 경로를 연결한다. 실제 외부 검증에 필요한 설정은 로컬 secret으로 관리하며 문서·채팅에 값을 남기지 않는다.
+
+[공통 계약·사용법](docs/contracts/backend-stage4-alignment.md)에 따라 업무 Controller에 응답 팩토리와 validation을 연결한다. 재시도에도 소유권을 확인하고, 멱등성 scope는 사용자+API ID로 유지하며 대상/본문/전제조건을 fingerprint에 넣는다. 도메인 갱신은 DB 잠금/조건부 UPDATE와 결합해야 한다. TTL 정리 scheduler와 Frontend decoder는 후속 범위다.
+
+커밋/푸시/PR은 수행하지 않았으며 이슈 #3은 열려 있다. 이번에는 작업 4까지만 진행했다. 아래 '공통 응답 미구현' 등의 내용은 과거 이력이다.
+
+## 이전 인수인계 — 작업 3 완료
+
+[이슈 #2](https://github.com/ho-beom-cheon/day_to_day_job_hopping/issues/2)로 V2 업무 DB 기준선과 V3 일정 preview/FINAL을 구현·적용했다. 업무 schema는 47테이블·567컬럼·107FK다. 기존 V1과 개발 volume을 보존했고 일반 테스트 11개 + PostgreSQL IT 8개, 4서비스 healthy, smoke 및 Backend 재시작을 통과했다. [완료 보고서](docs/database-stage3-completion-20260920.md).
+
+**다음은 사용자 요청 시 4번 Spring Boot 공통 기반**이다. OpenAPI v1.2.1의 응답/오류·validation·동시성·멱등성을 구체화한다. [DB 채택/차이](docs/contracts/database-stage3-alignment.md)에 기록한 설정/알림/프로필 저장 보완과 서비스 책임을 확인한다. 현재 업무 API/화면/seed는 구현하지 않았다.
+
+Flyway 이력은 `public`으로 고정했으며 업무 테이블은 `daily_career`다. V1/V2/V3를 수정하거나 다시 생성하지 말고 후속 migration을 추가한다. 커밋/푸시/PR은 수행하지 않았고 이슈 #2는 열려 있다. 아래 '업무 DDL 없음' 등은 이전 상태를 보존한 기록이다.
+
+## 이전 인수인계 — 작업 2 완료
+
+[이슈 #1](https://github.com/ho-beom-cheon/day_to_day_job_hopping/issues/1)을 등록하고 `SessionMigrationIT`의 고정 관리 포트 오류를 수정했다. 일반 테스트 11개와 실제 PostgreSQL IT 2개가 모두 통과했고, Compose smoke·4서비스 healthy·기존 개발 DB 이력 보존을 확인했다. [작업 2 완료 보고서](docs/docker-stage2-completion-20260920.md).
+
+사용자 요청에 따라 이번에는 2번만 완료했다. **다음 요청 대상은 3번 DB 스키마·마이그레이션**이며 [DB 이슈 초안](docs/database-stage3-issue-draft.md), [작업 1 차이 목록](docs/project-stage1-assessment-20260920.md), [계약 기준](docs/contracts/README.md)을 읽고 시작한다. 업무 DDL은 아직 없다. 커밋/푸시/PR은 수행하지 않았으며 이슈 #1은 열어 두었다.
+
+아래 이전 인수인계의 'IT 오류가 남음'과 '2번을 다음에 진행'은 과거 상태다. 최신 계획과 이번 보고서를 우선한다.
+
+## 이전 인수인계 — 작업 1 완료
+
+사용자가 세부 작업을 하나씩 진행하기로 했으며 **이번에는 프로젝트·설계 현황 정리(1번)만 완료**했다. 자세한 내용은 [작업 1 결과](docs/project-stage1-assessment-20260920.md)와 [계약 자료 안내](docs/contracts/README.md)를 읽는다.
+
+- Downloads의 `openapi.yaml` v1.2.1과 DB 상세 HTML v0.1을 `design-package/supplemental-20260920/`에 원본 그대로 보관했다. 'OpenAPI/상세 DB 자료 없음'은 해소됐다.
+- 직접 집계: API 91개·217스키마·1,036참조, DB 46테이블·557컬럼·105FK. 558컬럼인 v0.2 복원 요약과 차이는 후속 보완 기록으로 관리한다.
+- Docker config 성공과 4서비스 running/healthy를 현재 조회했다. 애플리케이션·테스트·DB 변경 및 재빌드는 하지 않았다.
+- 다음은 사용자의 **2번 시작 요청**에 따라 관련 이슈 확인 → 고정 관리 포트 수정 → 실제 PostgreSQL IT 재검증이다. 3번 업무 DDL을 함께 시작하지 않는다.
+- 아래 기존 인수인계는 과거 작업의 상세 이력이다. 원본 부재·Docker 부재 기록과 9절의 재개 요청문은 위 최신 상태 및 사용자의 현재 요청을 우선한다.
+
 이 문서 하나로 현재 상태를 파악하고 개발환경 실행 및 다음 작업을 이어갈 수 있도록 정리했다. 저장소는 `https://github.com/ho-beom-cheon/day_to_day_job_hopping`, 작업 브랜치는 `main`이다. 기존 기반 커밋은 `399fd2f`이며, 이 문서와 함께 오늘의 미커밋 변경을 저장한다.
 
 ## 1. 현재 어디까지 했나
 
-**공통 기반 구현과 Docker 개발 구성 보완까지 진행했다. 실제 Docker 통합 실행은 아직 검증하지 못했으므로 사용자 개발 순서의 2단계는 완료되지 않았다. 다음 작업은 집 PC에서 Docker 실행 검증이다.**
+**집 PC에서 Docker build/up, 4서비스 health/smoke, 실제 PostgreSQL/Flyway, 브라우저 HMR 및 down/up 데이터 보존을 검증했다. postgres-it는 관리 포트 하드코딩으로 IT 2개 중 1개 오류가 남아 2단계 전체 완료 판정은 보류한다. 다음 작업은 관련 이슈 확정 후 테스트 수정과 재검증이다.**
+
+최신 실행 근거 및 이슈 초안: [집 PC 검증 보고서](docs/docker-home-verification-20260920.md). 아래 이전 PC 검증 기록과 구분한다.
 
 - 6개월 학습·시험·복습 서비스인 ‘데일리 이직’을 개발 중이다.
 - 저장소는 빈 프로젝트가 아니다. Backend/Frontend 공통 기반, 테스트, Compose, CI 정의, 설계 패키지가 있다.
@@ -84,14 +164,14 @@ macOS/Linux에서는 환경파일이 없을 때 `cp .env.example .env`로 복사
 
 ## 4. 집에서 가장 먼저 완료할 검증
 
-아래 항목은 **아직 미검증**이다. 구성 파일만 확인한 결과와 실제 실행 성공을 구분해야 한다.
+집 PC에서 아래 다섯 항목은 통과했다. postgres-it만 실패가 남아 있으며 상세 결과는 최신 집 PC 검증 보고서를 따른다.
 
-- [ ] `docker compose up -d --build --wait --wait-timeout 180` 성공 및 4서비스 정상 상태.
-- [ ] 브라우저 시작 화면 표시, Frontend 컨테이너 smoke 성공.
-- [ ] Backend → 실제 PostgreSQL 연결 및 clean Flyway migration 성공.
-- [ ] `frontend/src`의 화면 문구를 임시 수정했을 때 브라우저에 반영되는지 확인 후 수정 복구.
-- [ ] 아래 down/up 전후 DB cluster ID와 Flyway 이력 동일, smoke 재통과.
-- [ ] Docker 실행 가능한 환경에서 Backend `postgres-it` 통합 테스트 성공.
+- [x] `docker compose up -d --build --wait --wait-timeout 180` 성공 및 4서비스 정상 상태.
+- [x] 브라우저 시작 화면 표시, Frontend 컨테이너 smoke 성공.
+- [x] Backend → 실제 PostgreSQL 연결 및 clean Flyway migration 성공.
+- [x] `frontend/src`의 화면 문구를 임시 수정했을 때 브라우저에 반영되는지 확인 후 수정 복구.
+- [x] 아래 down/up 전후 DB cluster ID와 Flyway 이력 동일, smoke 재통과.
+- [ ] Backend `postgres-it`: 실제 PostgreSQL migration/세션 저장 통과, health 테스트는 관리 포트 34343 대신 고정 9090 호출로 오류. 이슈 초안은 최신 보고서 8절 참조.
 
 기본 DB/사용자 기준 migration 및 영속성 확인 명령이다. `.env`에서 이름을 바꿨으면 `-U`/`-d` 값도 바꾼다. 첫 번째와 두 번째 조회 결과를 비교한다.
 
@@ -168,7 +248,7 @@ Docker 검증은 아래 자료 없이 진행 가능하다. 그러나 업무 DB/A
 | GAP-002: DB v0.2 원본 상세 DDL 없음 | 46테이블/558컬럼/105FK의 요약만 있음. 업무 Entity/Flyway 생성 전 원본 확보 필요 |
 | GAP-003: mastery 계산 산식 미확정 | 임의 산식이나 0% 대체 금지 |
 | GAP-006: 실제 학습 콘텐츠/문항/배정 규칙 원본 없음 | 임의 데모 데이터를 실제 학습 데이터처럼 구현하지 않음 |
-| GAP-005: Docker 실제 실행 게이트 | 집 PC에서 위 체크리스트를 수행하고 결과 기록 |
+| GAP-005: 통합 테스트 게이트 | Compose 실행 검증 통과. postgres-it 관리 포트 오류 수정·재검증 필요 |
 
 개발 중 유지할 핵심 원칙: 업무 ID는 JSON/Frontend string ↔ Backend Long 경계를 유지하고 숫자로 변환하지 않는다. 진척도 네 지표를 혼용하지 않는다. AI 사용자 cancel API/버튼과 공개 CANCELED를 임의 추가하지 않는다. revision/ETag 경쟁 제어와 시험 답안 보존·재채점 계약을 유지한다. 원본 설계 패키지를 임의 수정하지 않는다.
 
@@ -177,7 +257,7 @@ Docker 검증은 아래 자료 없이 진행 가능하다. 그러나 업무 DB/A
 ## 8. 사용자가 공유한 전체 개발 순서
 
 1. 프로젝트 현황 분석 + 개발환경 검증
-2. Docker 개발환경 구축 — 현재 실제 실행 검증이 남은 지점
+2. Docker 개발환경 구축 — 실제 Compose 검증 통과, postgres-it 오류 해결이 남은 지점
 3. DB 스키마 / 마이그레이션 — 원본 DDL 확보 필요
 4. Spring Boot 공통 기반
 5. 인증/회원
@@ -207,6 +287,6 @@ Docker 검증은 아래 자료 없이 진행 가능하다. 그러나 업무 DB/A
 
 ## 9. 다음 작업에 그대로 전달할 요청
 
-> WORK_HANDOFF.md를 읽고 현재 상태에서 이어서 진행해줘. 먼저 집 PC의 Docker 실행환경을 확인하고, 기존 4서비스 Compose의 build/up/health/smoke, 실제 PostgreSQL/Flyway, Frontend 소스 반영, down/up DB 보존 및 postgres-it 테스트를 검증해줘. 완료·실패·미검증을 구분하여 이 문서에 결과를 갱신해줘. 기존 공통 기반과 26단계 순서를 유지하고 원본 OpenAPI/업무 DDL이 없으면 추정 구현하지 말아줘. 2단계 검증 후 3단계에 필요한 원본 자료 존재 여부를 확인해줘.
+> WORK_HANDOFF.md와 docs/docker-home-verification-20260920.md를 읽고 이어서 진행해줘. Compose build/up/health/smoke, 실제 Flyway, HMR, DB 보존은 통과했다. 보고서 8절의 이슈 초안을 먼저 확정하고 SessionMigrationIT의 고정 관리 포트를 실제 배정 포트로 바꾼 뒤 Docker PostgreSQL에서 postgres-it를 재검증해줘. 결과를 문서에 반영하고 2단계에서 멈춰줘. 3단계나 업무 기능은 시작하지 말아줘.
 
 상세 근거가 필요할 때만 `docs/docker-development-stage2.md`, `docs/development-readiness-20260920.md`, `docs/implementation-gap-log.md`, `docs/runtime.md`, `docs/implementation-decisions.md`를 추가로 참고한다.

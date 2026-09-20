@@ -1,0 +1,6884 @@
+{
+  "date": "2026-09-20",
+  "scope": "Static source inventory; not full OpenAPI validation or database runtime verification",
+  "sources": [
+    {
+      "path": "design-package/supplemental-20260920/openapi.yaml",
+      "bytes": 1222892,
+      "sha256": "6c9d02efda9e093d9385ba676168e71dd7786e46d9f55d680963979ec90a22c5",
+      "sourceDirectory": "Downloads"
+    },
+    {
+      "path": "design-package/supplemental-20260920/데일리_이직_DB_ERD_설계서_v0.1_20260918.html",
+      "bytes": 376954,
+      "sha256": "fdc8883ca80ad2d3ebb3c2b27f3697fa3f67d695a718db97f06a02e46364db96",
+      "sourceDirectory": "Downloads"
+    }
+  ],
+  "openapi": {
+    "version": "3.1.1",
+    "documentVersion": "1.2.1",
+    "pathCount": 81,
+    "operationCount": 91,
+    "apiV1OperationCount": 89,
+    "schemaCount": 217,
+    "referenceCount": 1036,
+    "unresolvedLocalReferences": [],
+    "externalReferences": [],
+    "canceledEnums": [],
+    "cancelPaths": [],
+    "duplicateOperationIds": [],
+    "operations": [
+      {
+        "id": "OIDC-001",
+        "method": "GET",
+        "path": "/oauth2/authorization/google",
+        "summary": "Google 로그인 시작",
+        "tags": [
+          "인증"
+        ],
+        "statuses": [
+          "302"
+        ]
+      },
+      {
+        "id": "OIDC-002",
+        "method": "GET",
+        "path": "/login/oauth2/code/google",
+        "summary": "Google 로그인 콜백",
+        "tags": [
+          "인증"
+        ],
+        "statuses": [
+          "302"
+        ]
+      },
+      {
+        "id": "AUTH-004",
+        "method": "GET",
+        "path": "/api/v1/auth/csrf",
+        "summary": "CSRF 토큰 조회",
+        "tags": [
+          "인증"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "AUTH-002",
+        "method": "POST",
+        "path": "/api/v1/auth/logout",
+        "summary": "앱 로그아웃",
+        "tags": [
+          "인증"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "403",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "USER-001",
+        "method": "GET",
+        "path": "/api/v1/users/me",
+        "summary": "내 정보 조회",
+        "tags": [
+          "사용자"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "USER-002",
+        "method": "PATCH",
+        "path": "/api/v1/users/me",
+        "summary": "닉네임 변경",
+        "tags": [
+          "사용자"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "403",
+          "404",
+          "412",
+          "428",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "COMMON-001",
+        "method": "GET",
+        "path": "/api/v1/common-codes",
+        "summary": "학습 공통코드 조회",
+        "tags": [
+          "공통"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "TEMPLATE-001",
+        "method": "GET",
+        "path": "/api/v1/curriculum-templates",
+        "summary": "배포된 커리큘럼 템플릿 목록",
+        "tags": [
+          "커리큘럼"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "CURR-008",
+        "method": "POST",
+        "path": "/api/v1/curriculums",
+        "summary": "커리큘럼 최초 배정",
+        "tags": [
+          "커리큘럼"
+        ],
+        "statuses": [
+          "201",
+          "400",
+          "401",
+          "403",
+          "404",
+          "409",
+          "422",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "CURR-001",
+        "method": "GET",
+        "path": "/api/v1/curriculums/current",
+        "summary": "현재 커리큘럼 조회",
+        "tags": [
+          "커리큘럼"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "CURR-002",
+        "method": "GET",
+        "path": "/api/v1/curriculums/{curriculumId}",
+        "summary": "커리큘럼 상세",
+        "tags": [
+          "커리큘럼"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "CURR-003",
+        "method": "GET",
+        "path": "/api/v1/curriculums/{curriculumId}/months",
+        "summary": "교육 월차 목록",
+        "tags": [
+          "커리큘럼"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "CURR-004",
+        "method": "GET",
+        "path": "/api/v1/curriculums/{curriculumId}/months/{monthNo}",
+        "summary": "교육 월차 상세",
+        "tags": [
+          "커리큘럼"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "CURR-005",
+        "method": "GET",
+        "path": "/api/v1/curriculums/{curriculumId}/weeks",
+        "summary": "교육 주차 목록",
+        "tags": [
+          "커리큘럼"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "CURR-006",
+        "method": "GET",
+        "path": "/api/v1/curriculums/{curriculumId}/weeks/{weekNo}",
+        "summary": "교육 주차 상세",
+        "tags": [
+          "커리큘럼"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "CURR-009",
+        "method": "POST",
+        "path": "/api/v1/curriculums/{curriculumId}/reschedule-preview",
+        "summary": "일정 변경 미리보기",
+        "tags": [
+          "커리큘럼"
+        ],
+        "statuses": [
+          "201",
+          "400",
+          "401",
+          "403",
+          "404",
+          "409",
+          "412",
+          "422",
+          "428",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "CURR-007",
+        "method": "POST",
+        "path": "/api/v1/curriculums/{curriculumId}/reschedule",
+        "summary": "일정 변경 적용",
+        "tags": [
+          "커리큘럼"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "403",
+          "404",
+          "409",
+          "412",
+          "428",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "DASH-001",
+        "method": "GET",
+        "path": "/api/v1/dashboard",
+        "summary": "통합 대시보드",
+        "tags": [
+          "대시보드"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "DAY-001",
+        "method": "GET",
+        "path": "/api/v1/learning-days/today",
+        "summary": "오늘 학습 조회",
+        "tags": [
+          "학습일"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "DAY-002",
+        "method": "GET",
+        "path": "/api/v1/learning-days/{date}",
+        "summary": "지정일 학습 조회",
+        "tags": [
+          "학습일"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "DAY-003",
+        "method": "GET",
+        "path": "/api/v1/learning-days",
+        "summary": "기간별 학습 조회",
+        "tags": [
+          "학습일"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "DAY-004",
+        "method": "GET",
+        "path": "/api/v1/learning-days/{date}/sessions",
+        "summary": "지정일 세션 목록",
+        "tags": [
+          "학습일"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "SESSION-001",
+        "method": "GET",
+        "path": "/api/v1/learning-sessions/{sessionId}",
+        "summary": "학습 세션 상세",
+        "tags": [
+          "학습 세션"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "SESSION-002",
+        "method": "POST",
+        "path": "/api/v1/learning-sessions/{sessionId}/start",
+        "summary": "학습 세션 시작",
+        "tags": [
+          "학습 세션"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "403",
+          "404",
+          "409",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "SESSION-003",
+        "method": "POST",
+        "path": "/api/v1/learning-sessions/{sessionId}/complete",
+        "summary": "학습 세션 완료",
+        "tags": [
+          "학습 세션"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "403",
+          "404",
+          "409",
+          "422",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "SESSION-004",
+        "method": "GET",
+        "path": "/api/v1/learning-sessions/{sessionId}/contents",
+        "summary": "세션 콘텐츠 목록",
+        "tags": [
+          "학습 세션"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "CONTENT-001",
+        "method": "GET",
+        "path": "/api/v1/learning-contents/{contentId}",
+        "summary": "학습 콘텐츠 상세",
+        "tags": [
+          "학습 콘텐츠"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "409",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "CONTENT-002",
+        "method": "POST",
+        "path": "/api/v1/learning-contents/{contentId}/complete",
+        "summary": "콘텐츠 완료 확인",
+        "tags": [
+          "학습 콘텐츠"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "403",
+          "404",
+          "409",
+          "422",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "PROBLEM-001",
+        "method": "GET",
+        "path": "/api/v1/problems/{problemId}",
+        "summary": "일반 연습 문제 조회",
+        "tags": [
+          "문제풀이"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "403",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "ATTEMPT-001",
+        "method": "POST",
+        "path": "/api/v1/problem-attempts",
+        "summary": "일반 문제 답안 제출",
+        "tags": [
+          "문제풀이"
+        ],
+        "statuses": [
+          "201",
+          "400",
+          "401",
+          "403",
+          "404",
+          "409",
+          "422",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "ATTEMPT-003",
+        "method": "GET",
+        "path": "/api/v1/problem-attempts",
+        "summary": "연습 제출 이력",
+        "tags": [
+          "문제풀이"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "ATTEMPT-002",
+        "method": "GET",
+        "path": "/api/v1/problem-attempts/{attemptId}",
+        "summary": "연습 제출 결과 조회",
+        "tags": [
+          "문제풀이"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "PROBLEM-002",
+        "method": "POST",
+        "path": "/api/v1/problems/{problemId}/reports",
+        "summary": "문제 오류 신고",
+        "tags": [
+          "문제풀이"
+        ],
+        "statuses": [
+          "201",
+          "400",
+          "401",
+          "403",
+          "404",
+          "409",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "WRONG-001",
+        "method": "GET",
+        "path": "/api/v1/wrong-answers",
+        "summary": "오답 목록",
+        "tags": [
+          "오답노트"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "WRONG-002",
+        "method": "GET",
+        "path": "/api/v1/wrong-answers/{wrongAnswerId}",
+        "summary": "오답 상세",
+        "tags": [
+          "오답노트"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "WRONG-005",
+        "method": "PATCH",
+        "path": "/api/v1/wrong-answers/{wrongAnswerId}",
+        "summary": "개인 오답 메모 수정",
+        "tags": [
+          "오답노트"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "403",
+          "404",
+          "412",
+          "428",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "WRONG-003",
+        "method": "POST",
+        "path": "/api/v1/wrong-answers/{wrongAnswerId}/resolve",
+        "summary": "오답 해결 확인",
+        "tags": [
+          "오답노트"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "403",
+          "404",
+          "409",
+          "422",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "WRONG-004",
+        "method": "POST",
+        "path": "/api/v1/wrong-answers/{wrongAnswerId}/reopen",
+        "summary": "오답 재복습 표시",
+        "tags": [
+          "오답노트"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "403",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "TEST-007",
+        "method": "GET",
+        "path": "/api/v1/tests",
+        "summary": "시험 목록",
+        "tags": [
+          "시험"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "TEST-001",
+        "method": "GET",
+        "path": "/api/v1/tests/{testId}",
+        "summary": "시험 안내 조회",
+        "tags": [
+          "시험"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "TEST-002",
+        "method": "POST",
+        "path": "/api/v1/tests/{testId}/attempts",
+        "summary": "시험 응시 생성",
+        "tags": [
+          "시험"
+        ],
+        "statuses": [
+          "201",
+          "400",
+          "401",
+          "403",
+          "404",
+          "409",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "TEST-003",
+        "method": "GET",
+        "path": "/api/v1/test-attempts/{attemptId}",
+        "summary": "시험 복원·상태 조회",
+        "tags": [
+          "시험"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "TEST-004",
+        "method": "PUT",
+        "path": "/api/v1/test-attempts/{attemptId}/answers/{problemId}",
+        "summary": "시험 답안 저장",
+        "tags": [
+          "시험"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "403",
+          "404",
+          "409",
+          "412",
+          "422",
+          "428",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "TEST-005",
+        "method": "POST",
+        "path": "/api/v1/test-attempts/{attemptId}/submit",
+        "summary": "시험 최종 제출",
+        "tags": [
+          "시험"
+        ],
+        "statuses": [
+          "202",
+          "400",
+          "401",
+          "403",
+          "404",
+          "409",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "TEST-006",
+        "method": "GET",
+        "path": "/api/v1/test-attempts/{attemptId}/result",
+        "summary": "시험 결과 조회",
+        "tags": [
+          "시험"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "409",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "TEST-008",
+        "method": "GET",
+        "path": "/api/v1/test-attempts",
+        "summary": "시험 응시 이력",
+        "tags": [
+          "시험"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "PROGRESS-001",
+        "method": "GET",
+        "path": "/api/v1/learning-progress",
+        "summary": "전체 학습 진척",
+        "tags": [
+          "진척도"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "PROGRESS-002",
+        "method": "GET",
+        "path": "/api/v1/learning-progress/daily",
+        "summary": "일간 학습 통계",
+        "tags": [
+          "진척도"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "PROGRESS-003",
+        "method": "GET",
+        "path": "/api/v1/learning-progress/weekly",
+        "summary": "ISO 주간 학습 통계",
+        "tags": [
+          "진척도"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "PROGRESS-004",
+        "method": "GET",
+        "path": "/api/v1/learning-progress/monthly",
+        "summary": "달력 월간 학습 통계",
+        "tags": [
+          "진척도"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "PROGRESS-005",
+        "method": "GET",
+        "path": "/api/v1/learning-progress/categories",
+        "summary": "분야별 진척",
+        "tags": [
+          "진척도"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "CAL-001",
+        "method": "GET",
+        "path": "/api/v1/learning-calendar",
+        "summary": "월간 학습 캘린더",
+        "tags": [
+          "캘린더·휴식"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "REST-001",
+        "method": "POST",
+        "path": "/api/v1/rest-days",
+        "summary": "휴식일 적용",
+        "tags": [
+          "캘린더·휴식"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "403",
+          "404",
+          "409",
+          "412",
+          "428",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "REST-002",
+        "method": "DELETE",
+        "path": "/api/v1/rest-days/{date}",
+        "summary": "휴식일 해제 적용",
+        "tags": [
+          "캘린더·휴식"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "403",
+          "404",
+          "409",
+          "412",
+          "428",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "EVAL-001",
+        "method": "GET",
+        "path": "/api/v1/evaluations/monthly",
+        "summary": "월말 평가 이력",
+        "tags": [
+          "월말 평가"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "EVAL-003",
+        "method": "POST",
+        "path": "/api/v1/evaluations/monthly",
+        "summary": "월말 평가 스냅샷 생성",
+        "tags": [
+          "월말 평가"
+        ],
+        "statuses": [
+          "201",
+          "400",
+          "401",
+          "403",
+          "404",
+          "409",
+          "422",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "EVAL-002",
+        "method": "GET",
+        "path": "/api/v1/evaluations/{evaluationId}",
+        "summary": "월말 평가 상세",
+        "tags": [
+          "월말 평가"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "AI-001",
+        "method": "POST",
+        "path": "/api/v1/ai/explanations",
+        "summary": "추가 설명 생성",
+        "tags": [
+          "AI"
+        ],
+        "statuses": [
+          "202",
+          "400",
+          "401",
+          "403",
+          "404",
+          "409",
+          "422",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "AI-002",
+        "method": "POST",
+        "path": "/api/v1/ai/practice-problems",
+        "summary": "추가 연습문제 생성",
+        "tags": [
+          "AI"
+        ],
+        "statuses": [
+          "202",
+          "400",
+          "401",
+          "403",
+          "404",
+          "409",
+          "422",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "AI-003",
+        "method": "POST",
+        "path": "/api/v1/ai/wrong-answer-reviews",
+        "summary": "오답 분석 생성",
+        "tags": [
+          "AI"
+        ],
+        "statuses": [
+          "202",
+          "400",
+          "401",
+          "403",
+          "404",
+          "409",
+          "422",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "AI-004",
+        "method": "POST",
+        "path": "/api/v1/ai/daily-feedback",
+        "summary": "일간 학습 피드백 생성",
+        "tags": [
+          "AI"
+        ],
+        "statuses": [
+          "202",
+          "400",
+          "401",
+          "403",
+          "404",
+          "409",
+          "422",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "AI-005",
+        "method": "POST",
+        "path": "/api/v1/ai/monthly-reviews",
+        "summary": "월말 평가 해설 생성",
+        "tags": [
+          "AI"
+        ],
+        "statuses": [
+          "202",
+          "400",
+          "401",
+          "403",
+          "404",
+          "409",
+          "422",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "AI-006",
+        "method": "GET",
+        "path": "/api/v1/ai/jobs/{jobId}",
+        "summary": "AI 작업·결과 조회",
+        "tags": [
+          "AI"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "AI-007",
+        "method": "GET",
+        "path": "/api/v1/ai/usage",
+        "summary": "AI 사용 한도 조회",
+        "tags": [
+          "AI"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "AI-008",
+        "method": "GET",
+        "path": "/api/v1/ai/jobs",
+        "summary": "AI 생성 이력",
+        "tags": [
+          "AI"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "NOTI-001",
+        "method": "GET",
+        "path": "/api/v1/notifications",
+        "summary": "앱 알림 목록",
+        "tags": [
+          "알림·푸시"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "NOTI-002",
+        "method": "POST",
+        "path": "/api/v1/notifications/{notificationId}/read",
+        "summary": "알림 읽음",
+        "tags": [
+          "알림·푸시"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "403",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "NOTI-003",
+        "method": "POST",
+        "path": "/api/v1/notifications/read-all",
+        "summary": "기준시각까지 전체 읽음",
+        "tags": [
+          "알림·푸시"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "403",
+          "404",
+          "409",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "NOTI-004",
+        "method": "GET",
+        "path": "/api/v1/notifications/settings",
+        "summary": "알림 설정 조회",
+        "tags": [
+          "알림·푸시"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "NOTI-005",
+        "method": "PATCH",
+        "path": "/api/v1/notifications/settings",
+        "summary": "알림 설정 변경",
+        "tags": [
+          "알림·푸시"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "403",
+          "404",
+          "412",
+          "428",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "NOTI-006",
+        "method": "GET",
+        "path": "/api/v1/push/config",
+        "summary": "Web Push 공개 설정",
+        "tags": [
+          "알림·푸시"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "NOTI-007",
+        "method": "POST",
+        "path": "/api/v1/push/subscriptions",
+        "summary": "브라우저 푸시 구독 등록",
+        "tags": [
+          "알림·푸시"
+        ],
+        "statuses": [
+          "201",
+          "400",
+          "401",
+          "403",
+          "404",
+          "409",
+          "422",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "NOTI-009",
+        "method": "GET",
+        "path": "/api/v1/push/subscriptions",
+        "summary": "내 푸시 구독 목록",
+        "tags": [
+          "알림·푸시"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "NOTI-008",
+        "method": "DELETE",
+        "path": "/api/v1/push/subscriptions/{subscriptionId}",
+        "summary": "푸시 구독 해제",
+        "tags": [
+          "알림·푸시"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "403",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "NOTION-001",
+        "method": "GET",
+        "path": "/api/v1/integrations/notion",
+        "summary": "Notion 연결 상태",
+        "tags": [
+          "Notion"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "NOTION-003",
+        "method": "DELETE",
+        "path": "/api/v1/integrations/notion",
+        "summary": "Notion 연결 해제",
+        "tags": [
+          "Notion"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "403",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "NOTION-006",
+        "method": "POST",
+        "path": "/api/v1/integrations/notion/authorization-requests",
+        "summary": "Notion 인가 요청 생성",
+        "tags": [
+          "Notion"
+        ],
+        "statuses": [
+          "201",
+          "400",
+          "401",
+          "403",
+          "404",
+          "409",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "NOTION-007",
+        "method": "GET",
+        "path": "/api/v1/integrations/notion/callback",
+        "summary": "Notion 인가 콜백",
+        "tags": [
+          "Notion"
+        ],
+        "statuses": [
+          "302"
+        ]
+      },
+      {
+        "id": "NOTION-008",
+        "method": "GET",
+        "path": "/api/v1/integrations/notion/targets",
+        "summary": "Notion 대상 매핑 조회",
+        "tags": [
+          "Notion"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "409",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "NOTION-009",
+        "method": "PUT",
+        "path": "/api/v1/integrations/notion/targets",
+        "summary": "Notion 대상 매핑 저장",
+        "tags": [
+          "Notion"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "403",
+          "404",
+          "409",
+          "412",
+          "422",
+          "428",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "NOTION-004",
+        "method": "POST",
+        "path": "/api/v1/integrations/notion/sync",
+        "summary": "Notion 동기화 접수",
+        "tags": [
+          "Notion"
+        ],
+        "statuses": [
+          "202",
+          "400",
+          "401",
+          "403",
+          "404",
+          "409",
+          "422",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "NOTION-005",
+        "method": "GET",
+        "path": "/api/v1/integrations/notion/sync-history",
+        "summary": "Notion 동기화 이력",
+        "tags": [
+          "Notion"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "NOTION-010",
+        "method": "GET",
+        "path": "/api/v1/integrations/notion/sync-jobs/{syncId}",
+        "summary": "Notion 작업 상세",
+        "tags": [
+          "Notion"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "NOTION-011",
+        "method": "POST",
+        "path": "/api/v1/integrations/notion/sync-jobs/{syncId}/retry",
+        "summary": "Notion 실패 항목 재처리",
+        "tags": [
+          "Notion"
+        ],
+        "statuses": [
+          "202",
+          "400",
+          "401",
+          "403",
+          "404",
+          "409",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "SLACK-001",
+        "method": "GET",
+        "path": "/api/v1/integrations/slack",
+        "summary": "Slack 연결·알림 설정",
+        "tags": [
+          "Slack"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "SLACK-002",
+        "method": "PATCH",
+        "path": "/api/v1/integrations/slack",
+        "summary": "Slack 발송 설정 변경",
+        "tags": [
+          "Slack"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "403",
+          "404",
+          "409",
+          "412",
+          "428",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "SLACK-003",
+        "method": "POST",
+        "path": "/api/v1/integrations/slack/test-messages",
+        "summary": "Slack 테스트 메시지 접수",
+        "tags": [
+          "Slack"
+        ],
+        "statuses": [
+          "202",
+          "400",
+          "401",
+          "403",
+          "404",
+          "409",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "SLACK-004",
+        "method": "GET",
+        "path": "/api/v1/integrations/slack/deliveries",
+        "summary": "Slack 발송 이력",
+        "tags": [
+          "Slack"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "SLACK-005",
+        "method": "GET",
+        "path": "/api/v1/integrations/slack/deliveries/{deliveryId}",
+        "summary": "Slack 전송 상태",
+        "tags": [
+          "Slack"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "SETTING-001",
+        "method": "GET",
+        "path": "/api/v1/settings",
+        "summary": "사용자 기본 설정",
+        "tags": [
+          "설정"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "404",
+          "429",
+          "500",
+          "503"
+        ]
+      },
+      {
+        "id": "SETTING-002",
+        "method": "PATCH",
+        "path": "/api/v1/settings",
+        "summary": "사용자 기본 설정 변경",
+        "tags": [
+          "설정"
+        ],
+        "statuses": [
+          "200",
+          "400",
+          "401",
+          "403",
+          "404",
+          "412",
+          "428",
+          "429",
+          "500",
+          "503"
+        ]
+      }
+    ],
+    "schemaNames": [
+      "CategoryCode",
+      "Weekday",
+      "Difficulty",
+      "SessionStatus",
+      "DayStatus",
+      "CurriculumStatus",
+      "WrongStatus",
+      "TestType",
+      "JobStatus",
+      "AiPurpose",
+      "SyncEntity",
+      "NotificationType",
+      "RestReason",
+      "Meta",
+      "ValidationDetail",
+      "Error",
+      "ErrorEnvelope",
+      "CsrfToken",
+      "LogoutResult",
+      "User",
+      "UserPatch",
+      "CodeItem",
+      "CommonCodes",
+      "StudyPolicy",
+      "Settings",
+      "SettingsPatch",
+      "CurriculumTemplate",
+      "Curriculum",
+      "CurriculumCreate",
+      "CurriculumMonth",
+      "WeekSummary",
+      "SessionSummary",
+      "LearningDay",
+      "WeekDetail",
+      "Session",
+      "SessionCompleteRequest",
+      "DayProgress",
+      "SessionCompleteResult",
+      "ContentSummary",
+      "ProblemSummary",
+      "LearningContent",
+      "ContentCompleteResult",
+      "Option",
+      "Problem",
+      "AttemptRequest",
+      "ProblemAttempt",
+      "ProblemReportRequest",
+      "ProblemReport",
+      "WrongAnswerSummary",
+      "WrongAnswer",
+      "WrongResolve",
+      "WrongPatch",
+      "Test",
+      "TestProblem",
+      "TestAttempt",
+      "TestAnswerRequest",
+      "SavedTestAnswer",
+      "TestSubmitResult",
+      "CategoryScore",
+      "TestResultProblem",
+      "TestResult",
+      "TestAttemptSummary",
+      "OverallProgress",
+      "DailyProgress",
+      "PeriodProgress",
+      "CategoryProgress",
+      "CalendarDay",
+      "Calendar",
+      "ReschedulePreviewRequest",
+      "MovedDay",
+      "ReschedulePreview",
+      "ApplyPreview",
+      "ScheduleChangeResult",
+      "RestDayRequest",
+      "RestChangeResult",
+      "Evaluation",
+      "EvaluationCreate",
+      "CharacterState",
+      "Dashboard",
+      "AiExplanationRequest",
+      "AiPracticeRequest",
+      "AiWrongReviewRequest",
+      "AiDailyRequest",
+      "AiMonthlyRequest",
+      "AiExplanationResult",
+      "AiPracticeResult",
+      "AiWrongReviewResult",
+      "AiDailyResult",
+      "AiMonthlyResult",
+      "AiResult",
+      "JobReceipt",
+      "AiJob",
+      "AiJobSummary",
+      "AiUsage",
+      "TimedReminder",
+      "TestReminder",
+      "WeeklyReminder",
+      "NotificationSettings",
+      "NotificationSettingsPatch",
+      "Notification",
+      "ReadAllRequest",
+      "ReadAllResult",
+      "PushConfig",
+      "PushKeys",
+      "PushSubscribe",
+      "PushSubscription",
+      "DeletedResult",
+      "NotionConnection",
+      "OAuthAuthorization",
+      "NotionTarget",
+      "NotionTargets",
+      "NotionTargetsPut",
+      "NotionSyncRequest",
+      "SyncFailure",
+      "NotionSyncJob",
+      "DisconnectResult",
+      "SlackEvent",
+      "SlackConnection",
+      "SlackPatch",
+      "SlackDelivery",
+      "WrongAnswerPage",
+      "AttemptPage",
+      "TestPage",
+      "TestAttemptPage",
+      "NotificationPage",
+      "AiJobPage",
+      "NotionSyncPage",
+      "EvaluationPage",
+      "SlackDeliveryPage",
+      "AUTH004Response",
+      "AUTH002Response",
+      "USER001Response",
+      "USER002Response",
+      "COMMON001Response",
+      "TEMPLATE001Response",
+      "CURR008Response",
+      "CURR001Response",
+      "CURR002Response",
+      "CURR003Response",
+      "CURR004Response",
+      "CURR005Response",
+      "CURR006Response",
+      "CURR009Response",
+      "CURR007Response",
+      "DASH001Response",
+      "DAY001Response",
+      "DAY002Response",
+      "DAY003Response",
+      "DAY004Response",
+      "SESSION001Response",
+      "SESSION002Response",
+      "SESSION003Response",
+      "SESSION004Response",
+      "CONTENT001Response",
+      "CONTENT002Response",
+      "PROBLEM001Response",
+      "ATTEMPT001Response",
+      "ATTEMPT002Response",
+      "ATTEMPT003Response",
+      "PROBLEM002Response",
+      "WRONG001Response",
+      "WRONG002Response",
+      "WRONG003Response",
+      "WRONG004Response",
+      "WRONG005Response",
+      "TEST007Response",
+      "TEST001Response",
+      "TEST002Response",
+      "TEST003Response",
+      "TEST004Response",
+      "TEST005Response",
+      "TEST006Response",
+      "TEST008Response",
+      "PROGRESS001Response",
+      "PROGRESS002Response",
+      "PROGRESS003Response",
+      "PROGRESS004Response",
+      "PROGRESS005Response",
+      "CAL001Response",
+      "REST001Response",
+      "REST002Response",
+      "EVAL001Response",
+      "EVAL002Response",
+      "EVAL003Response",
+      "AI001Response",
+      "AI002Response",
+      "AI003Response",
+      "AI004Response",
+      "AI005Response",
+      "AI006Response",
+      "AI007Response",
+      "AI008Response",
+      "NOTI001Response",
+      "NOTI002Response",
+      "NOTI003Response",
+      "NOTI004Response",
+      "NOTI005Response",
+      "NOTI006Response",
+      "NOTI007Response",
+      "NOTI008Response",
+      "NOTI009Response",
+      "NOTION001Response",
+      "NOTION006Response",
+      "NOTION003Response",
+      "NOTION008Response",
+      "NOTION009Response",
+      "NOTION004Response",
+      "NOTION005Response",
+      "NOTION010Response",
+      "NOTION011Response",
+      "SLACK001Response",
+      "SLACK002Response",
+      "SLACK003Response",
+      "SLACK004Response",
+      "SLACK005Response",
+      "SETTING001Response",
+      "SETTING002Response"
+    ]
+  },
+  "database": {
+    "documentVersion": "0.1",
+    "tableCount": 46,
+    "columnCount": 557,
+    "foreignKeyCount": 105,
+    "foreignKeyReferenceAndTypeErrors": [],
+    "tables": [
+      {
+        "name": "app_user",
+        "domain": "사용자·인증",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "display_name",
+            "type": "varchar(80)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "표시 이름"
+          },
+          {
+            "name": "email",
+            "type": "varchar(320)",
+            "nullability": "허용",
+            "default": "—",
+            "description": "연락용 이메일; 로그인 식별키로 사용하지 않음"
+          },
+          {
+            "name": "status",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "'ACTIVE'",
+            "description": "허용값: ACTIVE, SUSPENDED, WITHDRAWN"
+          },
+          {
+            "name": "withdrawn_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "탈퇴 요청 시각"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "name": "user_identity",
+        "domain": "사용자·인증",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "user_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소유 사용자"
+          },
+          {
+            "name": "issuer",
+            "type": "varchar(255)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "OIDC 발급자 식별자"
+          },
+          {
+            "name": "subject",
+            "type": "varchar(255)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "OIDC subject"
+          },
+          {
+            "name": "last_login_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "최근 로그인 시각"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "user_setting",
+        "domain": "사용자·인증",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "user_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소유 사용자"
+          },
+          {
+            "name": "timezone",
+            "type": "varchar(64)",
+            "nullability": "불가",
+            "default": "'Asia/Seoul'",
+            "description": "IANA 타임존; 신규 과정·알림의 기본값"
+          },
+          {
+            "name": "locale",
+            "type": "varchar(16)",
+            "nullability": "불가",
+            "default": "'ko-KR'",
+            "description": "화면 언어"
+          },
+          {
+            "name": "target_role",
+            "type": "varchar(160)",
+            "nullability": "허용",
+            "default": "—",
+            "description": "목표 직무"
+          },
+          {
+            "name": "daily_goal_minutes",
+            "type": "smallint",
+            "nullability": "불가",
+            "default": "60",
+            "description": "신규 일정 기본 학습 분"
+          },
+          {
+            "name": "onboarding_completed_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "온보딩 완료"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "subject",
+        "domain": "커리큘럼",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "code",
+            "type": "varchar(40)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "분야 코드"
+          },
+          {
+            "name": "name",
+            "type": "varchar(100)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "분야명"
+          },
+          {
+            "name": "enabled",
+            "type": "boolean",
+            "nullability": "불가",
+            "default": "true",
+            "description": "사용 여부"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "name": "curriculum",
+        "domain": "커리큘럼",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "code",
+            "type": "varchar(64)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "불변 커리큘럼 코드"
+          },
+          {
+            "name": "title",
+            "type": "varchar(200)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "제목"
+          },
+          {
+            "name": "enabled",
+            "type": "boolean",
+            "nullability": "불가",
+            "default": "true",
+            "description": "신규 등록 허용"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "name": "curriculum_version",
+        "domain": "커리큘럼",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "curriculum_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "커리큘럼 원형"
+          },
+          {
+            "name": "version_no",
+            "type": "integer",
+            "nullability": "불가",
+            "default": "—",
+            "description": "발행 버전"
+          },
+          {
+            "name": "duration_months",
+            "type": "smallint",
+            "nullability": "불가",
+            "default": "6",
+            "description": "계획 기간; 기본 6개월"
+          },
+          {
+            "name": "status",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "'DRAFT'",
+            "description": "허용값: DRAFT, PUBLISHED, RETIRED"
+          },
+          {
+            "name": "description",
+            "type": "text",
+            "nullability": "허용",
+            "default": "—",
+            "description": "개요"
+          },
+          {
+            "name": "published_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "발행 시각"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "curriculum_id",
+            "targetTable": "curriculum",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "curriculum_unit",
+        "domain": "커리큘럼",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "curriculum_version_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소속 커리큘럼 버전"
+          },
+          {
+            "name": "parent_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "상위 구성"
+          },
+          {
+            "name": "unit_type",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "허용값: MONTH, WEEK, DAY, ITEM"
+          },
+          {
+            "name": "order_no",
+            "type": "integer",
+            "nullability": "불가",
+            "default": "—",
+            "description": "같은 부모 내 순서"
+          },
+          {
+            "name": "title",
+            "type": "varchar(200)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "구성명"
+          },
+          {
+            "name": "subject_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "학습 분야"
+          },
+          {
+            "name": "activity_type",
+            "type": "varchar(24)",
+            "nullability": "허용",
+            "default": "—",
+            "description": "ITEM만 사용: LEARN/PRACTICE/REVIEW/INTERVIEW/TEST"
+          },
+          {
+            "name": "estimated_minutes",
+            "type": "smallint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "예상 분; ITEM만 사용"
+          },
+          {
+            "name": "completion_weight",
+            "type": "numeric(8,3)",
+            "nullability": "허용",
+            "default": "—",
+            "description": "완료율 가중치; ITEM만 사용"
+          },
+          {
+            "name": "content_version_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "기본 콘텐츠 버전"
+          },
+          {
+            "name": "problem_version_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "기본 문제 버전"
+          },
+          {
+            "name": "test_version_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "기본 시험 버전"
+          },
+          {
+            "name": "required",
+            "type": "boolean",
+            "nullability": "불가",
+            "default": "true",
+            "description": "완료율 필수 항목"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "curriculum_version_id",
+            "targetTable": "curriculum_version",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "parent_id, curriculum_version_id",
+            "targetTable": "curriculum_unit",
+            "targetColumns": "id, curriculum_version_id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "subject_id",
+            "targetTable": "subject",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "content_version_id",
+            "targetTable": "learning_content_version",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "problem_version_id",
+            "targetTable": "problem_version",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "test_version_id",
+            "targetTable": "test_version",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "user_curriculum",
+        "domain": "개인 과정·일정",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "user_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소유 사용자"
+          },
+          {
+            "name": "curriculum_version_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "등록 시 고정한 버전"
+          },
+          {
+            "name": "start_date",
+            "type": "date",
+            "nullability": "불가",
+            "default": "—",
+            "description": "과정 시작 지역 날짜"
+          },
+          {
+            "name": "target_end_date",
+            "type": "date",
+            "nullability": "불가",
+            "default": "—",
+            "description": "최초 목표 종료일"
+          },
+          {
+            "name": "projected_end_date",
+            "type": "date",
+            "nullability": "불가",
+            "default": "—",
+            "description": "재배치 후 예상 종료일"
+          },
+          {
+            "name": "timezone",
+            "type": "varchar(64)",
+            "nullability": "불가",
+            "default": "'Asia/Seoul'",
+            "description": "과정 날짜 판정용 고정 타임존"
+          },
+          {
+            "name": "status",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "'PLANNED'",
+            "description": "허용값: PLANNED, ACTIVE, PAUSED, COMPLETED, CANCELED"
+          },
+          {
+            "name": "schedule_revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "일정 전체 동시성 버전"
+          },
+          {
+            "name": "completed_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "실제 완료 시각"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "curriculum_version_id",
+            "targetTable": "curriculum_version",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "schedule_policy",
+        "domain": "개인 과정·일정",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "user_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소유 사용자"
+          },
+          {
+            "name": "user_curriculum_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "사용자 과정"
+          },
+          {
+            "name": "effective_from",
+            "type": "date",
+            "nullability": "불가",
+            "default": "—",
+            "description": "적용 시작일"
+          },
+          {
+            "name": "effective_to",
+            "type": "date",
+            "nullability": "허용",
+            "default": "—",
+            "description": "적용 종료일; 끝 날짜 제외"
+          },
+          {
+            "name": "weekly_rest_count",
+            "type": "smallint",
+            "nullability": "불가",
+            "default": "2",
+            "description": "완전한 주의 기본 휴식일 수"
+          },
+          {
+            "name": "study_minutes",
+            "type": "smallint",
+            "nullability": "불가",
+            "default": "60",
+            "description": "학습일 기본 시간"
+          },
+          {
+            "name": "reschedule_mode",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "'EXTEND_END_DATE'",
+            "description": "허용값: EXTEND_END_DATE, KEEP_END_DATE"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "user_curriculum_id, user_id",
+            "targetTable": "user_curriculum",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "schedule_rest_weekday",
+        "domain": "개인 과정·일정",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "schedule_policy_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "일정 정책"
+          },
+          {
+            "name": "iso_weekday",
+            "type": "smallint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "월=1 ~ 일=7"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "schedule_policy_id",
+            "targetTable": "schedule_policy",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "learning_day",
+        "domain": "개인 과정·일정",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "user_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소유 사용자"
+          },
+          {
+            "name": "user_curriculum_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소속 사용자 과정"
+          },
+          {
+            "name": "local_date",
+            "type": "date",
+            "nullability": "불가",
+            "default": "—",
+            "description": "과정 타임존 기준 날짜"
+          },
+          {
+            "name": "day_type",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "'STUDY'",
+            "description": "허용값: STUDY, REST"
+          },
+          {
+            "name": "source",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "'POLICY'",
+            "description": "허용값: POLICY, MANUAL"
+          },
+          {
+            "name": "schedule_policy_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "생성에 사용한 정책"
+          },
+          {
+            "name": "planned_minutes",
+            "type": "smallint",
+            "nullability": "불가",
+            "default": "60",
+            "description": "해당 날짜 목표 분"
+          },
+          {
+            "name": "rest_reason",
+            "type": "text",
+            "nullability": "허용",
+            "default": "—",
+            "description": "휴식 사유"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "user_curriculum_id, user_id",
+            "targetTable": "user_curriculum",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "schedule_policy_id, user_curriculum_id, user_id",
+            "targetTable": "schedule_policy",
+            "targetColumns": "id, user_curriculum_id, user_id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "learning_day_item",
+        "domain": "개인 과정·일정",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "user_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소유 사용자"
+          },
+          {
+            "name": "user_curriculum_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소속 사용자 과정"
+          },
+          {
+            "name": "curriculum_version_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "등록 버전; 복합 FK 검증용"
+          },
+          {
+            "name": "curriculum_unit_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "원본 ITEM; 보충 학습은 NULL"
+          },
+          {
+            "name": "learning_day_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "현재 배정된 달력 날짜"
+          },
+          {
+            "name": "order_no",
+            "type": "integer",
+            "nullability": "불가",
+            "default": "—",
+            "description": "날짜 내 표시 순서"
+          },
+          {
+            "name": "activity_type",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "허용값: LEARN, PRACTICE, REVIEW, INTERVIEW, TEST"
+          },
+          {
+            "name": "content_version_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "고정 콘텐츠 버전"
+          },
+          {
+            "name": "problem_version_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "고정 문제 버전"
+          },
+          {
+            "name": "test_version_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "고정 시험 버전"
+          },
+          {
+            "name": "content_status",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "'PENDING'",
+            "description": "허용값: PENDING, READY, FAILED"
+          },
+          {
+            "name": "status",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "'NOT_STARTED'",
+            "description": "허용값: NOT_STARTED, IN_PROGRESS, COMPLETED, SKIPPED"
+          },
+          {
+            "name": "required",
+            "type": "boolean",
+            "nullability": "불가",
+            "default": "true",
+            "description": "커리큘럼 완료율 대상"
+          },
+          {
+            "name": "completion_weight",
+            "type": "numeric(8,3)",
+            "nullability": "불가",
+            "default": "1",
+            "description": "등록 시 고정 가중치"
+          },
+          {
+            "name": "started_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "최초 시작 시각"
+          },
+          {
+            "name": "completed_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "완료 시각"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "user_curriculum_id, user_id, curriculum_version_id",
+            "targetTable": "user_curriculum",
+            "targetColumns": "id, user_id, curriculum_version_id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "curriculum_unit_id, curriculum_version_id",
+            "targetTable": "curriculum_unit",
+            "targetColumns": "id, curriculum_version_id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "learning_day_id, user_curriculum_id, user_id",
+            "targetTable": "learning_day",
+            "targetColumns": "id, user_curriculum_id, user_id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "content_version_id",
+            "targetTable": "learning_content_version",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "problem_version_id",
+            "targetTable": "problem_version",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "test_version_id",
+            "targetTable": "test_version",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "schedule_change",
+        "domain": "개인 과정·일정",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "user_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소유 사용자"
+          },
+          {
+            "name": "user_curriculum_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "변경 과정"
+          },
+          {
+            "name": "from_revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "변경 전 버전"
+          },
+          {
+            "name": "to_revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "변경 후 버전"
+          },
+          {
+            "name": "reason_code",
+            "type": "varchar(40)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "변경 사유 코드"
+          },
+          {
+            "name": "before_snapshot",
+            "type": "jsonb",
+            "nullability": "불가",
+            "default": "—",
+            "description": "변경 날짜·항목 ID·예정일·정책의 변경 전 값"
+          },
+          {
+            "name": "after_snapshot",
+            "type": "jsonb",
+            "nullability": "불가",
+            "default": "—",
+            "description": "변경 후 값"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "user_curriculum_id, user_id",
+            "targetTable": "user_curriculum",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "learning_session",
+        "domain": "개인 과정·일정",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "user_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소유 사용자"
+          },
+          {
+            "name": "learning_day_item_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "배정 항목"
+          },
+          {
+            "name": "activity_date",
+            "type": "date",
+            "nullability": "불가",
+            "default": "—",
+            "description": "활동 발생일; 과정 타임존 기준"
+          },
+          {
+            "name": "started_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "—",
+            "description": "실제 시작 시각"
+          },
+          {
+            "name": "last_heartbeat_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "—",
+            "description": "마지막 서버 수신"
+          },
+          {
+            "name": "ended_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "종료 시각"
+          },
+          {
+            "name": "active_seconds",
+            "type": "integer",
+            "nullability": "불가",
+            "default": "0",
+            "description": "검증된 활성 학습 초"
+          },
+          {
+            "name": "heartbeat_seq",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "중복 heartbeat 방지 순번"
+          },
+          {
+            "name": "end_reason",
+            "type": "varchar(32)",
+            "nullability": "허용",
+            "default": "—",
+            "description": "COMPLETED/PAUSED/IDLE_TIMEOUT 등"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "learning_day_item_id, user_id",
+            "targetTable": "learning_day_item",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "learning_content",
+        "domain": "콘텐츠·문제",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "owner_user_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "NULL=공유 콘텐츠; 값 존재=개인 콘텐츠"
+          },
+          {
+            "name": "subject_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "주 분야"
+          },
+          {
+            "name": "title",
+            "type": "varchar(200)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "제목"
+          },
+          {
+            "name": "enabled",
+            "type": "boolean",
+            "nullability": "불가",
+            "default": "true",
+            "description": "신규 사용 허용"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "owner_user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "subject_id",
+            "targetTable": "subject",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "learning_content_version",
+        "domain": "콘텐츠·문제",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "learning_content_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "콘텐츠 원형"
+          },
+          {
+            "name": "version_no",
+            "type": "integer",
+            "nullability": "불가",
+            "default": "—",
+            "description": "버전"
+          },
+          {
+            "name": "status",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "'DRAFT'",
+            "description": "허용값: DRAFT, PUBLISHED, RETIRED"
+          },
+          {
+            "name": "body_markdown",
+            "type": "text",
+            "nullability": "불가",
+            "default": "—",
+            "description": "본문"
+          },
+          {
+            "name": "source_references",
+            "type": "jsonb",
+            "nullability": "불가",
+            "default": "'[]'::jsonb",
+            "description": "출처·검증일 등; URL 및 제목만"
+          },
+          {
+            "name": "content_digest",
+            "type": "varchar(64)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "정규화 본문의 SHA-256"
+          },
+          {
+            "name": "ai_job_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "생성 AI 작업"
+          },
+          {
+            "name": "published_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "발행 시각"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "learning_content_id",
+            "targetTable": "learning_content",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "ai_job_id",
+            "targetTable": "ai_job",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "problem",
+        "domain": "콘텐츠·문제",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "owner_user_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "NULL=공유; 값 존재=개인"
+          },
+          {
+            "name": "subject_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "주 분야"
+          },
+          {
+            "name": "title",
+            "type": "varchar(200)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "문제명"
+          },
+          {
+            "name": "parent_problem_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "면접 꼬리질문 원본"
+          },
+          {
+            "name": "enabled",
+            "type": "boolean",
+            "nullability": "불가",
+            "default": "true",
+            "description": "출제 허용"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "owner_user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "subject_id",
+            "targetTable": "subject",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "parent_problem_id",
+            "targetTable": "problem",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "problem_version",
+        "domain": "콘텐츠·문제",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "problem_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "문제 원형"
+          },
+          {
+            "name": "version_no",
+            "type": "integer",
+            "nullability": "불가",
+            "default": "—",
+            "description": "버전"
+          },
+          {
+            "name": "status",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "'DRAFT'",
+            "description": "허용값: DRAFT, PUBLISHED, RETIRED"
+          },
+          {
+            "name": "question_type",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "허용값: SINGLE_CHOICE, MULTI_CHOICE, SHORT_ANSWER, ESSAY, CODE, INTERVIEW"
+          },
+          {
+            "name": "difficulty",
+            "type": "smallint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "난도 1~5"
+          },
+          {
+            "name": "prompt_markdown",
+            "type": "text",
+            "nullability": "불가",
+            "default": "—",
+            "description": "지문"
+          },
+          {
+            "name": "choices",
+            "type": "jsonb",
+            "nullability": "불가",
+            "default": "'[]'::jsonb",
+            "description": "보기 배열 [{key,text}]; 객관식 이외는 빈 배열"
+          },
+          {
+            "name": "answer_key",
+            "type": "jsonb",
+            "nullability": "불가",
+            "default": "—",
+            "description": "정답; 서버 전용"
+          },
+          {
+            "name": "rubric",
+            "type": "jsonb",
+            "nullability": "불가",
+            "default": "—",
+            "description": "채점 기준; 서버 전용"
+          },
+          {
+            "name": "explanation_markdown",
+            "type": "text",
+            "nullability": "불가",
+            "default": "—",
+            "description": "해설; 공개 시점 제한"
+          },
+          {
+            "name": "grading_rule_version",
+            "type": "varchar(64)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "평가 규칙 버전"
+          },
+          {
+            "name": "ai_job_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "생성 AI 작업"
+          },
+          {
+            "name": "published_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "발행 시각"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "problem_id",
+            "targetTable": "problem",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "ai_job_id",
+            "targetTable": "ai_job",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "problem_attempt",
+        "domain": "콘텐츠·문제",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "user_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소유 사용자"
+          },
+          {
+            "name": "user_curriculum_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "학습 과정"
+          },
+          {
+            "name": "problem_version_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "출제 당시 문제 버전"
+          },
+          {
+            "name": "learning_session_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "학습 세션"
+          },
+          {
+            "name": "context_type",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "'PRACTICE'",
+            "description": "허용값: PRACTICE, REVIEW, INTERVIEW"
+          },
+          {
+            "name": "status",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "'DRAFT'",
+            "description": "허용값: DRAFT, SUBMITTED"
+          },
+          {
+            "name": "answer_payload",
+            "type": "jsonb",
+            "nullability": "불가",
+            "default": "'{}'::jsonb",
+            "description": "답안 JSON; 유형별 스키마 검증"
+          },
+          {
+            "name": "submitted_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "최초 제출 시각"
+          },
+          {
+            "name": "active_seconds",
+            "type": "integer",
+            "nullability": "불가",
+            "default": "0",
+            "description": "해당 문제 풀이 초"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "user_curriculum_id, user_id",
+            "targetTable": "user_curriculum",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "problem_version_id",
+            "targetTable": "problem_version",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "learning_session_id, user_id",
+            "targetTable": "learning_session",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "wrong_answer",
+        "domain": "오답·복습",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "user_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소유 사용자"
+          },
+          {
+            "name": "problem_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "문제 원형"
+          },
+          {
+            "name": "status",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "'OPEN'",
+            "description": "허용값: OPEN, MASTERED, ARCHIVED"
+          },
+          {
+            "name": "user_note",
+            "type": "text",
+            "nullability": "허용",
+            "default": "—",
+            "description": "사용자 직접 작성 노트"
+          },
+          {
+            "name": "first_wrong_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "—",
+            "description": "최초 오답 시각"
+          },
+          {
+            "name": "mastered_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "숙달 처리 시각"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "problem_id",
+            "targetTable": "problem",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "wrong_answer_occurrence",
+        "domain": "오답·복습",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "user_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소유 사용자"
+          },
+          {
+            "name": "wrong_answer_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "오답 노트"
+          },
+          {
+            "name": "grading_result_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "오답 판정의 근거 채점 결과"
+          },
+          {
+            "name": "status",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "'VALID'",
+            "description": "허용값: VALID, INVALIDATED"
+          },
+          {
+            "name": "error_type",
+            "type": "varchar(40)",
+            "nullability": "허용",
+            "default": "—",
+            "description": "개념/실수/시간/설명부족 등"
+          },
+          {
+            "name": "analysis_markdown",
+            "type": "text",
+            "nullability": "허용",
+            "default": "—",
+            "description": "심층 설명·응용·실무 예시"
+          },
+          {
+            "name": "invalidated_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "재채점으로 무효화한 시각"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "wrong_answer_id, user_id",
+            "targetTable": "wrong_answer",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "grading_result_id, user_id",
+            "targetTable": "grading_result",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "review_task",
+        "domain": "오답·복습",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "user_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소유 사용자"
+          },
+          {
+            "name": "wrong_answer_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "복습할 오답"
+          },
+          {
+            "name": "due_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "—",
+            "description": "복습 예정 시각"
+          },
+          {
+            "name": "status",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "'PLANNED'",
+            "description": "허용값: PLANNED, COMPLETED, CANCELED"
+          },
+          {
+            "name": "algorithm_version",
+            "type": "varchar(64)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "복습 간격 규칙 버전"
+          },
+          {
+            "name": "interval_days",
+            "type": "integer",
+            "nullability": "불가",
+            "default": "—",
+            "description": "이번 간격 일수"
+          },
+          {
+            "name": "completed_attempt_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "복습 완료의 문제 풀이"
+          },
+          {
+            "name": "completed_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "완료 시각"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "wrong_answer_id, user_id",
+            "targetTable": "wrong_answer",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "completed_attempt_id, user_id",
+            "targetTable": "problem_attempt",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "test",
+        "domain": "시험·평가",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "owner_user_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "NULL=공유 시험; 개인 AI 시험은 사용자 소유"
+          },
+          {
+            "name": "title",
+            "type": "varchar(200)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "시험명"
+          },
+          {
+            "name": "test_type",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "허용값: DAILY, WEEKLY, MONTHLY"
+          },
+          {
+            "name": "enabled",
+            "type": "boolean",
+            "nullability": "불가",
+            "default": "true",
+            "description": "신규 응시 허용"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "owner_user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "test_version",
+        "domain": "시험·평가",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "test_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "시험 원형"
+          },
+          {
+            "name": "version_no",
+            "type": "integer",
+            "nullability": "불가",
+            "default": "—",
+            "description": "버전"
+          },
+          {
+            "name": "status",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "'DRAFT'",
+            "description": "허용값: DRAFT, PUBLISHED, RETIRED"
+          },
+          {
+            "name": "time_limit_seconds",
+            "type": "integer",
+            "nullability": "불가",
+            "default": "—",
+            "description": "제한 시간 초"
+          },
+          {
+            "name": "attempt_limit",
+            "type": "smallint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "허용 횟수; NULL=제한 없음"
+          },
+          {
+            "name": "pass_percent",
+            "type": "numeric(5,2)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "합격 기준 백분율"
+          },
+          {
+            "name": "rule_version",
+            "type": "varchar(64)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "출제·합격 규칙 버전"
+          },
+          {
+            "name": "published_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "발행 시각"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "test_id",
+            "targetTable": "test",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "test_item",
+        "domain": "시험·평가",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "test_version_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "시험 버전"
+          },
+          {
+            "name": "problem_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "문제 원형; API problemId 대응"
+          },
+          {
+            "name": "problem_version_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "고정 문제 버전"
+          },
+          {
+            "name": "item_no",
+            "type": "integer",
+            "nullability": "불가",
+            "default": "—",
+            "description": "문항 순서"
+          },
+          {
+            "name": "max_score",
+            "type": "numeric(8,3)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "배점"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "test_version_id",
+            "targetTable": "test_version",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "problem_version_id, problem_id",
+            "targetTable": "problem_version",
+            "targetColumns": "id, problem_id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "test_attempt",
+        "domain": "시험·평가",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "user_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소유 사용자"
+          },
+          {
+            "name": "user_curriculum_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "응시 과정"
+          },
+          {
+            "name": "test_version_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "응시 시험 버전"
+          },
+          {
+            "name": "attempt_no",
+            "type": "integer",
+            "nullability": "불가",
+            "default": "—",
+            "description": "같은 사용자·시험 버전 내 응시 차수"
+          },
+          {
+            "name": "status",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "'IN_PROGRESS'",
+            "description": "허용값: IN_PROGRESS, SUBMITTED, VOIDED"
+          },
+          {
+            "name": "started_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "—",
+            "description": "서버 시작 시각"
+          },
+          {
+            "name": "deadline_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "—",
+            "description": "서버 마감 시각"
+          },
+          {
+            "name": "submitted_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "최초 제출 시각"
+          },
+          {
+            "name": "submit_reason",
+            "type": "varchar(24)",
+            "nullability": "허용",
+            "default": "—",
+            "description": "USER/TIMEOUT 등"
+          },
+          {
+            "name": "submission_digest",
+            "type": "varchar(64)",
+            "nullability": "허용",
+            "default": "—",
+            "description": "최종 답안 집합 해시"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "user_curriculum_id, user_id",
+            "targetTable": "user_curriculum",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "test_version_id",
+            "targetTable": "test_version",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "test_attempt_item",
+        "domain": "시험·평가",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "user_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소유 사용자"
+          },
+          {
+            "name": "test_attempt_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "시험 응시"
+          },
+          {
+            "name": "test_version_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "시험 버전; 복합 FK용"
+          },
+          {
+            "name": "test_item_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "원본 시험 문항"
+          },
+          {
+            "name": "display_order",
+            "type": "integer",
+            "nullability": "불가",
+            "default": "—",
+            "description": "실제 노출 순서"
+          },
+          {
+            "name": "question_snapshot",
+            "type": "jsonb",
+            "nullability": "불가",
+            "default": "—",
+            "description": "노출한 지문·보기·문제 버전·스키마 버전; 정답 제외"
+          },
+          {
+            "name": "grading_snapshot",
+            "type": "jsonb",
+            "nullability": "불가",
+            "default": "—",
+            "description": "배점·정답·루브릭; 서버 전용"
+          },
+          {
+            "name": "answer_payload",
+            "type": "jsonb",
+            "nullability": "불가",
+            "default": "'{}'::jsonb",
+            "description": "자동 저장 답안"
+          },
+          {
+            "name": "answered_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "최종 답안 저장 시각"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "test_attempt_id, test_version_id, user_id",
+            "targetTable": "test_attempt",
+            "targetColumns": "id, test_version_id, user_id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "test_item_id, test_version_id",
+            "targetTable": "test_item",
+            "targetColumns": "id, test_version_id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "grading_run",
+        "domain": "시험·평가",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "user_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소유 사용자"
+          },
+          {
+            "name": "problem_attempt_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "개별 풀이 채점 대상"
+          },
+          {
+            "name": "test_attempt_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "시험 채점 대상"
+          },
+          {
+            "name": "run_no",
+            "type": "integer",
+            "nullability": "불가",
+            "default": "—",
+            "description": "대상별 채점 차수"
+          },
+          {
+            "name": "status",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "'QUEUED'",
+            "description": "허용값: QUEUED, RUNNING, SUCCEEDED, FAILED"
+          },
+          {
+            "name": "grader_type",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "허용값: RULE, AI, HUMAN"
+          },
+          {
+            "name": "rule_version",
+            "type": "varchar(64)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "채점 규칙 버전"
+          },
+          {
+            "name": "input_digest",
+            "type": "varchar(64)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "입력 답안·문항 버전 해시"
+          },
+          {
+            "name": "is_current",
+            "type": "boolean",
+            "nullability": "불가",
+            "default": "false",
+            "description": "현재 공식 성적 여부"
+          },
+          {
+            "name": "ai_job_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "AI 작업"
+          },
+          {
+            "name": "finished_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "종료 시각"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "problem_attempt_id, user_id",
+            "targetTable": "problem_attempt",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "test_attempt_id, user_id",
+            "targetTable": "test_attempt",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "ai_job_id, user_id",
+            "targetTable": "ai_job",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "grading_result",
+        "domain": "시험·평가",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "user_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소유 사용자"
+          },
+          {
+            "name": "grading_run_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "채점 실행"
+          },
+          {
+            "name": "problem_attempt_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "개별 풀이인 경우"
+          },
+          {
+            "name": "test_attempt_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "시험인 경우"
+          },
+          {
+            "name": "test_attempt_item_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "시험 문항인 경우"
+          },
+          {
+            "name": "earned_score",
+            "type": "numeric(8,3)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "획득 점수"
+          },
+          {
+            "name": "max_score",
+            "type": "numeric(8,3)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "만점"
+          },
+          {
+            "name": "is_correct",
+            "type": "boolean",
+            "nullability": "허용",
+            "default": "—",
+            "description": "객관식 정오; 서술형은 NULL 가능"
+          },
+          {
+            "name": "rubric_result",
+            "type": "jsonb",
+            "nullability": "불가",
+            "default": "—",
+            "description": "평가 항목별 점수·근거"
+          },
+          {
+            "name": "feedback_markdown",
+            "type": "text",
+            "nullability": "불가",
+            "default": "—",
+            "description": "피드백"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "grading_run_id, problem_attempt_id, user_id",
+            "targetTable": "grading_run",
+            "targetColumns": "id, problem_attempt_id, user_id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "grading_run_id, test_attempt_id, user_id",
+            "targetTable": "grading_run",
+            "targetColumns": "id, test_attempt_id, user_id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "test_attempt_item_id, test_attempt_id, user_id",
+            "targetTable": "test_attempt_item",
+            "targetColumns": "id, test_attempt_id, user_id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "monthly_evaluation",
+        "domain": "시험·평가",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "user_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소유 사용자"
+          },
+          {
+            "name": "user_curriculum_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "평가 과정"
+          },
+          {
+            "name": "month_start",
+            "type": "date",
+            "nullability": "불가",
+            "default": "—",
+            "description": "보고 대상 달의 1일"
+          },
+          {
+            "name": "report_version",
+            "type": "integer",
+            "nullability": "불가",
+            "default": "—",
+            "description": "보고서 버전"
+          },
+          {
+            "name": "source_cutoff_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "—",
+            "description": "원천 집계 기준 시각"
+          },
+          {
+            "name": "calculation_version",
+            "type": "varchar(64)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "지표 산정 규칙 버전"
+          },
+          {
+            "name": "status",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "'GENERATING'",
+            "description": "허용값: GENERATING, READY, FAILED"
+          },
+          {
+            "name": "metrics_snapshot",
+            "type": "jsonb",
+            "nullability": "불가",
+            "default": "—",
+            "description": "지표 분자·분모·대상 ID·기간·가중치 스냅샷"
+          },
+          {
+            "name": "report_payload",
+            "type": "jsonb",
+            "nullability": "허용",
+            "default": "—",
+            "description": "강점/취약점/다음 달 계획"
+          },
+          {
+            "name": "ai_job_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "보고서 생성 AI 작업"
+          },
+          {
+            "name": "published_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "평가 공개 시각"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "user_curriculum_id, user_id",
+            "targetTable": "user_curriculum",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "ai_job_id, user_id",
+            "targetTable": "ai_job",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "ai_conversation",
+        "domain": "AI·사용량",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "user_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소유 사용자"
+          },
+          {
+            "name": "user_curriculum_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "관련 과정"
+          },
+          {
+            "name": "purpose",
+            "type": "varchar(40)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "TUTOR/WRONG_ANSWER/INTERVIEW 등"
+          },
+          {
+            "name": "title",
+            "type": "varchar(200)",
+            "nullability": "허용",
+            "default": "—",
+            "description": "대화 제목"
+          },
+          {
+            "name": "status",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "'OPEN'",
+            "description": "허용값: OPEN, CLOSED"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "user_curriculum_id, user_id",
+            "targetTable": "user_curriculum",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "ai_message",
+        "domain": "AI·사용량",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "user_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소유 사용자"
+          },
+          {
+            "name": "conversation_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "대화"
+          },
+          {
+            "name": "message_no",
+            "type": "integer",
+            "nullability": "불가",
+            "default": "—",
+            "description": "대화 내 순번"
+          },
+          {
+            "name": "role",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "허용값: USER, ASSISTANT"
+          },
+          {
+            "name": "body_markdown",
+            "type": "text",
+            "nullability": "불가",
+            "default": "—",
+            "description": "화면 표시 대화 내용"
+          },
+          {
+            "name": "ai_job_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "응답 생성 작업"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "conversation_id, user_id",
+            "targetTable": "ai_conversation",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "ai_job_id, user_id",
+            "targetTable": "ai_job",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "ai_budget",
+        "domain": "AI·사용량",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "user_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소유 사용자"
+          },
+          {
+            "name": "period_start",
+            "type": "date",
+            "nullability": "불가",
+            "default": "—",
+            "description": "예산 적용 시작일"
+          },
+          {
+            "name": "period_end",
+            "type": "date",
+            "nullability": "불가",
+            "default": "—",
+            "description": "종료일; 끝 날짜 제외"
+          },
+          {
+            "name": "currency",
+            "type": "varchar(3)",
+            "nullability": "불가",
+            "default": "'KRW'",
+            "description": "예산 통화 코드"
+          },
+          {
+            "name": "limit_amount",
+            "type": "numeric(18,6)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "사용자 설정 예산 한도"
+          },
+          {
+            "name": "hard_limit_enabled",
+            "type": "boolean",
+            "nullability": "불가",
+            "default": "true",
+            "description": "한도 도달 시 신규 요청 차단"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "ai_job",
+        "domain": "AI·사용량",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "user_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소유 사용자"
+          },
+          {
+            "name": "budget_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "적용 예산"
+          },
+          {
+            "name": "conversation_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "관련 대화"
+          },
+          {
+            "name": "job_type",
+            "type": "varchar(40)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "CONTENT/EXPLANATION/GRADING/INTERVIEW/REPORT"
+          },
+          {
+            "name": "dedupe_key",
+            "type": "varchar(160)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "같은 목적의 논리 작업 키"
+          },
+          {
+            "name": "status",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "'QUEUED'",
+            "description": "허용값: QUEUED, RUNNING, SUCCEEDED, FAILED, CANCELED, UNKNOWN"
+          },
+          {
+            "name": "provider",
+            "type": "varchar(40)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "AI 제공자"
+          },
+          {
+            "name": "model",
+            "type": "varchar(128)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "실제 요청 모델 식별자"
+          },
+          {
+            "name": "prompt_version",
+            "type": "varchar(64)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "프롬프트 버전"
+          },
+          {
+            "name": "input_snapshot",
+            "type": "jsonb",
+            "nullability": "불가",
+            "default": "—",
+            "description": "허용된 학습 입력만; 자격증명 제외"
+          },
+          {
+            "name": "result_payload",
+            "type": "jsonb",
+            "nullability": "허용",
+            "default": "—",
+            "description": "정규화된 작업 결과"
+          },
+          {
+            "name": "reserved_amount",
+            "type": "numeric(18,6)",
+            "nullability": "불가",
+            "default": "0",
+            "description": "아직 정산하지 않은 예약액; 예산 통화 기준"
+          },
+          {
+            "name": "attempt_count",
+            "type": "integer",
+            "nullability": "불가",
+            "default": "0",
+            "description": "물리 요청 횟수"
+          },
+          {
+            "name": "next_attempt_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "다음 시도 시각"
+          },
+          {
+            "name": "lease_token",
+            "type": "varchar(64)",
+            "nullability": "허용",
+            "default": "—",
+            "description": "작업 점유 토큰"
+          },
+          {
+            "name": "lease_until",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "점유 만료"
+          },
+          {
+            "name": "finished_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "완료 시각"
+          },
+          {
+            "name": "error_code",
+            "type": "varchar(64)",
+            "nullability": "허용",
+            "default": "—",
+            "description": "정규화 오류 코드"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "budget_id, user_id",
+            "targetTable": "ai_budget",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "conversation_id, user_id",
+            "targetTable": "ai_conversation",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "ai_usage",
+        "domain": "AI·사용량",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "user_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소유 사용자"
+          },
+          {
+            "name": "ai_job_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "논리 AI 작업"
+          },
+          {
+            "name": "attempt_no",
+            "type": "integer",
+            "nullability": "불가",
+            "default": "—",
+            "description": "물리 호출 차수"
+          },
+          {
+            "name": "provider",
+            "type": "varchar(40)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "제공자"
+          },
+          {
+            "name": "provider_request_id",
+            "type": "varchar(200)",
+            "nullability": "허용",
+            "default": "—",
+            "description": "제공자 요청 식별자"
+          },
+          {
+            "name": "status",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "'PENDING'",
+            "description": "허용값: PENDING, KNOWN, UNAVAILABLE"
+          },
+          {
+            "name": "input_tokens",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "전체 입력 토큰"
+          },
+          {
+            "name": "cached_input_tokens",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "입력 토큰의 캐시 부분집합"
+          },
+          {
+            "name": "output_tokens",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "전체 출력 토큰"
+          },
+          {
+            "name": "reasoning_tokens",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "출력 토큰의 추론 부분집합"
+          },
+          {
+            "name": "provider_cost_usd",
+            "type": "numeric(18,8)",
+            "nullability": "허용",
+            "default": "—",
+            "description": "제공자 기준 비용; 미확인은 NULL"
+          },
+          {
+            "name": "budget_cost_amount",
+            "type": "numeric(18,6)",
+            "nullability": "허용",
+            "default": "—",
+            "description": "고정 환산한 예산 통화 비용"
+          },
+          {
+            "name": "fx_rate",
+            "type": "numeric(18,8)",
+            "nullability": "허용",
+            "default": "—",
+            "description": "USD→예산통화 환산율"
+          },
+          {
+            "name": "pricing_snapshot",
+            "type": "jsonb",
+            "nullability": "허용",
+            "default": "—",
+            "description": "실제 적용 단가·계산 기준·확인일"
+          },
+          {
+            "name": "reconciled_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "사용량 정산 시각"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "ai_job_id, user_id",
+            "targetTable": "ai_job",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "notification_preference",
+        "domain": "알림",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "user_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소유 사용자"
+          },
+          {
+            "name": "channel",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "허용값: IN_APP, WEB_PUSH, SLACK"
+          },
+          {
+            "name": "event_type",
+            "type": "varchar(40)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "DAILY/REVIEW/TEST/MONTHLY 등"
+          },
+          {
+            "name": "enabled",
+            "type": "boolean",
+            "nullability": "불가",
+            "default": "false",
+            "description": "수신 허용"
+          },
+          {
+            "name": "local_time",
+            "type": "time",
+            "nullability": "허용",
+            "default": "—",
+            "description": "정기 발송 지역 시간"
+          },
+          {
+            "name": "send_on_rest_day",
+            "type": "boolean",
+            "nullability": "불가",
+            "default": "false",
+            "description": "휴식일 발송 허용"
+          },
+          {
+            "name": "quiet_start",
+            "type": "time",
+            "nullability": "허용",
+            "default": "—",
+            "description": "방해 금지 시작"
+          },
+          {
+            "name": "quiet_end",
+            "type": "time",
+            "nullability": "허용",
+            "default": "—",
+            "description": "방해 금지 종료"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "push_subscription",
+        "domain": "알림",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "user_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소유 사용자"
+          },
+          {
+            "name": "endpoint_hash",
+            "type": "varchar(64)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "endpoint 정규화 SHA-256; 로그 원문 금지"
+          },
+          {
+            "name": "endpoint_ciphertext",
+            "type": "bytea",
+            "nullability": "불가",
+            "default": "—",
+            "description": "암호화된 endpoint"
+          },
+          {
+            "name": "auth_ciphertext",
+            "type": "bytea",
+            "nullability": "불가",
+            "default": "—",
+            "description": "암호화된 auth secret"
+          },
+          {
+            "name": "key_id",
+            "type": "varchar(100)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "암호화 키 식별자; 실제 키는 외부 보관"
+          },
+          {
+            "name": "p256dh",
+            "type": "text",
+            "nullability": "불가",
+            "default": "—",
+            "description": "클라이언트 공개키"
+          },
+          {
+            "name": "device_label",
+            "type": "varchar(100)",
+            "nullability": "허용",
+            "default": "—",
+            "description": "사용자 기기명"
+          },
+          {
+            "name": "status",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "'ACTIVE'",
+            "description": "허용값: ACTIVE, REVOKED, EXPIRED"
+          },
+          {
+            "name": "last_success_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "최근 제공자 수락 시각"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "notification",
+        "domain": "알림",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "user_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소유 사용자"
+          },
+          {
+            "name": "event_type",
+            "type": "varchar(40)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "알림 유형"
+          },
+          {
+            "name": "title",
+            "type": "varchar(200)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "제목"
+          },
+          {
+            "name": "body",
+            "type": "text",
+            "nullability": "불가",
+            "default": "—",
+            "description": "본문"
+          },
+          {
+            "name": "deep_link",
+            "type": "varchar(500)",
+            "nullability": "허용",
+            "default": "—",
+            "description": "허용된 앱 내부 이동 경로"
+          },
+          {
+            "name": "dedupe_key",
+            "type": "varchar(160)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "동일 이벤트 중복 생성 방지"
+          },
+          {
+            "name": "scheduled_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "—",
+            "description": "발송 예정 시각"
+          },
+          {
+            "name": "event_local_date",
+            "type": "date",
+            "nullability": "허용",
+            "default": "—",
+            "description": "알림 기준 지역 날짜"
+          },
+          {
+            "name": "timezone",
+            "type": "varchar(64)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "날짜/시각 판정 타임존 스냅샷"
+          },
+          {
+            "name": "read_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "앱에서 읽은 시각"
+          },
+          {
+            "name": "canceled_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "일정 변경 등으로 취소"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "notification_delivery",
+        "domain": "알림",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "user_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소유 사용자"
+          },
+          {
+            "name": "notification_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "알림"
+          },
+          {
+            "name": "channel",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "허용값: WEB_PUSH, SLACK"
+          },
+          {
+            "name": "push_subscription_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "웹 푸시 대상"
+          },
+          {
+            "name": "integration_connection_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "Slack 연결"
+          },
+          {
+            "name": "status",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "'QUEUED'",
+            "description": "허용값: QUEUED, SENDING, SENT, FAILED, CANCELED, UNKNOWN"
+          },
+          {
+            "name": "attempt_count",
+            "type": "integer",
+            "nullability": "불가",
+            "default": "0",
+            "description": "발송 시도 수"
+          },
+          {
+            "name": "next_attempt_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "재시도 시각"
+          },
+          {
+            "name": "lease_token",
+            "type": "varchar(64)",
+            "nullability": "허용",
+            "default": "—",
+            "description": "점유 토큰"
+          },
+          {
+            "name": "lease_until",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "점유 만료"
+          },
+          {
+            "name": "sent_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "제공자가 요청을 수락한 시각"
+          },
+          {
+            "name": "last_error_code",
+            "type": "varchar(64)",
+            "nullability": "허용",
+            "default": "—",
+            "description": "마지막 오류"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "notification_id, user_id",
+            "targetTable": "notification",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "push_subscription_id, user_id",
+            "targetTable": "push_subscription",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "integration_connection_id, user_id",
+            "targetTable": "integration_connection",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "integration_connection",
+        "domain": "외부 연동",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "user_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소유 사용자"
+          },
+          {
+            "name": "provider",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "허용값: NOTION, SLACK"
+          },
+          {
+            "name": "status",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "'ACTIVE'",
+            "description": "허용값: ACTIVE, DISCONNECTED, ERROR"
+          },
+          {
+            "name": "credential_ref",
+            "type": "varchar(240)",
+            "nullability": "허용",
+            "default": "—",
+            "description": "외부 비밀 저장소 자격증명 참조"
+          },
+          {
+            "name": "external_workspace_id",
+            "type": "varchar(200)",
+            "nullability": "허용",
+            "default": "—",
+            "description": "외부 워크스페이스"
+          },
+          {
+            "name": "config",
+            "type": "jsonb",
+            "nullability": "불가",
+            "default": "'{}'::jsonb",
+            "description": "비민감 외부 DB/채널/템플릿 ID 및 선택 동기화 설정"
+          },
+          {
+            "name": "api_version",
+            "type": "varchar(40)",
+            "nullability": "허용",
+            "default": "—",
+            "description": "연동 구현이 고정한 API 버전"
+          },
+          {
+            "name": "disconnected_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "연결 해제 시각"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "integration_mapping",
+        "domain": "외부 연동",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "user_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소유 사용자"
+          },
+          {
+            "name": "connection_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "외부 연결"
+          },
+          {
+            "name": "content_version_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "학습 콘텐츠 버전"
+          },
+          {
+            "name": "problem_version_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "문제 버전"
+          },
+          {
+            "name": "problem_attempt_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "개별 풀이"
+          },
+          {
+            "name": "wrong_answer_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "오답 노트"
+          },
+          {
+            "name": "test_attempt_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "시험 응시"
+          },
+          {
+            "name": "monthly_evaluation_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "월말 평가"
+          },
+          {
+            "name": "learning_session_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "학습 기록"
+          },
+          {
+            "name": "external_object_id",
+            "type": "varchar(200)",
+            "nullability": "허용",
+            "default": "—",
+            "description": "외부 페이지 식별자; 생성 전 NULL"
+          },
+          {
+            "name": "local_revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "외부 전송용 단조 증가 버전"
+          },
+          {
+            "name": "synced_revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "마지막으로 성공한 버전"
+          },
+          {
+            "name": "synced_digest",
+            "type": "varchar(64)",
+            "nullability": "허용",
+            "default": "—",
+            "description": "성공 페이로드 해시"
+          },
+          {
+            "name": "template_version",
+            "type": "varchar(64)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "적용 템플릿 버전"
+          },
+          {
+            "name": "last_synced_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "성공 시각"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "connection_id, user_id",
+            "targetTable": "integration_connection",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "content_version_id",
+            "targetTable": "learning_content_version",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "problem_version_id",
+            "targetTable": "problem_version",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "problem_attempt_id, user_id",
+            "targetTable": "problem_attempt",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "wrong_answer_id, user_id",
+            "targetTable": "wrong_answer",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "test_attempt_id, user_id",
+            "targetTable": "test_attempt",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "monthly_evaluation_id, user_id",
+            "targetTable": "monthly_evaluation",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "learning_session_id, user_id",
+            "targetTable": "learning_session",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "sync_job",
+        "domain": "외부 연동",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "user_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소유 사용자"
+          },
+          {
+            "name": "mapping_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "대상 매핑"
+          },
+          {
+            "name": "source_revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "대상 앱 전송 버전"
+          },
+          {
+            "name": "operation",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "'UPSERT'",
+            "description": "허용값: UPSERT, ARCHIVE"
+          },
+          {
+            "name": "status",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "'QUEUED'",
+            "description": "허용값: QUEUED, RUNNING, SUCCEEDED, FAILED, SUPERSEDED, CONFLICT, UNKNOWN"
+          },
+          {
+            "name": "payload_snapshot",
+            "type": "jsonb",
+            "nullability": "불가",
+            "default": "—",
+            "description": "전송할 확정 스냅샷; 자격증명 제외"
+          },
+          {
+            "name": "attempt_count",
+            "type": "integer",
+            "nullability": "불가",
+            "default": "0",
+            "description": "시도 수"
+          },
+          {
+            "name": "next_attempt_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "다음 시도"
+          },
+          {
+            "name": "lease_token",
+            "type": "varchar(64)",
+            "nullability": "허용",
+            "default": "—",
+            "description": "점유 토큰"
+          },
+          {
+            "name": "lease_until",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "점유 만료"
+          },
+          {
+            "name": "finished_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "종료 시각"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "mapping_id, user_id",
+            "targetTable": "integration_mapping",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "sync_attempt",
+        "domain": "외부 연동",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "user_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소유 사용자"
+          },
+          {
+            "name": "sync_job_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "동기화 작업"
+          },
+          {
+            "name": "attempt_no",
+            "type": "integer",
+            "nullability": "불가",
+            "default": "—",
+            "description": "시도 순번"
+          },
+          {
+            "name": "started_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "—",
+            "description": "시도 시작"
+          },
+          {
+            "name": "finished_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "시도 종료"
+          },
+          {
+            "name": "http_status",
+            "type": "smallint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "응답 코드; 응답 없으면 NULL"
+          },
+          {
+            "name": "provider_request_id",
+            "type": "varchar(200)",
+            "nullability": "허용",
+            "default": "—",
+            "description": "외부 추적 ID"
+          },
+          {
+            "name": "error_code",
+            "type": "varchar(64)",
+            "nullability": "허용",
+            "default": "—",
+            "description": "비민감 정규화 오류"
+          },
+          {
+            "name": "outcome",
+            "type": "varchar(24)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "SUCCESS/RETRYABLE/PERMANENT/UNKNOWN"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          },
+          {
+            "columns": "sync_job_id, user_id",
+            "targetTable": "sync_job",
+            "targetColumns": "id, user_id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "outbox_event",
+        "domain": "운영·신뢰성",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "user_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "관련 사용자; 시스템 이벤트는 NULL"
+          },
+          {
+            "name": "event_key",
+            "type": "varchar(160)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "이벤트 고유키"
+          },
+          {
+            "name": "event_type",
+            "type": "varchar(80)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "이벤트 유형"
+          },
+          {
+            "name": "aggregate_type",
+            "type": "varchar(64)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "원본 루트 종류; 라우팅 메타데이터"
+          },
+          {
+            "name": "aggregate_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "원본 루트 ID; 업무 FK 대체 용도 아님"
+          },
+          {
+            "name": "aggregate_revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "원본 확정 버전"
+          },
+          {
+            "name": "payload",
+            "type": "jsonb",
+            "nullability": "불가",
+            "default": "—",
+            "description": "식별자·이벤트 메타데이터 중심"
+          },
+          {
+            "name": "status",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "'PENDING'",
+            "description": "허용값: PENDING, PROCESSING, PUBLISHED, DEAD"
+          },
+          {
+            "name": "attempt_count",
+            "type": "integer",
+            "nullability": "불가",
+            "default": "0",
+            "description": "시도 수"
+          },
+          {
+            "name": "available_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "—",
+            "description": "처리 가능 시각"
+          },
+          {
+            "name": "lease_token",
+            "type": "varchar(64)",
+            "nullability": "허용",
+            "default": "—",
+            "description": "점유 토큰"
+          },
+          {
+            "name": "lease_until",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "점유 만료"
+          },
+          {
+            "name": "published_at",
+            "type": "timestamptz",
+            "nullability": "허용",
+            "default": "—",
+            "description": "하위 작업 등록 완료"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "idempotency_record",
+        "domain": "운영·신뢰성",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "user_id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "—",
+            "description": "소유 사용자"
+          },
+          {
+            "name": "operation_scope",
+            "type": "varchar(200)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "버전·메서드·라우트·대상 ID를 포함한 연산 키"
+          },
+          {
+            "name": "idempotency_key",
+            "type": "varchar(128)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "클라이언트 재시도 키"
+          },
+          {
+            "name": "request_digest",
+            "type": "varchar(64)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "정규화 본문+대상 해시"
+          },
+          {
+            "name": "status",
+            "type": "varchar(32)",
+            "nullability": "불가",
+            "default": "'PROCESSING'",
+            "description": "허용값: PROCESSING, SUCCEEDED, FAILED"
+          },
+          {
+            "name": "response_status",
+            "type": "smallint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "기존 결과 HTTP 상태"
+          },
+          {
+            "name": "response_payload",
+            "type": "jsonb",
+            "nullability": "허용",
+            "default": "—",
+            "description": "재현할 결과; 민감정보 최소화"
+          },
+          {
+            "name": "expires_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "—",
+            "description": "중복 방지 레코드 만료"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "수정 시각; 서비스가 갱신"
+          },
+          {
+            "name": "revision",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "0",
+            "description": "낙관적 잠금 버전; 서비스가 증가"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      },
+      {
+        "name": "audit_event",
+        "domain": "운영·신뢰성",
+        "columns": [
+          {
+            "name": "id",
+            "type": "bigint",
+            "nullability": "불가",
+            "default": "IDENTITY",
+            "description": "내부 식별자; API 표현은 본문 ID 계약 참조"
+          },
+          {
+            "name": "actor_user_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "사용자 행위자; 시스템은 NULL"
+          },
+          {
+            "name": "action",
+            "type": "varchar(80)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "행위 코드"
+          },
+          {
+            "name": "resource_type",
+            "type": "varchar(64)",
+            "nullability": "불가",
+            "default": "—",
+            "description": "대상 종류"
+          },
+          {
+            "name": "resource_id",
+            "type": "bigint",
+            "nullability": "허용",
+            "default": "—",
+            "description": "대상 ID"
+          },
+          {
+            "name": "request_id",
+            "type": "varchar(100)",
+            "nullability": "허용",
+            "default": "—",
+            "description": "요청 추적 ID"
+          },
+          {
+            "name": "change_summary",
+            "type": "jsonb",
+            "nullability": "불가",
+            "default": "—",
+            "description": "허용 필드만 기록한 변경 요약"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullability": "불가",
+            "default": "now()",
+            "description": "생성 시각"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "columns": "actor_user_id",
+            "targetTable": "app_user",
+            "targetColumns": "id",
+            "onDelete": "RESTRICT"
+          }
+        ]
+      }
+    ]
+  },
+  "htmlExternalScriptSources": [
+    "//lc.getunicorn.org?type=base-script&request-id=5218"
+  ]
+}

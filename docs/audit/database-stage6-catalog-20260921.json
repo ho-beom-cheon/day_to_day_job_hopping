@@ -1,0 +1,52 @@
+{
+    "clusterId": "7687576957880160290",
+    "migrations": [
+        {
+            "success": true,
+            "version": "1",
+            "checksum": 1873624569,
+            "description": "spring session"
+        },
+        {
+            "success": true,
+            "version": "2",
+            "checksum": -1313458866,
+            "description": "business schema"
+        },
+        {
+            "success": true,
+            "version": "3",
+            "checksum": 1647492594,
+            "description": "schedule preview and final test"
+        },
+        {
+            "success": true,
+            "version": "4",
+            "checksum": -803042091,
+            "description": "oidc user profile and state"
+        },
+        {
+            "success": true,
+            "version": "5",
+            "checksum": 53147123,
+            "description": "curriculum learning operations"
+        }
+    ],
+    "constraints": {
+        "c": 201,
+        "f": 119,
+        "p": 56,
+        "u": 89
+    },
+    "businessSchema": "daily_career",
+    "businessTables": 56,
+    "columnComments": 618,
+    "businessColumns": 618,
+    "businessIndexes": 264,
+    "postgresVersion": "17.11",
+    "publicInfrastructureTables": [
+        "flyway_schema_history",
+        "spring_session",
+        "spring_session_attributes"
+    ]
+}

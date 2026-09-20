@@ -1,5 +1,7 @@
 # 2단계 Docker 개발환경 결과 — 2026-09-20
 
+> 이 문서는 이전 PC의 구성 작업 기록이다. 집 PC에서 Compose 실행·영속성·HMR은 통과했고 postgres-it 오류가 남았다. [최신 실행 결과 및 이슈 초안](docker-home-verification-20260920.md)을 우선 참고한다.
+
 ## 1. 작업 결과
 
 기존 Compose, 이미지 digest, Maven/npm, DB 설정, healthcheck를 재사용했다.

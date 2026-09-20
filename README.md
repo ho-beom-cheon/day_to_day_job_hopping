@@ -5,16 +5,25 @@
 **집에서 이어서 작업할 때: [통합 작업 인수인계 문서](WORK_HANDOFF.md)** — 현재 상태, 실행 명령, 남은 검증과 다음 작업 순서.
 
 - [구현 계획](docs/implementation-plan.md)
+- [작업 1 완료: 설계 원본·소스 현황과 채택 기준](docs/project-stage1-assessment-20260920.md)
+- [작업 2 완료: Docker 개발환경 통합 테스트 보완](docs/docker-stage2-completion-20260920.md)
+- [작업 3 완료: PostgreSQL 업무 스키마·마이그레이션](docs/database-stage3-completion-20260920.md)
+- [작업 4 완료: Spring Boot 공통 응답·검증·동시성·멱등성](docs/backend-stage4-completion-20260920.md)
+- [작업 5: 인증·회원 구현과 현재 검증 결과](docs/auth-stage5-verification-20260920.md)
+- [작업 6 완료: 커리큘럼·학습 운영](docs/curriculum-stage6-verification-20260921.md)
+- [작업 7 완료: 휴식일·일정 변경](docs/schedule-stage7-verification-20260921.md)
+- [작업 8 완료: 문제·문제풀이·오답 복습](docs/problem-stage8-verification-20260921.md)
+- [Google 로그인 로컬 설정](docs/google-login-local-setup.md)
 - [현재 진행 및 검증 결과](docs/implementation-progress.md)
 - [계약 누락 및 차단 항목](docs/implementation-gap-log.md)
 - [실행 방법](docs/runtime.md)
 - [원본 설계 패키지](design-package/daily_career_codex_implementation_20260919_full/00_START_HERE/README.md)
 
-현재는 Phase 1 공통 기반 구현 단계이며 실제 학습 API는 아직 제공하지 않습니다.
-공개 API와 업무 DB 스키마는 원본 OpenAPI/DDL 확보 후 연결합니다.
+현재는 작업 1–8 완료 상태입니다. 문제 조회·제출·동기 규칙 채점·신고와 오답 목록·메모·해결·재개 API까지 구현했습니다. [작업 8 검증 결과](docs/problem-stage8-verification-20260921.md)에 일반 38개와 실제 PostgreSQL IT 52개, 총 90개 테스트 결과를 기록했습니다. 사용자 결정에 따라 운영 콘텐츠는 비어 있습니다. 작업 1–8의 번호와 범위는 유지하고 9단계 이후를 Backend/UI 사용자 흐름 중심으로 재구성했으며, 다음은 작업 9 Next.js 공통 기반입니다.
+공통 기반, Google OIDC, 커리큘럼·학습·일정·문제 Backend 운영 기능을 구현했습니다. 설계 차이는 [계약 자료 안내](docs/contracts/README.md)에 따라 계속 보완합니다.
 
 이번 요청의 **2단계(Docker 개발환경)** 결과는 [검증 보고서](docs/docker-development-stage2.md)에 기록합니다.
-Docker Engine이 없는 현재 PC에서는 컨테이너 실행·DB 영속성 검증이 아직 완료되지 않았습니다.
+집 PC에서 컨테이너 실행·DB 영속성·HMR 검증을 통과했고, 작업 2에서 관리 포트 오류를 수정해 일반 테스트 11개와 PostgreSQL IT 2개도 모두 통과했습니다. [최신 완료 보고서](docs/docker-stage2-completion-20260920.md), [이전 실행 기록](docs/docker-home-verification-20260920.md).
 
 ## 새 PC 개발환경 구축 (Phase 1 운영 기준 추가)
 
@@ -66,7 +75,7 @@ docker compose exec -T frontend node scripts/smoke.mjs
 docker compose exec -T postgres sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT version, description, success FROM flyway_schema_history ORDER BY installed_rank;"'
 ```
 
-Backend 시작 시 Flyway가 schema를 자동 구성합니다. 현재 migration은 공식 Spring Session 테이블이며 업무 schema는 원본 DDL을 기다리고 있습니다. smoke test는 **Frontend 컨테이너 → 내부 Backend health(DB 포함 UP)** 및 Nginx의 Frontend/Backend 연결을 검사합니다. 내부 health는 브라우저용 공개 API가 아닙니다.
+Backend 시작 시 Flyway가 schema를 자동 구성합니다. V1은 public의 Spring Session, V2는 daily_career 업무 기준선, V3는 일정 preview·최종시험 보완입니다. Flyway 이력은 public으로 고정합니다. 기존 DB는 후속 migration으로 업그레이드하며 적용 파일을 수정하거나 volume을 초기화하지 않습니다. smoke test는 **Frontend 컨테이너 → 내부 Backend health(DB 포함 UP)** 및 Nginx의 Frontend/Backend 연결을 검사합니다. 내부 health는 브라우저용 공개 API가 아닙니다.
 
 ### 일상 운영 명령
 
@@ -105,7 +114,7 @@ Backend 시작 시 Flyway가 schema를 자동 구성합니다. 현재 migration�
 
 아래 조회 결과의 cluster ID와 migration 이력이 `down`/`up` 전후 동일한지 비교합니다.
 업무 테이블이나 테스트 데이터를 추가하지 않고 기존 DB cluster 보존을 확인합니다.
-현재 PC에서는 Docker Engine 부재로 이 절차를 실행하지 못했습니다.
+2026-09-20 집 PC에서 아래 절차와 smoke 재검증을 통과했습니다.
 
 ```sh
 docker compose exec -T postgres sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT system_identifier FROM pg_control_system(); SELECT version, description, checksum, success FROM flyway_schema_history ORDER BY installed_rank;"'
