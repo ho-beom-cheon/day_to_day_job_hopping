@@ -1,5 +1,36 @@
 # 실행 및 검증
 
+## IntelliJ IDEA: 한 번에 빌드/실행 (Windows)
+
+프로젝트 루트를 열면 `.run/`의 공유 설정이 **Run → Edit Configurations**에 표시된다.
+IDE의 번들 **Shell Script** 플러그인이 활성화되어 있어야 한다.
+
+| 실행 설정 | 동작 |
+|---|---|
+| `Daily Career - Full Stack` | Docker Compose로 프론트·서버를 빌드하고 PostgreSQL·Nginx까지 함께 시작, health 통과까지 대기 |
+| `Daily Career - Build All` | Maven Wrapper `verify`(서버 컴파일·테스트·JAR) → `npm ci` → Next.js production build |
+| `Daily Career - Stop All` | 전체 컨테이너 중지, DB 데이터 유지 |
+
+일반 실행은 **Daily Career - Full Stack**을 선택하고 **Shift+F10**.
+기본 접속 주소는 http://localhost:8080 이다. Docker Desktop의 Linux containers가 실행 중이어야 한다.
+최초 실행 시 `.env`가 없으면 `.env.example`에서 로컬 DB 비밀번호를 무작위 생성하여 만든다.
+기존 `.env`는 수정하지 않으므로 비밀번호가 비어 있다면 직접 채워야 한다.
+컨테이너는 백그라운드에서 유지된다. IDE 실행 종료 버튼으로는 중지되지 않으며 **Stop All**을 사용한다.
+Frontend `src` 수정은 개발 서버에 자동 반영된다. Backend/의존성/설정 변경은 Full Stack을 다시 실행하여 재빌드한다. Java 디버거 연결은 제공하지 않는다.
+
+Build All은 Docker 없이 사용 가능하며 `JAVA_HOME`의 JDK 21과 PATH의 Node.js 22.13+/npm이 필요하다.
+IDE의 Java 코드 분석이 필요하면 `backend/pom.xml`을 Maven 프로젝트로 추가하고 Project SDK를 21로 설정한다.
+Windows가 C 드라이브에 설치되지 않은 PC는 각 설정의 Interpreter path를 해당 PowerShell 경로로 변경한다.
+다른 OS에서는 아래 Maven/npm 및 Docker Compose 명령을 사용한다.
+
+터미널에서도 동일한 작업을 실행할 수 있다:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ide.ps1 -Action Build
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ide.ps1 -Action Up
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ide.ps1 -Action Stop
+```
+
 ## 현재 구현 범위
 
 프로젝트 골격과 공통 기반이다. 로그인/과정/학습/시험 API는 아직 없다.
@@ -36,11 +67,16 @@ cd backend
 ```
 
 Linux에서는 `sh mvnw -B -ntp verify`와 `sh mvnw -B -ntp -Ppostgres-it verify`.
-일반 verify는 8개 단위/MVC 테스트와 실행 JAR 빌드, postgres-it은 실제
+일반 verify는 11개 단위/MVC/health 테스트와 실행 JAR 빌드, postgres-it은 실제
 PostgreSQL 17의 clean Flyway migration, 애플리케이션 기동, JDBC 세션 저장/조회/삭제를 검사한다.
 Docker가 없으면 통합 프로필은 실패한다. `skip`을 성공처럼 처리하지 않는다.
 
 ## Docker Compose / 단일 VM
+
+현재 기본 Compose는 개발 전용이다. Frontend development stage와 source mount를 사용한다.
+운영용 Frontend runtime stage는 보존했지만 별도 운영 Compose/HTTPS 구성은 후속 배포 단계 범위다.
+소스 반영, 주소, DB 보존 검증 절차는 [README](../README.md), 이번 검증 결과는
+[2단계 보고서](docker-development-stage2.md)를 따른다.
 
 1. `.env.example`을 `.env`로 복사하고 DATABASE_PASSWORD를 로컬에서 설정한다. 자세한 새 PC 절차는 README에 증분 추가했다.
 2. 로컬 HTTP 개발 템플릿은 SESSION_COOKIE_SECURE=false이며 운영 HTTPS에서는 true로 변경한다.

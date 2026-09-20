@@ -21,7 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Testcontainers
 @SpringBootTest(classes = DailyCareerApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class SessionMigrationIT {
-    @Container static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:17.11-alpine3.23@sha256:5a1b083da321ba67c86c3169d22778c561fa0935f17acbff7bbc0537f1e50dd6");
+    // Same manifest as Compose; digest-only notation also parses correctly in Testcontainers.
+    @Container static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres@sha256:5a1b083da321ba67c86c3169d22778c561fa0935f17acbff7bbc0537f1e50dd6");
     @DynamicPropertySource static void database(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
         registry.add("spring.datasource.username", postgres::getUsername);

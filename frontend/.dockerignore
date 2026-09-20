@@ -3,3 +3,6 @@ node_modules
 coverage
 *.log
 tsconfig.tsbuildinfo
+# Keep local secrets out of the build context and COPY . . layers.
+**/.env
+**/.env.*

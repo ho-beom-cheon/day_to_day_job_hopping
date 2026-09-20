@@ -33,7 +33,12 @@ services:
         condition: service_healthy
     restart: unless-stopped
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      target: development
+    volumes:
+      # Bind only source: host node_modules and .next never enter the container.
+      - ./frontend/src:/app/src:ro
     environment:
       BACKEND_HEALTH_URL: http://backend:9090/actuator/health
       NGINX_ORIGIN: http://nginx
@@ -44,6 +49,7 @@ services:
       test: ["CMD", "node", "scripts/healthcheck.mjs"]
       interval: 10s
       timeout: 8s
+      start_period: 60s
       retries: 12
     restart: unless-stopped
   nginx:
