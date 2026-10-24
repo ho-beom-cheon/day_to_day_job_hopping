@@ -1,13 +1,13 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarClock, ExternalLink, Eye, EyeOff, NotebookPen, Plus, RotateCcw } from "lucide-react";
+import { CalendarClock, CheckCheck, ExternalLink, Eye, EyeOff, NotebookPen, Plus, RotateCcw } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { StatePanel } from "@/components/ui/state-panel";
 import {
   addRetry, categories, categoryLabel, codingKeys, codingLinksQuery, codingLogsQuery, codingOverviewQuery, createLink, createLog, reasonLabel, resultLabel, results,
-  setLinkHidden, updateCodingTarget, type Category, type CodingOverview, type LogInput, type PracticeLog, type ProblemLink, type Result,
+  setLinkMark, updateCodingTarget, type Category, type CodingOverview, type LogInput, type PracticeLog, type ProblemLink, type Result,
 } from "./api";
 
 const panel = "rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:p-7";
@@ -176,11 +176,13 @@ function LinkManager({ links }: { links: ProblemLink[] }) {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState<{ title: string; url: string; level: string; category: Category | "" }>({ title: "", url: "", level: "", category: "" });
   const refresh = () => client.invalidateQueries({ queryKey: codingKeys.all });
-  const hide = useMutation({ mutationFn: (link: ProblemLink) => setLinkHidden(link.linkId, !link.hidden), onSuccess: refresh });
+  const mark = useMutation({ mutationFn: ({ link, kind }: { link: ProblemLink; kind: "hidden" | "solved-before" }) =>
+    setLinkMark(link.linkId, kind, kind === "hidden" ? !link.hidden : !link.solvedBefore), onSuccess: refresh });
+  const solvedBefore = links.filter(link => link.solvedBefore).length;
   const add = useMutation({ mutationFn: () => createLink({ title: value.title.trim(), url: value.url.trim(), level: value.level === "" ? null : Number(value.level), category: value.category as Category }),
     onSuccess: async () => { setValue({ title: "", url: "", level: "", category: "" }); await refresh(); } });
   return <section className={panel}>
-    <div className="flex items-center justify-between gap-3"><div><h2 className="text-lg font-black text-[#0a1837] dark:text-slate-50">추천 목록 관리</h2><p className="mt-1 text-xs text-slate-500">{links.length}개 · 숨긴 문제는 추천에서 빠져요. 프로그래머스 기본 목록은 2026-10-25에 링크를 확인했어요.</p></div><Button variant="outline" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? "접기" : "펼치기"}</Button></div>
+    <div className="flex items-center justify-between gap-3"><div><h2 className="text-lg font-black text-[#0a1837] dark:text-slate-50">추천 목록 관리</h2><p className="mt-1 text-xs text-slate-500">{links.length}개 · 이미 푼 문제 {solvedBefore}개 · 앱을 쓰기 전에 푼 문제는 &quot;이미 풂&quot;으로, 풀지 않을 문제는 숨기기로 표시하세요. 둘 다 추천에서 빠지고 주간 목표·성공률에는 세지 않아요. 프로그래머스 기본 목록은 2026-10-25에 링크를 확인했어요.</p></div><Button variant="outline" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? "접기" : "펼치기"}</Button></div>
     {open && <>
       <div className="mt-4 grid gap-3 rounded-2xl border border-slate-200 p-4 dark:border-slate-700 sm:grid-cols-[minmax(0,1.2fr)_minmax(0,1.4fr)_90px_minmax(0,1fr)_auto] sm:items-end">
         <label className="grid gap-1 text-xs font-bold text-slate-500">문제 이름<input className={input} value={value.title} onChange={event => setValue({ ...value, title: event.target.value })}/></label>
@@ -192,10 +194,11 @@ function LinkManager({ links }: { links: ProblemLink[] }) {
       {add.error && <p role="alert" className="mt-2 text-xs text-rose-600">{add.error.message}</p>}
       <div className="mt-4 grid gap-4 sm:grid-cols-2">{categories.map(([code, label]) => { const group = links.filter(link => link.category === code); return group.length === 0 ? null : <div key={code}>
         <h3 className="text-xs font-black text-slate-500">{label}</h3>
-        <ul className="mt-2 grid gap-1">{group.map(link => <li key={link.linkId} className={`flex items-center justify-between gap-2 rounded-xl px-2 py-1 text-sm ${link.hidden ? "opacity-50" : ""}`}>
+        <ul className="mt-2 grid gap-1">{group.map(link => <li key={link.linkId} className={`flex items-center justify-between gap-2 rounded-xl px-2 py-1 text-sm ${link.hidden || link.solvedBefore ? "opacity-50" : ""}`}>
           <a href={link.url} target="_blank" rel="noopener noreferrer" className="min-w-0 truncate text-slate-700 hover:text-blue-700 hover:underline dark:text-slate-200">{link.title}{link.level !== null && <span className="ml-1 text-xs text-slate-400">Lv. {link.level}</span>}{link.own && <span className="ml-1 text-xs text-blue-600">내 문제</span>}</a>
-          <span className="flex shrink-0 items-center gap-2">{link.lastResult && <span className={`rounded-full px-2 py-0.5 text-[10px] font-black ${resultTone[link.lastResult]}`}>{resultLabel[link.lastResult]}</span>}
-            <button type="button" aria-label={link.hidden ? `${link.title} 다시 보이기` : `${link.title} 숨기기`} disabled={hide.isPending} onClick={() => hide.mutate(link)} className="grid size-8 place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800">{link.hidden ? <Eye size={15}/> : <EyeOff size={15}/>}</button></span>
+          <span className="flex shrink-0 items-center gap-1">{link.lastResult && <span className={`mr-1 rounded-full px-2 py-0.5 text-[10px] font-black ${resultTone[link.lastResult]}`}>{resultLabel[link.lastResult]}</span>}
+            <button type="button" aria-pressed={link.solvedBefore} aria-label={link.solvedBefore ? `${link.title} 이미 푼 문제 표시 해제` : `${link.title} 이미 푼 문제로 표시`} disabled={mark.isPending} onClick={() => mark.mutate({ link, kind: "solved-before" })} className={`inline-flex h-8 items-center gap-1 rounded-lg px-2 text-[11px] font-bold ${link.solvedBefore ? "bg-emerald-100 text-emerald-700" : "text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800"}`}><CheckCheck size={14}/>이미 풂</button>
+            <button type="button" aria-label={link.hidden ? `${link.title} 다시 보이기` : `${link.title} 숨기기`} disabled={mark.isPending} onClick={() => mark.mutate({ link, kind: "hidden" })} className="grid size-8 place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800">{link.hidden ? <Eye size={15}/> : <EyeOff size={15}/>}</button></span>
         </li>)}</ul>
       </div>; })}</div>
     </>}

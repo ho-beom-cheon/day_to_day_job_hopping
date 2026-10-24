@@ -109,7 +109,7 @@ class CodingTrackIT {
         assertThat(own.own()).isTrue();
         assertThat(coding.links(other)).noneMatch(link -> link.linkId().equals(own.linkId()));
         long seed = coding.links(owner).getFirst().linkId();
-        assertThat(coding.hide(owner, seed, true).hidden()).isTrue();
+        assertThat(coding.mark(owner, seed, "HIDDEN", true).hidden()).isTrue();
         assertThat(coding.links(other).stream().filter(link -> link.linkId() == seed).findFirst().orElseThrow().hidden()).isFalse();
         assertThat(coding.overview(owner).recommendations()).noneMatch(item -> item.link().linkId() == seed);
 
@@ -119,6 +119,30 @@ class CodingTrackIT {
         assertThatThrownBy(() -> coding.createLink(owner, new CodingTrack.LinkRequest("x", "javascript:alert(1)", null, "OTHER"))).isInstanceOf(ApiException.class);
         assertThatThrownBy(() -> coding.createLog(owner, new CodingTrack.LogRequest(null, "x", null, "SORT", "", "SUCCESS", null, "", "",
                 LocalDate.now(CodingTrack.SEOUL).plusDays(1)))).isInstanceOf(ApiException.class);
+    }
+
+    @Test void solvedBeforeLeavesRecommendationsWithoutCountingTowardTheWeekOrRates() {
+        long user = user();
+        var first = coding.overview(user).recommendations().getFirst().link();
+        var marked = coding.mark(user, first.linkId(), "SOLVED_BEFORE", true);
+        assertThat(marked.solvedBefore()).isTrue();
+        assertThat(marked.hidden()).isFalse();
+        assertThat(marked.attempts()).isZero();
+
+        var overview = coding.overview(user);
+        assertThat(overview.weekDone()).isZero();
+        assertThat(overview.categoryStats()).isEmpty();
+        assertThat(overview.recommendations()).hasSize(2).noneMatch(item -> item.link().linkId().equals(first.linkId()));
+        assertThat(coding.logs(user)).isEmpty();
+
+        // One mark per link: hiding replaces it, and clearing the other kind leaves it alone.
+        assertThat(coding.mark(user, first.linkId(), "HIDDEN", true)).satisfies(link -> {
+            assertThat(link.hidden()).isTrue();
+            assertThat(link.solvedBefore()).isFalse();
+        });
+        assertThat(coding.mark(user, first.linkId(), "SOLVED_BEFORE", false).hidden()).isTrue();
+        assertThat(coding.mark(user, first.linkId(), "HIDDEN", false).hidden()).isFalse();
+        assertThat(coding.overview(user).recommendations().getFirst().link().linkId()).isEqualTo(first.linkId());
     }
 
     private static CodingTrack.LogRequest request(long link, String result) {

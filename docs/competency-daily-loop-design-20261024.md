@@ -262,7 +262,7 @@ v2 채택 시 시트가 없는 역량은 "준비 중"으로 남는다(§3.2). �
 
 ### 4.7 코딩 테스트 트랙 (앱 밖 풀이)
 
-역량 루프와 별개인 트랙이다(2026-10-24 사용자 결정, §12-13). **1차 구현 완료(2026-10-25, V36)**: 메뉴, `/coding-log` 화면, 주간 목표, 링크 추천, 기록, 다시 풀기, 홈 진행 표시. AI 풀이 회고·패턴 카드(§4.7.6)와 GitHub 동기화는 아직 구현하지 않았다. 문제는 외부 사이트(주로 프로그래머스)에서 풀고, 앱은 **무엇을 풀지 추천하고, 기록하고, 다시 풀 일정을 잡고, 풀이를 회고**한다. 직접 코드 작성 능력을 앱이 채점하지 않는다는 9/27 결정은 유지한다. 정답 여부는 외부 사이트의 채점이 정한다.
+역량 루프와 별개인 트랙이다(2026-10-24 사용자 결정, §12-13). **1차 구현 완료(2026-10-25, V36·V37)**: 메뉴, `/coding-log` 화면, 주간 목표, 링크 추천, 이미 푼 문제 표시, 기록, 다시 풀기, 홈 진행 표시. AI 풀이 회고·패턴 카드(§4.7.6)와 GitHub 동기화는 아직 구현하지 않았다. 문제는 외부 사이트(주로 프로그래머스)에서 풀고, 앱은 **무엇을 풀지 추천하고, 기록하고, 다시 풀 일정을 잡고, 풀이를 회고**한다. 직접 코드 작성 능력을 앱이 채점하지 않는다는 9/27 결정은 유지한다. 정답 여부는 외부 사이트의 채점이 정한다.
 
 역량맵에 넣지 않는 이유: 선정기가 "오늘 과제"로 뽑아도 앱 안에서 풀 수 없고, 루브릭 채점 구조로 구현 정확성을 판단할 수 없다. 말로 설명하는 판단(복잡도·경계값)은 K5(§3.4, v1은 J1)가 맡는다.
 
@@ -286,7 +286,8 @@ SQL은 금융 IT 자회사·SI 코딩 테스트에 나오는 곳이 있고 Oracl
 
 - 앱은 **문제 이름, 링크, 사이트 문제 번호, 레벨, 유형만** 저장한다. 문제 본문·입출력 예시·해설은 저장하거나 가져오지 않는다. 문제는 사이트의 저작물이기 때문이다.
 - 프로그래머스는 문제·풀이 기록용 공개 API를 확인하지 못했고(2026-10-25 조사), robots.txt가 `/users` 경로를 크롤러에 막아 두었다. 그래서 자동 수집·스크래핑은 하지 않는다.
-- 초기 목록은 Claude가 프로그래머스 공개 문제(고득점 Kit 분류, SQL 고득점 Kit)에서 유형별 1~6개씩 73개를 골라 seed(V36)로 넣었다. 2026-10-25에 각 링크를 열어 제목과 레벨이 맞는 것만 넣었다(윈도 함수는 1개뿐). 사용자는 화면에서 추가·숨김할 수 있다.
+- 초기 목록은 Claude가 프로그래머스 공개 문제(고득점 Kit 분류, SQL 고득점 Kit)에서 유형별 1~6개씩 73개를 골라 seed(V36)로 넣었다. 2026-10-25에 각 링크를 열어 제목과 레벨이 맞는 것만 넣었다(윈도 함수는 1개뿐).
+- **이미 푼 문제 표시(2026-10-25, V37)**: 앱은 프로그래머스 계정의 풀이 기록을 모르므로 0에서 시작한다. 앱을 쓰기 전에 푼 문제는 추천 목록 관리에서 "이미 풂"으로 표시한다. 표시한 문제는 추천에서 빠지고, 기록이 아니므로 주간 목표·성공률·레벨 계산·다시 풀기에 들어가지 않는다. 숨김과 같은 표(`coding_problem_mark.kind`)에 두며 한 문제에는 표시가 하나만 남는다. 사용자는 화면에서 추가·숨김할 수 있다.
 - 추천 규칙(서버, AI 호출 0회). 이번 주 남은 목표 수만큼 아래 순서로 채운다.
   1. 다시 풀 날이 된 문제(§4.7.5)
   2. 약한 유형(최근 4주 성공률 70% 미만, 낮은 순)의 안 푼 문제
@@ -554,7 +555,7 @@ P2 필수 작업:
 | `card_review_log` | id, card_id, user_id, rating(KNOWN/VAGUE/UNKNOWN), note, reviewed_at | 5분 카드 복습 |
 | `task_issue_report` | id, user_id, bank_item_id, task_id, mock_session_id, target(MATERIAL/FEEDBACK/FOLLOWUP/INTERVIEWER), reason, note, exclude_score, status(OPEN/CONFIRMED/REJECTED), resolution_note, created_at, resolved_at | 과제 오류 신고(§6.4) |
 | `coding_problem_link` | id, owner_user_id(NULL이면 seed), site, site_problem_ref, title, url, level, category, link_checked_at, created_at | 링크 추천 목록(§4.7.3). 문제 본문은 저장하지 않음. V36 |
-| `coding_problem_hidden` | user_id, link_id, hidden_at | 사용자별 숨긴 추천 문제. seed는 모든 사용자가 같이 쓰므로 숨김은 따로 둔다. V36 |
+| `coding_problem_mark` | user_id, link_id, kind(HIDDEN/SOLVED_BEFORE), marked_at | 사용자별 추천 문제 표시(숨김, 이미 풂). seed는 모든 사용자가 같이 쓰므로 표시는 따로 둔다. V36 `coding_problem_hidden`을 V37에서 이름을 바꾸고 `kind`를 더했다 |
 | `coding_practice_log` | id, user_id, problem_link_id, solved_on, site, site_problem_ref, problem_title, problem_url, category, language, result(SUCCESS/FAILED/TIMEOUT/SOLUTION_VIEWED), minutes, stuck_note, problem_summary, note, source(MANUAL/GITHUB), source_commit, code_text, retry_step, next_retry_at, retro_job_id, retro_payload, revision | 코딩 테스트 기록·다시 풀기·회고(§4.7). V36은 같은 문제 판정 키 `problem_key`를 더하고 회고·GitHub 컬럼(`problem_summary`, `source_commit`, `code_text`, `retro_*`)은 해당 기능을 만들 때 추가한다. `code_text`는 최대 12,000자 |
 | `coding_github_sync` | user_id, connection_id, repository, last_commit_sha, last_synced_at, status | 백준허브 저장소 동기화(선택, §4.7.4) |
 | `task_feedback` | task_id 또는 mock_session_id, usefulness(1~5), note | 파일럿 핵심 지표 |

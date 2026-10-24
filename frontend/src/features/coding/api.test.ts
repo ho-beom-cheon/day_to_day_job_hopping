@@ -12,6 +12,8 @@ describe("coding contract", () => {
       recommendations: [{ reason: "RETRY_DUE", link, retryOf: log }, { reason: "NEW_CATEGORY", link, retryOf: null }] });
     expect(overview.recommendations[0].retryOf?.logId).toBe("3");
     expect(overview.recommendations[1].link?.linkId).toBe("7");
+    expect(decodeLink({ ...link, solvedBefore: true }).solvedBefore).toBe(true);
+    expect(decodeLink(link).solvedBefore).toBe(false);
     expect(overview.categoryStats[0]).toEqual({ category: "DP", attempts: 2, successes: 1 });
   });
 

@@ -40,7 +40,7 @@ public class CodingTrack {
 
     public record Settings(int weeklyTarget) {}
     public record Link(@JsonId Long linkId, String site, String siteProblemRef, String title, String url, Integer level, String category,
-                       boolean own, boolean hidden, int attempts, String lastResult) {}
+                       boolean own, boolean hidden, boolean solvedBefore, int attempts, String lastResult) {}
     public record LinkRequest(String title, String url, Integer level, String category) {}
     public record Log(@JsonId Long logId, @JsonId Long problemLinkId, LocalDate solvedOn, String site, String problemTitle, String problemUrl,
                       String category, String language, String result, Integer minutes, String stuckNote, String note, String source,
@@ -95,7 +95,7 @@ public class CodingTrack {
         }
         Set<String> everTried = new HashSet<>(jdbc.queryForList("select distinct category from daily_career.coding_practice_log where user_id=?", String.class, user));
         var order = CodingRules.categoryOrder(stats.stream().map(stat -> new CodingRules.Stat(stat.category(), stat.attempts(), stat.successes())).toList(), everTried);
-        var unsolved = links.values().stream().filter(link -> !link.hidden() && link.attempts() == 0)
+        var unsolved = links.values().stream().filter(link -> !link.hidden() && !link.solvedBefore() && link.attempts() == 0)
                 .map(link -> new CodingRules.Candidate(link.linkId(), link.category(), link.level())).toList();
         for (var pick : CodingRules.pick(slots - result.size(), order, unsolved, targets(user, links.values())))
             result.add(new Recommendation(pick.reason(), links.get(pick.linkId()), null));
@@ -126,16 +126,17 @@ public class CodingTrack {
     @Transactional(readOnly = true)
     public List<Link> links(long user) {
         users.current(user);
-        return jdbc.query(LINKS + " order by l.owner_user_id nulls first,l.id", this::link, user, user, user, user);
+        return jdbc.query(LINKS + " order by l.owner_user_id nulls first,l.id", this::link, user, user, user, user, user);
     }
 
     private List<Link> visibleLinks(long user) {
-        return jdbc.query(LINKS + " order by l.id", this::link, user, user, user, user);
+        return jdbc.query(LINKS + " order by l.id", this::link, user, user, user, user, user);
     }
 
     private static final String LINKS = """
             select l.*,l.owner_user_id is not null as own,
-                exists(select 1 from daily_career.coding_problem_hidden h where h.user_id=? and h.link_id=l.id) as hidden,
+                exists(select 1 from daily_career.coding_problem_mark m where m.user_id=? and m.link_id=l.id and m.kind='HIDDEN') as hidden,
+                exists(select 1 from daily_career.coding_problem_mark m where m.user_id=? and m.link_id=l.id and m.kind='SOLVED_BEFORE') as solved_before,
                 (select count(*)::int from daily_career.coding_practice_log g where g.user_id=? and g.problem_key='link:'||l.id) as attempts,
                 (select g.result from daily_career.coding_practice_log g where g.user_id=? and g.problem_key='link:'||l.id order by g.solved_on desc,g.id desc limit 1) as last_result
             from daily_career.coding_problem_link l where (l.owner_user_id is null or l.owner_user_id=?)
@@ -155,11 +156,18 @@ public class CodingTrack {
         return link(user, id);
     }
 
+    /**
+     * Sets or clears a mark: HIDDEN, or SOLVED_BEFORE for problems solved before using the app. A link keeps one mark, so
+     * setting one replaces the other. Marked links leave recommendations; neither mark counts toward the week or success rates.
+     */
     @Transactional
-    public Link hide(long user, long linkId, boolean hidden) {
+    public Link mark(long user, long linkId, String kind, boolean set) {
         link(user, linkId);
-        if (hidden) jdbc.update("insert into daily_career.coding_problem_hidden(user_id,link_id) values (?,?) on conflict do nothing", user, linkId);
-        else jdbc.update("delete from daily_career.coding_problem_hidden where user_id=? and link_id=?", user, linkId);
+        if (set) jdbc.update("""
+                insert into daily_career.coding_problem_mark(user_id,link_id,kind) values (?,?,?)
+                on conflict (user_id,link_id) do update set kind=excluded.kind,marked_at=now()
+                """, user, linkId, kind);
+        else jdbc.update("delete from daily_career.coding_problem_mark where user_id=? and link_id=? and kind=?", user, linkId, kind);
         return link(user, linkId);
     }
 
@@ -244,7 +252,7 @@ public class CodingTrack {
     }
 
     private Link link(long user, long id) {
-        var rows = jdbc.query(LINKS + " and l.id=?", this::link, user, user, user, user, id);
+        var rows = jdbc.query(LINKS + " and l.id=?", this::link, user, user, user, user, user, id);
         if (rows.isEmpty()) throw new ApiException(ApiErrorCode.RESOURCE_NOT_FOUND);
         return rows.getFirst();
     }
@@ -257,7 +265,7 @@ public class CodingTrack {
 
     private Link link(ResultSet row, int number) throws SQLException {
         return new Link(row.getLong("id"), row.getString("site"), row.getString("site_problem_ref"), row.getString("title"), row.getString("url"),
-                row.getObject("level", Integer.class), row.getString("category"), row.getBoolean("own"), row.getBoolean("hidden"),
+                row.getObject("level", Integer.class), row.getString("category"), row.getBoolean("own"), row.getBoolean("hidden"), row.getBoolean("solved_before"),
                 row.getInt("attempts"), row.getString("last_result"));
     }
 

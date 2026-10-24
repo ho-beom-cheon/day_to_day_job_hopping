@@ -47,12 +47,22 @@ class CodingController {
 
     @PutMapping("/links/{linkId}/hidden")
     ResponseEntity<?> hide(@AuthenticationPrincipal AppPrincipal p, @PathVariable String linkId, HttpServletRequest r) {
-        return ApiResponses.ok(r, coding.hide(user(p), Ids.parse(linkId), true));
+        return ApiResponses.ok(r, coding.mark(user(p), Ids.parse(linkId), "HIDDEN", true));
     }
 
     @DeleteMapping("/links/{linkId}/hidden")
     ResponseEntity<?> unhide(@AuthenticationPrincipal AppPrincipal p, @PathVariable String linkId, HttpServletRequest r) {
-        return ApiResponses.ok(r, coding.hide(user(p), Ids.parse(linkId), false));
+        return ApiResponses.ok(r, coding.mark(user(p), Ids.parse(linkId), "HIDDEN", false));
+    }
+
+    @PutMapping("/links/{linkId}/solved-before")
+    ResponseEntity<?> solvedBefore(@AuthenticationPrincipal AppPrincipal p, @PathVariable String linkId, HttpServletRequest r) {
+        return ApiResponses.ok(r, coding.mark(user(p), Ids.parse(linkId), "SOLVED_BEFORE", true));
+    }
+
+    @DeleteMapping("/links/{linkId}/solved-before")
+    ResponseEntity<?> notSolvedBefore(@AuthenticationPrincipal AppPrincipal p, @PathVariable String linkId, HttpServletRequest r) {
+        return ApiResponses.ok(r, coding.mark(user(p), Ids.parse(linkId), "SOLVED_BEFORE", false));
     }
 
     @GetMapping("/logs")

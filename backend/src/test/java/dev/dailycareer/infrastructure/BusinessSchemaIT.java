@@ -69,7 +69,7 @@ class BusinessSchemaIT {
     @AfterAll static void closeConnection() { if (dataSource != null) dataSource.destroy(); }
 
     @Test void upgradesV1WithoutLosingSessionsAndCanRunAgain() {
-        assertThat(upgradeCount).isEqualTo(35);
+        assertThat(upgradeCount).isEqualTo(36);
         assertThat(jdbc.queryForObject("select scheduled_reminders_enabled from daily_career.user_setting where user_id=?", Boolean.class, legacyUser)).isFalse();
         assertThat(jdbc.queryForObject("select count(*) from daily_career.app_user where display_name=? and email is null and profile_image_url is null", Integer.class, "legacy-" + "x".repeat(70))).isEqualTo(1);
         assertThat(jdbc.queryForMap("select daily_goal_minutes,rest_days_per_week,weekday_study_start_time,weekend_study_start_time,theme from daily_career.user_setting where user_id=?", legacyUser))
@@ -85,7 +85,7 @@ class BusinessSchemaIT {
         assertThat(jdbc.queryForObject("select count(*) from pg_tables where tablename='flyway_schema_history' and schemaname='public'", Integer.class)).isEqualTo(1);
         assertThat(jdbc.queryForObject("select count(*) from pg_tables where tablename='flyway_schema_history' and schemaname='daily_career'", Integer.class)).isZero();
         assertThat(jdbc.queryForList("select version from public.flyway_schema_history order by installed_rank", String.class))
-                .containsExactlyElementsOf(IntStream.rangeClosed(1, 36).mapToObj(Integer::toString).toList());
+                .containsExactlyElementsOf(IntStream.rangeClosed(1, 37).mapToObj(Integer::toString).toList());
     }
 
     @Test void resetRemovesLegacyLearningAndKeepsAccountsSettingsAndIntegrations() {

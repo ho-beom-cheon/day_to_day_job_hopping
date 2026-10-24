@@ -37,7 +37,7 @@ const result = (value: unknown): Result => {
   return code as Result;
 };
 
-export type ProblemLink = { linkId: Id; site: string; siteProblemRef: string | null; title: string; url: string; level: number | null; category: Category; own: boolean; hidden: boolean; attempts: number; lastResult: Result | null };
+export type ProblemLink = { linkId: Id; site: string; siteProblemRef: string | null; title: string; url: string; level: number | null; category: Category; own: boolean; hidden: boolean; solvedBefore: boolean; attempts: number; lastResult: Result | null };
 export type PracticeLog = { logId: Id; problemLinkId: Id | null; solvedOn: string; site: string; problemTitle: string; problemUrl: string | null; category: Category; language: string; result: Result; minutes: number | null; stuckNote: string; note: string; source: "MANUAL" | "GITHUB"; retryStep: number; nextRetryAt: string | null; revision: number };
 export type Recommendation = { reason: "RETRY_DUE" | "WEAK_CATEGORY" | "NEW_CATEGORY" | "NEXT"; link: ProblemLink | null; retryOf: PracticeLog | null };
 export type CategoryStat = { category: Category; attempts: number; successes: number };
@@ -47,7 +47,7 @@ export type LogInput = { problemLinkId: Id | null; title: string; url: string; c
 export function decodeLink(value: unknown): ProblemLink {
   const data = object(value, "link");
   return { linkId: readId(data.linkId), site: text(data.site, "site"), siteProblemRef: optional(data.siteProblemRef, "siteProblemRef"), title: text(data.title, "title"),
-    url: text(data.url, "url"), level: optionalInteger(data.level, "level"), category: category(data.category), own: data.own === true, hidden: data.hidden === true,
+    url: text(data.url, "url"), level: optionalInteger(data.level, "level"), category: category(data.category), own: data.own === true, hidden: data.hidden === true, solvedBefore: data.solvedBefore === true,
     attempts: integer(data.attempts, "attempts"), lastResult: data.lastResult === null || data.lastResult === undefined ? null : result(data.lastResult) };
 }
 
@@ -86,7 +86,8 @@ export const codingLogsQuery = queryOptions({ queryKey: [...codingKeys.all, "log
 
 export const updateCodingTarget = async (weeklyTarget: number) => (await api.request({ path: "/api/v1/coding/settings", method: "PUT", body: { weeklyTarget }, decode: one(settings) })).data;
 export const createLink = async (body: { title: string; url: string; level: number | null; category: Category }) => (await api.request({ path: "/api/v1/coding/links", method: "POST", body, decode: one(decodeLink) })).data;
-export const setLinkHidden = async (id: Id, hidden: boolean) => (await api.request({ path: `/api/v1/coding/links/${id}/hidden`, method: hidden ? "PUT" : "DELETE", decode: one(decodeLink) })).data;
+/** One mark per link: setting one replaces the other. Both leave recommendations and count toward neither the week nor success rates. */
+export const setLinkMark = async (id: Id, mark: "hidden" | "solved-before", on: boolean) => (await api.request({ path: `/api/v1/coding/links/${id}/${mark}`, method: on ? "PUT" : "DELETE", decode: one(decodeLink) })).data;
 export const createLog = async (input: LogInput) => (await api.request({ path: "/api/v1/coding/logs", method: "POST", decode: one(decodeLog), body: {
   problemLinkId: input.problemLinkId, title: input.title, url: input.url, category: input.category || null, language: input.language, result: input.result,
   minutes: input.minutes, stuckNote: input.stuckNote, note: input.note, solvedOn: input.solvedOn || null } })).data;
