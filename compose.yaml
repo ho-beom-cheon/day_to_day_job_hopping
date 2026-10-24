@@ -69,8 +69,6 @@ services:
     build:
       context: ./frontend
       target: development
-      additional_contexts:
-        course_examples: ./content/java-four-week-v1/examples
     volumes:
       # Bind only source: host node_modules and .next never enter the container.
       - ./frontend/src:/app/src:ro

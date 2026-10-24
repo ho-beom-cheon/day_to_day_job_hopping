@@ -1,17 +1,15 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { BellRing, Bot, CheckCircle2, Cloud, FileText, MessageSquare, RefreshCw, ShieldCheck } from "lucide-react";
+import { BellRing, CheckCircle2, Cloud, FileText, MessageSquare, RefreshCw, ShieldCheck } from "lucide-react";
 import { StatePanel } from "@/components/ui/state-panel";
 import { integrationKeys, notionQuery, pushQuery, settingsQuery, slackQuery } from "./queries";
 import { NotificationPreferencesForm } from "./notification-preferences-form";
 import { SlackCard } from "./slack-card";
 import { NotionCard } from "./notion-card";
-import { browserConnectionQuery } from "./browser-connections";
 import { OpenRouterCard } from "./openrouter-card";
 import { ConnectionReturnNotice } from "./connection-return-notice";
 import { WebPushCard } from "./web-push-card";
-import { getAiUsage } from "@/features/ai/api";
 
 export function IntegrationSettingsScreen() {
   const client = useQueryClient();
@@ -19,12 +17,9 @@ export function IntegrationSettingsScreen() {
   const notion = useQuery(notionQuery);
   const slack = useQuery(slackQuery);
   const push = useQuery(pushQuery);
-  const ai = useQuery(browserConnectionQuery("openrouter"));
-  const aiUsage = useQuery({ queryKey: ["ai-usage"], queryFn: getAiUsage });
   if ([settings, notion, slack, push].some((query) => query.isPending)) return <StatePanel state="loading"/>;
   if ([settings, notion, slack, push].some((query) => query.isError)) return <StatePanel state="error" onRefresh={() => void client.invalidateQueries({ queryKey: integrationKeys.all })}/>;
   const s = settings.data!, n = notion.data!, sl = slack.data!, pc = push.data!;
-  const isOpenAi = aiUsage.data?.provider === "OPENAI";
   return <div className="mx-auto grid max-w-5xl gap-6 pb-8">
     <header>
       <p className="text-sm font-extrabold text-blue-600 dark:text-blue-300">CONNECTED WORKSPACE</p>
@@ -32,11 +27,10 @@ export function IntegrationSettingsScreen() {
       <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">학습 기록은 앱에 먼저 안전하게 저장됩니다. 외부 전송 실패는 학습 완료에 영향을 주지 않습니다.</p>
     </header>
     <ConnectionReturnNotice/>
-    <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <section className="grid gap-4 sm:grid-cols-3">
       <Summary icon={BellRing} label="앱 알림" value="사용 가능" ok/>
       <Summary icon={FileText} label="Notion" value={n.connected ? "연결됨" : "연결 필요"} ok={n.connected}/>
       <Summary icon={MessageSquare} label="Slack" value={sl.configured ? (sl.enabled ? "발송 중" : "꺼짐") : "연결 필요"} ok={sl.configured && sl.enabled}/>
-      <Summary icon={Bot} label={isOpenAi ? "AI · OpenAI" : "AI · OpenRouter"} value={isOpenAi ? aiUsage.data?.enabled ? "API 키 설정됨" : "API 키 설정 필요" : ai.isError ? "확인 실패" : ai.isPending ? "확인 중" : ai.data?.connected ? "연결됨" : "연결 필요"} ok={isOpenAi ? aiUsage.data?.enabled === true : ai.data?.connected === true}/>
     </section>
     <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:p-7">
       <div className="flex items-start justify-between gap-4"><div><h2 className="text-xl font-black text-[#0a1837] dark:text-slate-50">알림 시간</h2><p className="mt-1 text-sm text-slate-500 dark:text-slate-400">한국 시간 기준이며 변경은 모든 기기에 함께 적용됩니다.</p></div><ShieldCheck className="text-emerald-600"/></div>
@@ -45,19 +39,11 @@ export function IntegrationSettingsScreen() {
     <section className="grid gap-5 lg:grid-cols-2">
       <WebPushCard config={pc} settings={s}/>
       <SlackCard connection={sl}/>
-      {isOpenAi ? <OpenAiCard enabled={aiUsage.data?.enabled === true}/> : <OpenRouterCard/>}
-      <Card icon={RefreshCw} title="전송 원칙" status="업무와 분리"><p>부분 실패와 결과 불명은 별도 상태로 남기며 재시도합니다. 외부 장애로 완료된 학습·시험 결과를 취소하지 않습니다.</p><div className="mt-5 flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-200"><CheckCircle2 size={18}/>앱 데이터가 원본입니다</div></Card>
+      <OpenRouterCard/>
+      <Card icon={RefreshCw} title="전송 원칙" status="업무와 분리"><p>부분 실패와 결과 불명은 별도 상태로 남기며 재시도합니다. 외부 장애로 앱에 저장된 학습 기록을 취소하지 않습니다.</p><div className="mt-5 flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-200"><CheckCircle2 size={18}/>앱 데이터가 원본입니다</div></Card>
       <NotionCard connection={n}/>
     </section>
   </div>;
-}
-
-function OpenAiCard({ enabled }: { enabled: boolean }) {
-  return <article className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:p-6">
-    <h2 className="flex items-center gap-3 text-lg font-black text-slate-900 dark:text-slate-50"><Bot size={22}/>AI · OpenAI</h2>
-    <p className="mt-4 text-sm leading-6 text-slate-600 dark:text-slate-300">{enabled ? "OpenAI API 키가 설정되었습니다. 실제 생성은 계정 잔액과 한도에 따라 달라집니다." : "운영자가 OpenAI API 키를 서버에 설정해야 합니다."} 요청 시 해당 날짜의 학습 제목과 진행 상태를 OpenAI에 전송하며 API 요금이 발생할 수 있습니다.</p>
-    <a href="/assistant" className="mt-5 inline-block text-sm font-bold text-blue-700 underline dark:text-blue-300">AI 도우미 열기</a>
-  </article>;
 }
 
 function Summary({ icon: Icon, label, value, ok }: { icon: typeof BellRing; label: string; value: string; ok: boolean }) {

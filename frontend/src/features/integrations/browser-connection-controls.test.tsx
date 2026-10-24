@@ -3,7 +3,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { BrowserConnectionControls } from "./browser-connection-controls";
 import { decodeBrowserConnection } from "./browser-connections";
-import { decodeAvailableTargets } from "./notion-target-picker";
 
 const mocks = vi.hoisted(() => ({ status: vi.fn(), authorize: vi.fn(), disconnect: vi.fn() }));
 vi.mock("./browser-connections", async importOriginal => ({
@@ -39,9 +38,7 @@ describe("browser connections", () => {
     expect(mocks.disconnect).toHaveBeenCalledWith("openrouter", 7);
     await waitFor(() => expect(screen.queryByRole("button", { name: "연결 해제" })).not.toBeInTheDocument());
   });
-  it("rejects ambiguous status and preserves paginated Notion target IDs", () => {
+  it("rejects ambiguous connection status", () => {
     expect(() => decodeBrowserConnection({ ...ready, connected: "false" })).toThrow();
-    expect(decodeAvailableTargets({ content: [{ title: "학습 기록", databaseId: "db-1", dataSourceId: "source-1" }], nextCursor: "next-page" })).toEqual({ content: [{ title: "학습 기록", databaseId: "db-1", dataSourceId: "source-1" }], nextCursor: "next-page" });
-    expect(() => decodeAvailableTargets({ content: [{ title: "broken" }], nextCursor: null })).toThrow();
   });
 });

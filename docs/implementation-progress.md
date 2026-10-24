@@ -1,5 +1,12 @@
 # 구현 진행
 
+## 최신 진행 — R0 기존 학습 초기화 완료 (2026-10-24)
+
+- 복구 수단: `legacy-before-reset` 태그(커밋 `7dddd44`, 579개 파일), DB 백업 `backups/daily-career-public-20261024T193919-c3d6f49f.dump`(복원 리허설 통과).
+- V34로 옛 학습 테이블 61개·뷰 1개·함수 3개를 삭제하고 알림·outbox·멱등성 기록을 비웠다. 남은 테이블 20개(계정·설정·연동·AI 비용 기록). 실DB 적용 후 계정 1·AI 사용 기록 14건 유지를 확인했다. 삭제된 dev 시드 V8.1은 `ignore-migration-patterns: "*:missing"`으로 검증에서 제외했다.
+- Backend: 학습·시험·문제·진척·대시보드·AI·공통코드 모듈 삭제, Notion은 연결·해제만 유지. Frontend: 화면 6개(`/`, `/login`, `/workspace`, `/settings`, `/settings/integrations`, `/notifications`)만 남겼다. `content/`, QA Compose 3개와 volume, 카탈로그 스크립트를 삭제했다.
+- 검증: Backend 단위 59 + PostgreSQL IT 34 통과, Frontend 16개 테스트 파일·typecheck·lint·build 통과, Compose 4서비스 healthy, runtime smoke PASS.
+
 ## 최신 진행 — 학습 루프 재설계 초안 (2026-10-24)
 
 - 실사용 기록(활성 `JAVA-CORE-4W` 완료 2일·일일 시험 0회, 90분 표기 대비 약 1,600자 본문, 옛 원문 혼입·중복 배정)을 근거로 학습 설계를 재검토했다.

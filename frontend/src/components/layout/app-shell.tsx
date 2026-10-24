@@ -1,6 +1,6 @@
 "use client";
 import { useQueryClient } from "@tanstack/react-query";
-import { BarChart3, Bell, Bot, BookOpen, CalendarDays, ChevronDown, CircleHelp, ClipboardCheck, FileQuestion, Home, LogOut, MoreHorizontal, NotebookPen, Search, Settings, UserRound, X, type LucideIcon } from "lucide-react";
+import { Bell, ChevronDown, CircleHelp, Home, LogOut, MoreHorizontal, Search, Settings, UserRound, X, type LucideIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -13,27 +13,19 @@ import { cn } from "@/lib/utils";
 
 const navigation: ReadonlyArray<{ label: string; href: string; icon: LucideIcon; pending: boolean }> = [
   { label: "홈", href: "/workspace", icon: Home, pending: false },
-  { label: "학습하기", href: "/learning", icon: BookOpen, pending: false },
-  { label: "문제 풀기", href: "/practice", icon: FileQuestion, pending: false },
-  { label: "시험", href: "/tests", icon: ClipboardCheck, pending: false },
-  { label: "오답노트", href: "/review", icon: NotebookPen, pending: false },
-  { label: "학습통계", href: "/progress", icon: BarChart3, pending: false },
-  { label: "캘린더", href: "/calendar", icon: CalendarDays, pending: false },
   { label: "알림", href: "/notifications", icon: Bell, pending: false },
-  { label: "AI 도우미", href: "/assistant", icon: Bot, pending: false },
 ];
 
 const mobileNavigation: ReadonlyArray<{ label: string; href: string; icon: LucideIcon }> = [
   { label: "홈", href: "/workspace", icon: Home },
-  { label: "학습", href: "/learning", icon: BookOpen },
-  { label: "시험", href: "/tests", icon: ClipboardCheck },
-  { label: "성장", href: "/progress", icon: BarChart3 },
+  { label: "알림", href: "/notifications", icon: Bell },
+  { label: "설정", href: "/settings", icon: Settings },
 ];
 
 const searchablePages = [
   ...navigation.filter(item => !item.pending),
-  { label: "학습 로드맵", href: "/roadmap", icon: BookOpen },
   { label: "설정", href: "/settings", icon: Settings },
+  { label: "알림 및 외부 연동", href: "/settings/integrations", icon: Bell },
 ] as const;
 
 export function AppShell({ session, children }: { session: SessionViewModel; children: ReactNode }) {
@@ -97,7 +89,7 @@ export function AppShell({ session, children }: { session: SessionViewModel; chi
       <main className="mx-auto w-full max-w-[1480px] px-4 py-6 sm:px-6 lg:px-8 xl:py-8">{children}</main>
     </div>
     {moreOpen && <div className="fixed inset-0 z-30 lg:hidden" role="presentation"><button type="button" aria-label="더보기 메뉴 닫기" onClick={() => setMoreOpen(false)} className="absolute inset-0 bg-slate-950/30 backdrop-blur-[2px]"/><section id="mobile-more-menu" role="dialog" aria-modal="true" aria-labelledby="more-menu-title" className="absolute inset-x-0 bottom-0 rounded-t-[28px] bg-white px-5 pb-[calc(5.5rem+env(safe-area-inset-bottom))] pt-5 shadow-2xl"><div className="flex items-center justify-between"><div><p className="text-xs font-bold text-blue-600">전체 메뉴</p><h2 id="more-menu-title" className="mt-1 text-xl font-black text-[#0a1837]">더보기</h2></div><button type="button" aria-label="닫기" onClick={() => setMoreOpen(false)} className="grid size-10 place-items-center rounded-full bg-slate-100 text-slate-600"><X size={20}/></button></div><div className="mt-5 grid grid-cols-3 gap-3">{navigation.slice(1).map(({label,href,icon:Icon,pending}) => pending ? <span key={label} aria-disabled="true" className="flex min-h-20 flex-col items-center justify-center gap-2 rounded-2xl bg-slate-50 text-xs font-bold text-slate-400"><Icon size={21}/>{label}<span className="text-[9px] font-semibold">준비 중</span></span> : <Link key={label} href={href} onClick={() => setMoreOpen(false)} className="flex min-h-20 flex-col items-center justify-center gap-2 rounded-2xl bg-blue-50 text-xs font-bold text-blue-700"><Icon size={21}/>{label}</Link>)}</div><div className="mt-4 grid grid-cols-2 gap-3 border-t border-slate-100 pt-4"><Link href="/settings" onClick={() => setMoreOpen(false)} className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-50 text-sm font-bold text-slate-600"><Settings size={18}/>설정</Link><span className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-50 text-sm font-bold text-slate-600"><CircleHelp size={18}/>고객센터</span></div></section></div>}
-    <nav aria-label="모바일 주요 메뉴" className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 border-t border-slate-200 bg-white px-[max(0.5rem,env(safe-area-inset-left))] pb-[env(safe-area-inset-bottom)] lg:hidden">
+    <nav aria-label="모바일 주요 메뉴" className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-4 border-t border-slate-200 bg-white px-[max(0.5rem,env(safe-area-inset-left))] pb-[env(safe-area-inset-bottom)] lg:hidden">
       {mobileNavigation.map(({label,href,icon:Icon}) => <Link key={label} href={href} aria-current={active(href)?"page":undefined} className={cn("flex min-h-16 flex-col items-center justify-center gap-1 text-[11px] font-bold",active(href)?"text-blue-700":"text-slate-500")}><Icon size={19}/>{label}</Link>)}
       <button type="button" aria-expanded={moreOpen} aria-controls="mobile-more-menu" onClick={() => setMoreOpen(true)} className={cn("flex min-h-16 flex-col items-center justify-center gap-1 text-[11px] font-bold",moreOpen?"text-blue-700":"text-slate-500")}><MoreHorizontal size={19}/>더보기</button>
     </nav>

@@ -3,9 +3,7 @@ package dev.dailycareer.integration.notion;
 import dev.dailycareer.common.api.ApiErrorCode;
 import dev.dailycareer.common.api.ApiException;
 import dev.dailycareer.common.api.ApiResponses;
-import dev.dailycareer.common.concurrency.Revisions;
 import dev.dailycareer.common.idempotency.IdempotencyService;
-import dev.dailycareer.common.json.Ids;
 import dev.dailycareer.user.AppPrincipal;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -14,10 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -63,54 +58,6 @@ public class NotionController {
         }
         boolean connected = service.completeAuthorization(principal.userId(), request.getSession(false).getId(), state, code);
         return redirect(connected ? "connected" : "failed");
-    }
-
-    @GetMapping("/available-targets")
-    ResponseEntity<?> availableTargets(@AuthenticationPrincipal AppPrincipal principal,
-            @RequestParam(required=false) String query, @RequestParam(required=false) String cursor, HttpServletRequest request) {
-        return ApiResponses.ok(request, service.availableTargets(user(principal), query, cursor));
-    }
-
-    @GetMapping("/targets")
-    ResponseEntity<?> targets(@AuthenticationPrincipal AppPrincipal principal, HttpServletRequest request) {
-        var value = service.targets(user(principal));
-        return ApiResponses.success(request, 200, value, Revisions.etag(value == null ? 0 : value.revision()), null);
-    }
-
-    @PutMapping("/targets")
-    ResponseEntity<?> updateTargets(@AuthenticationPrincipal AppPrincipal principal,
-                                    @RequestBody NotionViews.TargetsPut body, HttpServletRequest request) {
-        var value = service.updateTargets(user(principal), body, Revisions.required(request));
-        return ApiResponses.success(request, 200, value, Revisions.etag(value.revision()), null);
-    }
-
-    @PostMapping("/sync")
-    ResponseEntity<?> sync(@AuthenticationPrincipal AppPrincipal principal,
-                           @RequestBody NotionViews.SyncRequest body, HttpServletRequest request) {
-        return service.createSync(user(principal), body, IdempotencyService.requiredKey(request)).toResponse(request);
-    }
-
-    @GetMapping("/sync-history")
-    ResponseEntity<?> history(@AuthenticationPrincipal AppPrincipal principal,
-                              @RequestParam(required = false) String status,
-                              @RequestParam(defaultValue = "0") int page,
-                              @RequestParam(defaultValue = "20") int size,
-                              @RequestParam(defaultValue = "createdAt,desc") String sort,
-                              HttpServletRequest request) {
-        return ApiResponses.ok(request, service.history(user(principal), status, page, size, sort));
-    }
-
-    @GetMapping("/sync-jobs/{syncId}")
-    ResponseEntity<?> job(@AuthenticationPrincipal AppPrincipal principal, @PathVariable String syncId,
-                          HttpServletRequest request) {
-        return ApiResponses.ok(request, service.get(user(principal), Ids.parse(syncId)));
-    }
-
-    @PostMapping("/sync-jobs/{syncId}/retry")
-    ResponseEntity<?> retry(@AuthenticationPrincipal AppPrincipal principal, @PathVariable String syncId,
-                            HttpServletRequest request) throws IOException {
-        noBody(request);
-        return service.retry(user(principal), Ids.parse(syncId), IdempotencyService.requiredKey(request)).toResponse(request);
     }
 
     private static ResponseEntity<Void> redirect(String result) {

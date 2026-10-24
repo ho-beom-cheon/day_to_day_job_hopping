@@ -514,7 +514,7 @@ I1 경력 카드는 결국 경력기술서 문장이 된다.
 2. **DB를 백업한다.** 기존 `scripts/database-backup.ps1`를 쓰고, 복원 리허설(`scripts/database-restore-drill.ps1`)로 백업이 열리는지 확인한다.
 3. **데이터를 삭제한다.** 아래 "삭제" 테이블을 한 트랜잭션에서 비운다. 실행 전에 테이블별 행 수를 기록하고, 실행 후 0인지 확인한다.
 4. **옛 코드·화면·콘텐츠를 삭제한다.** Backend의 학습·시험·문제·진척·대시보드·AI 연습 모듈, Frontend의 해당 화면, `content/` 원고, `prompts/financial-backend-v1/`를 지운다. 남는 기능(로그인·설정·알림·연동)이 참조하던 부분은 끊는다.
-5. **테이블을 삭제한다.** 새 migration(V34)으로 옛 학습 테이블을 DROP한다. 기존 migration 파일은 수정하지 않는다. 옛 테이블을 검사하던 테스트(`BusinessSchemaIT` 등)는 새 기준으로 고친다.
+5. **테이블을 삭제한다.** 새 migration(V34)으로 옛 학습 테이블을 DROP한다. 3번의 데이터 삭제도 같은 migration 트랜잭션에서 한다. 실행 전 백업 복원본에 V34를 먼저 적용해 확인한다(2026-10-24 확인: 남은 테이블 20개, AI 사용 기록 14건과 계정 유지). 기존 migration 파일은 수정하지 않는다. 옛 테이블을 검사하던 테스트(`BusinessSchemaIT` 등)는 새 기준으로 고친다.
 6. **확인한다.** Backend·Frontend 빌드와 테스트, Compose 실행, 로그인·설정·알림·연동 화면이 열리는지 확인한다.
 
 **삭제** (2026-10-24 기준 행 수)
@@ -525,7 +525,8 @@ I1 경력 카드는 결국 경력기술서 문장이 된다.
 | 배정·일정·진도 | `user_curriculum`(4), `learning_day`(47), `learning_day_item`(85), `assigned_learning_day`(38), `assigned_content`(47), `assigned_session_detail`(47), `learning_session`, `schedule_policy`(4), `schedule_rest_weekday`(8), `schedule_change`(3), `schedule_preview`(6), `study_completion`(13) | |
 | 문제·시험·채점 | `problem`(393), `problem_version`(393), `problem_attempt`(34), `problem_report`, `test`(30), `test_version`(30), `test_item`(90), `test_attempt`(3), `test_attempt_item`(5), `grading_run`(37), `grading_result`(39), `monthly_evaluation`, `study_evaluation`, `study_evaluation_part`, `review_task`(13), `wrong_answer`(13), `wrong_answer_occurrence`(14) | |
 | 추가 학습·AI 학습 | `extra_learning`(10), `extra_learning_catalog`(113), `extra_learning_time`, `ai_learning_topic`(2), `ai_practice_attempt`(11), `ai_practice_run`, `ai_practice_run_answer`, `ai_practice_wrong_note`(7), `ai_practice_question_report`, `ai_conversation`, `ai_message` | AI 도우미 대화 포함 |
-| 옛 학습 알림·동기화 | `notification`(29), `notification_delivery`(26), `outbox_event`(27), `notion_sync_batch`(11), `notion_sync_item`(97), `notion_target`(6), `notion_target_set`(1), `idempotency_record`(119) | 옛 학습 기록용. Notion 대상은 답변집 기준으로 다시 정한다 |
+| 옛 학습 동기화 | `notion_sync_batch`(11), `notion_sync_item`(97), `notion_target`(6), `notion_target_set`(1), `integration_mapping`, `sync_job`, `sync_attempt` | 테이블 삭제. 옛 학습 엔터티와 외부 객체를 잇던 구조다. Notion 대상은 답변집 기준으로 다시 정한다 |
+| 옛 알림·멱등성 기록 | `notification`(29), `notification_delivery`(26), `outbox_event`(27), `idempotency_record`(119) | **데이터만 삭제하고 테이블은 유지**한다. 알림·Slack·Web Push·멱등성 코드가 계속 쓰기 때문이다 |
 
 **유지**
 
@@ -533,8 +534,8 @@ I1 경력 카드는 결국 경력기술서 문장이 된다.
 | --- | --- | --- |
 | 계정·로그인 | `app_user`, `user_identity`, `oidc_login_state` | 다시 로그인하지 않아도 되게 |
 | 설정 | `user_setting` | 새 컬럼만 추가(§8) |
-| 연동 연결 | `integration_connection`, `notion_credential`, `notion_oauth_state`, `notion_revocation`, `browser_connection`, `browser_oauth_state`, `push_subscription`, `notification_preference`, `sync_job`, `sync_attempt`, `integration_mapping` | 다시 연결하는 수고를 줄인다. 쓰지 않게 된 연결은 설정에서 해제 |
-| AI 비용 기록 | `ai_job`(23), `ai_usage`(14), `ai_budget`(6) | 비용 이력. `ai_job`의 옛 입력 스냅샷은 비운다(`input_snapshot`, `result_payload`를 NULL로) |
+| 연동 연결 | `integration_connection`, `notion_credential`, `notion_oauth_state`, `notion_revocation`, `browser_connection`, `browser_oauth_state`, `push_subscription`, `notification_preference` | 다시 연결하는 수고를 줄인다. 쓰지 않게 된 연결은 설정에서 해제 |
+| AI 비용 기록 | `ai_job`(23), `ai_usage`(14), `ai_budget`(6) | 비용 이력. `ai_job`의 옛 입력·결과는 비우고(`input_snapshot`은 `{}`, `result_payload`는 NULL), 삭제되는 AI 대화와의 연결 컬럼(`conversation_id`)은 없앤다 |
 | 기타 | `audit_event` | 감사 기록 |
 
 QA용 Compose 환경(`compose.course-qa.yaml`, `compose.extra-learning-qa.yaml`, `compose.study-program-qa.yaml`)은 옛 학습 기능 검증용이다. R0에서 compose 파일과 해당 Docker volume을 함께 지운다(§12-11 결정됨). volume은 지우기 전에 `docker volume ls`로 이름을 확인하고 기록한다.

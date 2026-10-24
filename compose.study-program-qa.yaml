@@ -1,7 +1,0 @@
-# Isolated policy/prompt acceptance. Use only with compose.course-qa.yaml.
-# The public application's data and running containers are not selected here.
-services:
-  backend:
-    image: daily-career-study-policy-check
-  frontend:
-    image: daily-career-study-frontend

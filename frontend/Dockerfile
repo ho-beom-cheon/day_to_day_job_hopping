@@ -11,7 +11,6 @@ CMD ["npm", "run", "dev", "--", "--hostname", "0.0.0.0", "--webpack"]
 
 FROM dependencies AS build
 COPY . .
-COPY --from=course_examples . /content/java-four-week-v1/examples
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run typecheck && npm run lint && npm test && npm run build
 

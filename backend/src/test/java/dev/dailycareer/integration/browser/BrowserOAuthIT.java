@@ -2,7 +2,6 @@ package dev.dailycareer.integration.browser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dailycareer.DailyCareerApplication;
-import dev.dailycareer.common.api.ApiErrorCode;
 import dev.dailycareer.common.api.ApiException;
 import dev.dailycareer.integration.IntegrationService;
 import dev.dailycareer.integration.IntegrationViews;
@@ -34,7 +33,7 @@ import static org.assertj.core.api.Assertions.*;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @Import(BrowserOAuthIT.Fakes.class)
 @SpringBootTest(classes = DailyCareerApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        properties = {"management.server.port=0", "daily-career.slack.poll-delay-ms=3600000", "daily-career.ai.poll-delay-ms=3600000"})
+        properties = {"management.server.port=0", "daily-career.slack.poll-delay-ms=3600000"})
 class BrowserOAuthIT {
     @Container static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(
             "postgres@sha256:5a1b083da321ba67c86c3169d22778c561fa0935f17acbff7bbc0537f1e50dd6").withUsername("daily_career");
@@ -47,7 +46,6 @@ class BrowserOAuthIT {
         r.add("OPENROUTER_MODEL", () -> "test/model");
     }
     @Autowired BrowserConnections service;
-    @Autowired dev.dailycareer.ai.AiService ai;
     @Autowired ObjectMapper json;
     @Autowired JdbcTemplate jdbc;
     @Autowired Fake provider;
@@ -105,48 +103,6 @@ class BrowserOAuthIT {
         try { assertThat(service.callback(user,"slack","session",state,"code",null)).isFalse(); }
         finally { provider.duringExchange = () -> {}; }
         assertThat(service.status(user,"slack").connected()).isFalse();
-    }
-    @Test void queuesAiUsingOwnedSnapshotAndCancelsItWithoutChangingProviderOnReconnect() throws Exception {
-        long user = user();
-        String url = service.authorize(user,"openrouter","session").authorizationUrl();
-        String state = param(param(url,"callback_url"),"state");
-        assertThat(service.callback(user,"openrouter","session",state,"code",null)).isTrue();
-        long course = curriculum(user);
-        var input = json.createObjectNode().put("curriculumId",Long.toString(course)).put("date",java.time.LocalDate.now(java.time.ZoneId.of("Asia/Seoul")).toString());
-        var reply = ai.create(user,"AI-004","DAILY_FEEDBACK",input,UUID.randomUUID());
-        long job = reply.data().path("jobId").asLong();
-        var row = jdbc.queryForMap("select * from daily_career.ai_job where id=?",job);
-        assertThat(row.get("provider")).isEqualTo("OPENROUTER");
-        assertThat(row.get("browser_credential_ref").toString()).isEqualTo(service.reference(user,"openrouter"));
-        assertThat(json.readTree(row.get("input_snapshot").toString()).path("learningRecords").size()).isEqualTo(1);
-        assertThat(ai.usage(user).get("enabled")).isEqualTo(true);
-        service.disconnect(user,"openrouter",1);
-        assertThat(ai.usage(user).get("enabled")).isEqualTo(false);
-        assertThat(jdbc.queryForObject("select status from daily_career.ai_job where id=?",String.class,job)).isEqualTo("CANCELED");
-    }
-    @Test void doesNotQueueDailyFeedbackWithoutStartedLearning() {
-        long user = user();
-        String url = service.authorize(user,"openrouter","session").authorizationUrl();
-        String state = param(param(url,"callback_url"),"state");
-        assertThat(service.callback(user,"openrouter","session",state,"code",null)).isTrue();
-        long course = curriculum(user);
-        jdbc.update("update daily_career.learning_day_item set status='NOT_STARTED',completed_at=null where user_id=? and user_curriculum_id=?",user,course);
-        var input = json.createObjectNode().put("curriculumId",Long.toString(course))
-                .put("date",java.time.LocalDate.now(java.time.ZoneId.of("Asia/Seoul")).toString());
-
-        assertThatThrownBy(() -> ai.create(user,"AI-004","DAILY_FEEDBACK",input,UUID.randomUUID()))
-                .isInstanceOfSatisfying(ApiException.class, failure ->
-                        assertThat(failure.code()).isEqualTo(ApiErrorCode.AI_INPUT_NOT_ELIGIBLE));
-        assertThat(jdbc.queryForObject("select count(*) from daily_career.ai_job where user_id=?",Integer.class,user)).isZero();
-    }
-    private long curriculum(long user) {
-        long curriculum = jdbc.queryForObject("insert into daily_career.curriculum(code,title) values (?, 'AI test') returning id",Long.class,"AI-"+UUID.randomUUID());
-        long version = jdbc.queryForObject("insert into daily_career.curriculum_version(curriculum_id,version_no,status,published_at) values (?,1,'PUBLISHED',clock_timestamp()) returning id",Long.class,curriculum);
-        long course = jdbc.queryForObject("insert into daily_career.user_curriculum(user_id,curriculum_version_id,start_date,target_end_date,projected_end_date,status) values (?,?,current_date,current_date+30,current_date+30,'ACTIVE') returning id",Long.class,user,version);
-        java.time.LocalDate today = java.time.LocalDate.now(java.time.ZoneId.of("Asia/Seoul"));
-        long day = jdbc.queryForObject("insert into daily_career.learning_day(user_id,user_curriculum_id,local_date) values (?,?,?) returning id",Long.class,user,course,today);
-        jdbc.update("insert into daily_career.learning_day_item(user_id,user_curriculum_id,curriculum_version_id,learning_day_id,order_no,activity_type,status,completed_at) values (?,?,?,?,1,'LEARN','COMPLETED',clock_timestamp())",user,course,version,day);
-        return course;
     }
     private long user() {
         long id = jdbc.queryForObject("insert into daily_career.app_user(display_name,email) values ('oauth-test',?) returning id",Long.class,UUID.randomUUID()+"@example.test");

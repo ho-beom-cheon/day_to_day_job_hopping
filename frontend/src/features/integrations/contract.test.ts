@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { jobReceipt, notionSyncJob, notionTargets, pushSubscription, settings, slackDeliveries } from "./contract";
+import { jobReceipt, pushSubscription, settings, slackDeliveries } from "./contract";
 
 const validSettings = {
   studyReminder: { enabled: true, time: "19:30" },
@@ -54,22 +54,5 @@ describe("integration settings contract", () => {
       statusPath: "/api/v1/integrations/slack/deliveries/9223372036854775807",
       createdAt: "2026-09-23T12:00:00+09:00", reused: false,
     }).jobId).toBe("9223372036854775807");
-  });
-
-  it("keeps Notion batch and source ids as strings", () => {
-    const decoded = notionSyncJob({
-      syncId: "9223372036854775807", curriculumId: "1", status: "PARTIAL_SUCCESS",
-      connectionRevision: 2, targetsRevision: 3, entityTypes: ["PROBLEM"], from: "2026-09-01", to: "2026-09-23",
-      createdCount: 0, updatedCount: 0, skippedCount: 0, failedCount: 1, totalCount: 1,
-      startedAt: "2026-09-23T12:00:00+09:00", completedAt: "2026-09-23T12:01:00+09:00",
-      createdAt: "2026-09-23T12:00:00+09:00",
-      failures: [{ entityType: "PROBLEM", sourceId: "9223372036854775806", code: "NOTION_RESULT_UNKNOWN", message: "결과 확인 필요", retryable: true }],
-    });
-    expect(decoded.syncId).toBe("9223372036854775807");
-    expect(decoded.failures[0].sourceId).toBe("9223372036854775806");
-  });
-
-  it("accepts the unmapped Notion targets null state", () => {
-    expect(notionTargets(null)).toBeNull();
   });
 });

@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ApiError } from "@/api/client";
 import { Button } from "@/components/ui/button";
-import { weekdayOptions } from "@/features/onboarding/model";
+import { weekdayOptions } from "@/lib/weekdays";
 import type { NotificationSettings } from "./contract";
 import { settingsQuery, updateSettings } from "./queries";
 

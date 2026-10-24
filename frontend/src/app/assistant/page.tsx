@@ -1,1 +1,0 @@
-import { SessionGate } from "@/features/session/session-gate";import { AssistantScreen } from "@/features/ai/assistant-screen";export default function AssistantPage(){return <SessionGate><AssistantScreen/></SessionGate>}

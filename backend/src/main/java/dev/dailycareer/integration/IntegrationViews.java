@@ -14,7 +14,7 @@ public final class IntegrationViews {
             WeeklyReminder weeklyReport,Boolean pushEnabled,Boolean scheduledRemindersEnabled) {}
     public record PushConfig(Boolean enabled,String publicKey) {}
     public record NotionConnection(Boolean connected,String status,String workspaceName,String workspaceId,String notionVersion,
-            OffsetDateTime lastSyncedAt,Boolean targetsConfigured,Integer connectionRevision) {}
+            Integer connectionRevision) {}
     public record SlackConnection(Boolean configured,String channelName,Boolean enabled,List<String> eventTypes,
             OffsetDateTime updatedAt,Integer revision) {}
     public record SlackPatch(Boolean enabled,List<String> eventTypes) {}

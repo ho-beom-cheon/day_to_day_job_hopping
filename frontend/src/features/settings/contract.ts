@@ -1,6 +1,5 @@
 import { decodeEnvelope } from "@/api/contract";
-import type { Weekday } from "@/features/onboarding/contract";
-import { weekdayOptions } from "@/features/onboarding/model";
+import { weekdayOptions, type Weekday } from "@/lib/weekdays";
 
 export type StudyPreferences = {
   studyPolicy: { dailyStudyMinutes: number; restDaysPerWeek: number; restWeekdays: Weekday[] };

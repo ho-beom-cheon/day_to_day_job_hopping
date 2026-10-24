@@ -6,9 +6,6 @@ import {
   decodeNotion,
   decodeNotionAuthorization,
   decodeNotionDisconnect,
-  decodeNotionSyncJob,
-  decodeNotionSyncPage,
-  decodeNotionTargets,
   decodePush,
   decodePushSubscription,
   decodePushSubscriptions,
@@ -17,8 +14,6 @@ import {
   decodeSlackDeliveries,
   decodeSlackDelivery,
   type NotificationSettings,
-  type NotionEntityType,
-  type NotionTarget,
   type SlackConnection,
 } from "./contract";
 import type { BrowserPushSubscription } from "./web-push";
@@ -32,19 +27,6 @@ export const settingsQuery = queryOptions({
 export const notionQuery = queryOptions({
   queryKey: [...integrationKeys.all, "notion"],
   queryFn: async () => (await api.request({ path: "/api/v1/integrations/notion", decode: decodeNotion })).data.data,
-});
-export const notionTargetsQuery = queryOptions({
-  queryKey: [...integrationKeys.all, "notion-targets"],
-  queryFn: async () => (await api.request({ path: "/api/v1/integrations/notion/targets", decode: decodeNotionTargets })).data.data,
-});
-export const notionHistoryQuery = queryOptions({
-  queryKey: [...integrationKeys.all, "notion-history"],
-  queryFn: async () => (await api.request({ path: "/api/v1/integrations/notion/sync-history?page=0&size=10&sort=createdAt,desc", decode: decodeNotionSyncPage })).data.data,
-  refetchInterval: (query) => query.state.data?.content.some(({ status }) => status === "READY" || status === "PROCESSING") ? 2_000 : false,
-});
-export const notionJobQuery = (syncId: string) => queryOptions({
-  queryKey: [...integrationKeys.all, "notion-jobs", syncId],
-  queryFn: async () => (await api.request({ path: `/api/v1/integrations/notion/sync-jobs/${encodeURIComponent(syncId)}`, decode: decodeNotionSyncJob })).data.data,
 });
 export const slackQuery = queryOptions({
   queryKey: [...integrationKeys.all, "slack"],
@@ -107,31 +89,6 @@ export const disconnectNotion = () => api.request({
   path: "/api/v1/integrations/notion",
   method: "DELETE",
   decode: (value) => decodeNotionDisconnect(value).data,
-});
-
-export const saveNotionTargets = ({ targets, revision }: { targets: NotionTarget[]; revision: number }) => api.request({
-  path: "/api/v1/integrations/notion/targets",
-  method: "PUT",
-  body: { targets },
-  etag: `"${revision}"`,
-  decode: (value) => decodeNotionTargets(value).data,
-});
-
-export const startNotionSync = ({ curriculumId, entityTypes, from, to }: {
-  curriculumId: string; entityTypes: NotionEntityType[]; from: string; to: string;
-}) => api.request({
-  path: "/api/v1/integrations/notion/sync",
-  method: "POST",
-  body: { curriculumId, entityTypes, from, to },
-  idempotencyKey: crypto.randomUUID(),
-  decode: (value) => decodeJobReceipt(value).data,
-});
-
-export const retryNotionSync = (syncId: string) => api.request({
-  path: `/api/v1/integrations/notion/sync-jobs/${encodeURIComponent(syncId)}/retry`,
-  method: "POST",
-  idempotencyKey: crypto.randomUUID(),
-  decode: (value) => decodeJobReceipt(value).data,
 });
 
 export const sendSlackTest = () => api.request({

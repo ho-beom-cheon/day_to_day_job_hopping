@@ -97,7 +97,7 @@ class AuthenticationIT {
         JsonNode user = data(me);
         assertThat(user.get("userId").isTextual()).isTrue();
         assertThat(user.get("role").asText()).isEqualTo("USER");
-        assertThat(user.get("curriculumId").isNull()).isTrue();
+        assertThat(user.has("curriculumId")).isFalse();
         assertThat(user.get("profileImageUrl").asText()).isEqualTo("https://example.test/profile.png");
         assertThat(user.get("joinedAt").asText()).endsWith("+09:00");
         String etag = me.headers().firstValue("etag").orElseThrow();

@@ -1,6 +1,0 @@
-# Use with compose.course-qa.yaml for issue #10 browser acceptance.
-services:
-  backend:
-    image: daily-career-extra-learning-build
-  frontend:
-    image: daily-career-extra-learning-frontend

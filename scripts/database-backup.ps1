@@ -1,17 +1,13 @@
 param(
-    [ValidateSet('Public', 'QA')]
+    [ValidateSet('Public')]
     [string]$Target = 'Public'
 )
 
 $ErrorActionPreference = 'Stop'
 $projectRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $backupDirectory = Join-Path $projectRoot 'backups'
-$composeArguments = if ($Target -eq 'Public') {
-    @('-f', 'compose.yaml', '-f', 'compose.public.yaml')
-} else {
-    @('--env-file', '.env.course-qa.local', '-f', 'compose.course-qa.yaml')
-}
-$requiredSettings = if ($Target -eq 'Public') { '.env' } else { '.env.course-qa.local' }
+$composeArguments = @('-f', 'compose.yaml', '-f', 'compose.public.yaml')
+$requiredSettings = '.env'
 $backupName = 'daily-career-{0}-{1}-{2}.dump' -f $Target.ToLowerInvariant(), (Get-Date -Format 'yyyyMMddTHHmmss'), ([guid]::NewGuid().ToString('N').Substring(0, 8))
 $containerFile = "/tmp/$backupName"
 $backupFile = Join-Path $backupDirectory $backupName
