@@ -1,3 +1,4 @@
-import { LoginLanding } from "@/features/session/login-landing";
+import { redirect } from "next/navigation";
 
-export default function Home() { return <LoginLanding />; }
+/** No landing page: the dashboard asks for Google login when there is no session. */
+export default function Home() { redirect("/workspace"); }
