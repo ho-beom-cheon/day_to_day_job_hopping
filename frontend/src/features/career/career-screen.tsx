@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BadgeCheck, Loader2, Mic, Plus, ShieldAlert } from "lucide-react";
+import { BadgeCheck, Check, Loader2, Mic, Pencil, Plus, ShieldAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -95,8 +95,12 @@ function ClaimItem({ claim }: { claim: ResumeClaim }) {
   const review = useMutation({ mutationFn: () => reviewClaim(claim.claimId), onSuccess: refresh });
   const interview = useMutation({ mutationFn: () => interviewClaim(claim.claimId), onSuccess: task => router.push(task.status === "PREPARING" ? "/workspace" : `/tasks/${task.taskId}`) });
   const confirmMetric = useMutation({ mutationFn: () => patchClaim(claim.claimId, claim.revision, { metricConfirmed: !claim.metricConfirmed }), onSuccess: refresh });
+  const [draft, setDraft] = useState<string | null>(null);
+  const revise = useMutation({ mutationFn: (revisedText: string) => patchClaim(claim.claimId, claim.revision, { revisedText }), onSuccess: async () => { setDraft(null); await refresh(); } });
   const result = claim.review && "status" in claim.review ? claim.review : null;
-  const error = review.error ?? interview.error ?? confirmMetric.error;
+  const revised = claim.revisedText?.trim() || null;
+  const applied = !!result?.suggestedRevision && revised === result.suggestedRevision.trim();
+  const error = review.error ?? interview.error ?? confirmMetric.error ?? revise.error;
   return <li className="rounded-2xl border border-slate-200 p-4 dark:border-slate-700">
     <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{claim.claimText}</p>
     <div className="mt-2 flex flex-wrap gap-2 text-xs font-bold">
@@ -108,8 +112,18 @@ function ClaimItem({ claim }: { claim: ResumeClaim }) {
     {result && <div className="mt-3 grid gap-2 text-sm">
       {result.issues.map(issue => <p key={issue.detail} className="flex gap-2 text-amber-800 dark:text-amber-200"><ShieldAlert size={16} className="mt-0.5 shrink-0"/>{issue.detail}</p>)}
       {result.likelyQuestions.length > 0 && <div><p className="text-xs font-extrabold text-slate-500">예상 질문</p><ul className="mt-1 list-disc pl-5 text-slate-700 dark:text-slate-200">{result.likelyQuestions.map(question => <li key={question}>{question}</li>)}</ul></div>}
-      {result.suggestedRevision && <p className="rounded-xl bg-slate-50 p-3 text-slate-700 dark:bg-[#151f2f] dark:text-slate-200"><b className="text-xs text-slate-500">수정 제안</b><br/>{result.suggestedRevision}</p>}
+      {result.suggestedRevision && <div className="rounded-xl bg-slate-50 p-3 text-slate-700 dark:bg-[#151f2f] dark:text-slate-200">
+        <b className="text-xs text-slate-500">수정 제안</b><p>{result.suggestedRevision}</p>
+        <Button className="mt-2" variant="outline" disabled={applied || revise.isPending} onClick={() => revise.mutate(result.suggestedRevision)}><Check size={16}/>{applied ? "반영됨" : "제안 반영"}</Button>
+      </div>}
     </div>}
+    {draft !== null ? <div className="mt-3 grid gap-2">
+      <textarea aria-label="반영할 문장" className={`${input} min-h-20 py-2`} maxLength={2000} value={draft} onChange={event => setDraft(event.target.value)}/>
+      <div className="flex gap-2"><Button disabled={!draft.trim() || revise.isPending} onClick={() => revise.mutate(draft)}>저장</Button><Button variant="outline" onClick={() => setDraft(null)}>취소</Button></div>
+    </div> : revised ? <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-100">
+      <b className="text-xs text-emerald-700 dark:text-emerald-300">반영한 문장 · AI 점검과 면접은 이 문장으로 진행돼요</b><p>{revised}</p>
+      <Button className="mt-2" variant="outline" onClick={() => setDraft(revised)}><Pencil size={16}/>직접 고치기</Button>
+    </div> : <Button className="mt-3" variant="outline" onClick={() => setDraft(result?.suggestedRevision || claim.claimText)}><Pencil size={16}/>문장 직접 고치기</Button>}
     <div className="mt-3 flex flex-wrap gap-2">
       <Button variant="outline" disabled={claim.reviewPending || review.isPending} onClick={() => review.mutate()}>{result ? "다시 점검" : "AI 사전 점검"}</Button>
       <Button disabled={interview.isPending} onClick={() => interview.mutate()}><Mic size={16}/>압박형 면접 연습</Button>

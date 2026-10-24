@@ -138,7 +138,7 @@ public class CareerFacts {
         Claim claim = claim(user, id);
         ObjectNode input = json.createObjectNode().put("claimId", id);
         var queued = ai.enqueue(user, REVIEW_JOB, LoopPrompts.VERSION, input, "claim-review:" + id + ":" + claim.revision(),
-                AiJobService.estimateTokens(prompts.overhead(LoopPrompts.Role.CLAIM_REVIEW), claim.claimText(), "fact"),
+                AiJobService.estimateTokens(prompts.overhead(LoopPrompts.Role.CLAIM_REVIEW), effectiveText(claim), "fact"),
                 LoopPrompts.Role.CLAIM_REVIEW.maxOutputTokens);
         jdbc.update("update daily_career.resume_claim set review_job_id=? where id=?", queued.jobId(), id);
         return claim(user, id);
@@ -159,6 +159,13 @@ public class CareerFacts {
         if (competency == null || store.currentSheet(competency.id()) == null) throw new ApiException(ApiErrorCode.COMPETENCY_NOT_READY);
         var selection = new TaskSelector.Selection(competency, "INTERVIEW", 4, "I1 · 이력서 문장 검증 · 압박형 면접");
         return tasks.view(user, tasks.create(user, selection, null, id));
+    }
+
+    /** The sentence the AI works from: the learner's applied revision when present, otherwise the original claim. */
+    static final String EFFECTIVE_CLAIM_TEXT = "coalesce(nullif(btrim(c.revised_text),''),c.claim_text)";
+
+    private static String effectiveText(Claim claim) {
+        return claim.revisedText() == null || claim.revisedText().isBlank() ? claim.claimText() : claim.revisedText().strip();
     }
 
     static ObjectNode factInput(ObjectMapper json, Map<String, Object> row) {
@@ -238,10 +245,10 @@ public class CareerFacts {
 
         @Override public AiRequest request(Job job) {
             Map<String, Object> row = jdbc.queryForMap("""
-                    select c.claim_text,f.project_name,f.client_name,f.period_from,f.period_to,f.role_text,f.tech_text,f.confirmed_scope,f.caution_text,f.status
+                    select %s as claim_text,f.project_name,f.client_name,f.period_from,f.period_to,f.role_text,f.tech_text,f.confirmed_scope,f.caution_text,f.status
                     from daily_career.resume_claim c left join daily_career.career_fact f on f.id=c.career_fact_id and f.user_id=c.user_id
                     where c.id=? and c.user_id=?
-                    """, job.input().path("claimId").asLong(), job.userId());
+                    """.formatted(EFFECTIVE_CLAIM_TEXT), job.input().path("claimId").asLong(), job.userId());
             ObjectNode input = json.createObjectNode().put("claim", row.get("claim_text").toString());
             if ("CONFIRMED".equals(row.get("status"))) input.set("fact", factInput(json, row));
             else input.putNull("fact");

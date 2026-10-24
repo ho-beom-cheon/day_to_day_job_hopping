@@ -49,10 +49,10 @@ final class TaskAiHandlers {
 
         private ObjectNode claimContext(long user, long claimId) {
             Map<String, Object> claim = jdbc.queryForMap("""
-                    select c.claim_text,f.project_name,f.client_name,f.period_from,f.period_to,f.role_text,f.tech_text,f.confirmed_scope,f.caution_text,f.status
+                    select %s as claim_text,f.project_name,f.client_name,f.period_from,f.period_to,f.role_text,f.tech_text,f.confirmed_scope,f.caution_text,f.status
                     from daily_career.resume_claim c left join daily_career.career_fact f on f.id=c.career_fact_id and f.user_id=c.user_id
                     where c.id=? and c.user_id=?
-                    """, claimId, user);
+                    """.formatted(CareerFacts.EFFECTIVE_CLAIM_TEXT), claimId, user);
             ObjectNode context = json.createObjectNode().put("claim", claim.get("claim_text").toString()).put("pressureStyle", true);
             if ("CONFIRMED".equals(claim.get("status"))) context.set("fact", CareerFacts.factInput(json, claim));
             else context.putNull("fact");

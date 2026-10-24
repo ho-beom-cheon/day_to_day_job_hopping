@@ -146,12 +146,19 @@ class DailyLoopIT {
         assertThat(reviewed.reviewStatus()).isEqualTo("NEEDS_FIX");
         assertThat(model.inputs("claim_review").getLast().path("fact").path("projectName").asText()).isEqualTo("기업 현황 조회 재구축");
 
+        String revised = "조회 시간을 330ms로 줄였습니다(측정 조건 확인 필요).";
+        var patched = career.patchClaim(user, claim.claimId(), new CareerFacts.ClaimPatch(null, revised), career.claim(user, claim.claimId()).revision());
+        assertThat(career.review(user, claim.claimId()).reviewPending()).isTrue();
+        await(() -> career.claim(user, claim.claimId()), value -> !value.reviewPending());
+        assertThat(patched.claimText()).isEqualTo("조회 시간을 330ms(0.66초)로 줄였습니다.");
+        assertThat(model.inputs("claim_review").getLast().path("claim").asText()).isEqualTo(revised);
+
         long id = career.interview(user, claim.claimId()).taskId();
         Task task = await(() -> tasks.view(user, id), value -> "READY".equals(value.status()));
         assertThat(task.format()).isEqualTo("INTERVIEW");
         assertThat(jdbc.queryForObject("select owner_user_id from daily_career.task_bank_item b join daily_career.daily_task t on t.bank_item_id=b.id where t.id=?",
                 Long.class, id)).isEqualTo(user);
-        assertThat(model.inputs("task_generate").getLast().path("claimContext").path("claim").asText()).contains("330ms");
+        assertThat(model.inputs("task_generate").getLast().path("claimContext").path("claim").asText()).isEqualTo(revised);
     }
 
     private long user(BigDecimal limit) {
