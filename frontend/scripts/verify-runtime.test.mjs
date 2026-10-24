@@ -5,14 +5,22 @@ const options = {backendHealthUrl:"http://backend:9090/actuator/health", nginxOr
 function responses() {
   return vi.fn()
     .mockResolvedValueOnce(new Response('{"status":"UP"}'))
-    .mockResolvedValueOnce(new Response("데일리 이직"))
+    .mockResolvedValueOnce(new Response("Daily Leap"))
     .mockResolvedValueOnce(new Response(null, {status:401, headers:{"X-Trace-Id":"test"}}))
     .mockResolvedValueOnce(new Response(null, {status:404}));
 }
 it("requires the complete internal-health and proxy chain", async () => {
   const fetcher = responses();
   await verifyRuntime(options, fetcher);
-  expect(fetcher.mock.calls.map(([url])=>url)).toEqual([options.backendHealthUrl,"http://nginx/","http://nginx/api/v1/","http://nginx/actuator/health"]);
+  expect(fetcher.mock.calls.map(([url])=>url)).toEqual([options.backendHealthUrl,"http://nginx/","http://nginx/api/v1/users/me","http://nginx/actuator/health"]);
+});
+it("accepts the authenticated user endpoint when the development bypass is enabled", async () => {
+  const fetcher = vi.fn()
+    .mockResolvedValueOnce(new Response('{"status":"UP"}'))
+    .mockResolvedValueOnce(new Response("Daily Leap"))
+    .mockResolvedValueOnce(new Response('{}', {status:200, headers:{"X-Trace-Id":"test"}}))
+    .mockResolvedValueOnce(new Response(null, {status:404}));
+  await verifyRuntime({...options, devAuthBypass:true}, fetcher);
 });
 it("fails if the application answers but its database is down", async () => {
   const fetcher=vi.fn().mockResolvedValue(new Response('{"status":"DOWN"}', {status:503}));

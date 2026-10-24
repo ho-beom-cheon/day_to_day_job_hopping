@@ -94,13 +94,13 @@ public class LearningQueryService {
         var counts=jdbc.queryForMap("select count(*) filter(where required) as total,count(*) filter(where required and completed_at is not null) as done from daily_career.assigned_content where learning_day_item_id=? and user_id=?",session,user);
         return new Session(session,id(r,"learning_day_id"),id(r,"user_curriculum_id"),date(r,"local_date"),(String)r.get("category"),
                 (String)r.get("title"),(String)r.get("description"),number(r,"order_no"),(boolean)r.get("required"),(String)r.get("status"),
-                number(r,"estimated_minutes"),number(r,"actual_minutes"),"SELF_REPORTED",time(r,"started_at"),time(r,"completed_at"),
+                number(r,"estimated_minutes"),number(r,"actual_minutes"),(String)r.get("time_source"),time(r,"started_at"),time(r,"completed_at"),
                 number(counts,"total"),number(counts,"done"),revision(r,"revision"));
     }
     Map<String,Object> sessionRow(long user,long session) {
         users.current(user);
         var rows=jdbc.queryForList("""
-                select i.*,d.local_date,s.title,s.description,s.category,s.estimated_minutes,s.actual_minutes
+                select i.*,d.local_date,s.title,s.description,s.category,s.estimated_minutes,s.actual_minutes,s.time_source
                 from daily_career.learning_day_item i join daily_career.assigned_session_detail s on s.learning_day_item_id=i.id and s.user_id=i.user_id
                 join daily_career.learning_day d on d.id=i.learning_day_id and d.user_id=i.user_id where i.id=? and i.user_id=?
                 """,session,user);
@@ -133,8 +133,9 @@ public class LearningQueryService {
         var problems=jdbc.query("""
                 select p.id problem_id,p.title,v.question_type from daily_career.learning_content_problem cp join daily_career.problem_version v on v.id=cp.problem_version_id
                 join daily_career.problem p on p.id=v.problem_id where cp.content_version_id=? order by cp.sequence
+                limit coalesce((select problem_limit from daily_career.extra_learning where session_id=?),100)
                 """,(rs,n)->new ProblemSummary(rs.getLong("problem_id"),rs.getString("title"),
-                        "TRUE_FALSE".equals(rs.getString("question_type"))?"TRUE_FALSE":"MULTIPLE_CHOICE"),s.contentVersionId());
+                        "TRUE_FALSE".equals(rs.getString("question_type"))?"TRUE_FALSE":"MULTIPLE_CHOICE"),s.contentVersionId(),id(r,"learning_day_item_id"));
         return new LearningContent(s.contentId(),s.contentVersionId(),s.title(),s.type(),s.sequence(),s.required(),s.status(),s.completionRule(),
                 id(r,"learning_day_item_id"),(String)r.get("learning_objective"),(String)r.get("body_markdown"),
                 catalog.strings((String)r.get("key_points"),0,30,1000),catalog.strings((String)r.get("interview_points"),0,30,1000),problems,time(r,"completed_at"));
@@ -142,7 +143,8 @@ public class LearningQueryService {
     Course load(long user,long course) {
         users.current(user);
         var rows=jdbc.queryForList("""
-                select c.*,r.title,r.version_label from daily_career.user_curriculum c
+                select c.*,r.title,r.version_label,v.duration_months from daily_career.user_curriculum c
+                join daily_career.curriculum_version v on v.id=c.curriculum_version_id
                 join daily_career.curriculum_release r on r.curriculum_version_id=c.curriculum_version_id where c.id=? and c.user_id=?
                 """,course,user);
         if(rows.isEmpty())throw new ApiException(RESOURCE_NOT_FOUND);
@@ -152,9 +154,13 @@ public class LearningQueryService {
                 where d.user_id=? and d.user_curriculum_id=? order by a.day_no nulls last,d.local_date
                 """,user,course);
         var items=jdbc.queryForList("""
-                select i.*,s.title,s.category,s.estimated_minutes,s.actual_minutes from daily_career.learning_day_item i
+                select i.*,s.title,s.category,s.estimated_minutes,
+                  case when exists(select 1 from daily_career.extra_learning e where e.session_id=i.id) then 0 else s.actual_minutes end actual_minutes
+                from daily_career.learning_day_item i
                 join daily_career.assigned_session_detail s on s.learning_day_item_id=i.id and s.user_id=i.user_id
-                where i.user_id=? and i.user_curriculum_id=? order by i.order_no,i.id
+                where i.user_id=? and i.user_curriculum_id=?
+                  and not exists(select 1 from daily_career.extra_learning e where e.session_id=i.id and e.mode<>'AHEAD')
+                order by i.order_no,i.id
                 """,user,course);
         var policies=jdbc.queryForList("select * from daily_career.schedule_policy where user_id=? and user_curriculum_id=? order by effective_from desc limit 1",user,course);
         if(policies.isEmpty())throw new ApiException(CONTENT_NOT_READY);
@@ -178,11 +184,12 @@ public class LearningQueryService {
         Curriculum view() {
             Stats s=stats(days);
             var next=days.stream().filter(d->{var st=stats(List.of(d));return st.done<st.total;}).findFirst().orElse(null);
-            String status=s.total>0 && s.done==s.total?"COMPLETED":today().isBefore(date(row,"start_date"))?"PLANNED":"IN_PROGRESS";
+            String status="CANCELED".equals(row.get("status"))?"CANCELED":
+                    s.total>0 && s.done==s.total?"COMPLETED":today().isBefore(date(row,"start_date"))?"PLANNED":"IN_PROGRESS";
             return new Curriculum(id(row,"id"),id(row,"curriculum_version_id"),(String)row.get("version_label"),(String)row.get("title"),
                     date(row,"start_date"),date(row,"target_end_date"),date(row,"projected_end_date"),(int)days.stream().map(d->d.get("week_no")).distinct().count(),
                     days.size(),s.total,s.done,next==null?null:number(next,"week_no"),next==null?null:number(next,"day_no"),status,rate(s.done,s.total),policy,
-                    revision(row,"schedule_revision"),time(row,"created_at"));
+                    revision(row,"schedule_revision"),time(row,"created_at"),number(row,"duration_months"));
         }
         LearningDay day(LocalDate date) {
             var r=calendar.stream().filter(d->date.equals(date(d,"local_date"))).findFirst().orElse(null);

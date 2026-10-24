@@ -36,7 +36,8 @@ public final class LearningViews {
             Double completionRate,
             StudyPolicy studyPolicy,
             Integer scheduleRevision,
-            OffsetDateTime createdAt) {}
+            OffsetDateTime createdAt,
+            Integer durationMonths) {}
     public record StudyPolicy(
             Integer dailyStudyMinutes,
             Integer restDaysPerWeek,

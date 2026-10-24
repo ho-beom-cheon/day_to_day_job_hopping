@@ -3,6 +3,7 @@ package dev.dailycareer.infrastructure;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dailycareer.DailyCareerApplication;
+import dev.dailycareer.ai.AiPracticePlan;
 import dev.dailycareer.learning.LearningCatalog;
 import dev.dailycareer.user.AppPrincipal;
 import java.net.*;
@@ -53,6 +54,7 @@ class LearningOperationsIT {
         };}
     }
     @Autowired JdbcTemplate jdbc;@Autowired LearningCatalog catalog;@Autowired SessionRepository<? extends Session> repository;
+    @Autowired dev.dailycareer.learning.CatalogImportService imports;
     @LocalServerPort int port;
     static final ObjectMapper JSON=new ObjectMapper();
     static LearningFixture fixture;
@@ -62,11 +64,13 @@ class LearningOperationsIT {
     @Test void emptyStateAuthenticationAndOwnershipBoundaries() throws Exception {
         var a=new Browser();var b=new Browser();
         var current=a.get("/curriculums/current");ok(current,200);assertThat(data(current).isNull()).isTrue();assertThat(current.headers().firstValue("etag")).isEmpty();
+        assertThat(data(a.get("/dashboard")).get("recentSessions")).isEmpty();
         assertThat(data(a.get("/learning-days/today")).isNull()).isTrue();
         assertThat(data(a.get("/learning-days?from=2026-09-21&to=2026-09-22")).isEmpty()).isTrue();
         assertThat(data(a.get("/learning-days/2026-09-21/sessions")).isEmpty()).isTrue();
         error(a.get("/learning-days/2026-09-21?curriculumId=9223372036854775807"),404,"RESOURCE_NOT_FOUND");
         var created=a.create();ok(created,201);String course=data(created).get("curriculumId").asText();
+        assertThat(data(b.get("/dashboard")).get("recentSessions")).isEmpty();
         String session=firstSession(a,"2026-09-21");String content=data(a.get("/learning-sessions/"+session+"/contents")).get(0).get("contentId").asText();
         for(String path:List.of("/curriculums/"+course,"/curriculums/"+course+"/weeks","/learning-sessions/"+session,"/learning-sessions/"+session+"/contents","/learning-contents/"+content,
                 "/learning-days/2026-09-21?curriculumId="+course))error(b.get(path),404,"RESOURCE_NOT_FOUND");
@@ -143,6 +147,36 @@ class LearningOperationsIT {
         var next=b.post("/curriculums",createBody("2026-10-01"),key());ok(next,201);assertThat(data(next).get("curriculumId").asText()).isNotEqualTo(course);
         assertThat(data(b.get("/curriculums/"+course))).isEqualTo(done);
         assertThat(data(b.get("/learning-contents/"+read)).get("completedAt").isNull()).isFalse();
+    }
+
+    @Test void sessionSizedAiQuestionsCanCompletePracticeWithoutCuratedAttempt() throws Exception {
+        var b = new Browser();
+        b.create();
+        String session = firstSession(b, "2026-09-21");
+        var contents = data(b.get("/learning-sessions/" + session + "/contents"));
+        String practice = contents.get(1).get("contentId").asText();
+        ok(b.post("/learning-sessions/" + session + "/start", null, null), 200);
+
+        long budget = jdbc.queryForObject("""
+                insert into daily_career.ai_budget(user_id,period_start,period_end,limit_amount)
+                values (?,?::date,?::date,0) returning id
+                """, Long.class, b.user, "2026-09-21", "2026-09-22");
+        long job = jdbc.queryForObject("""
+                insert into daily_career.ai_job(user_id,budget_id,job_type,dedupe_key,status,provider,model,prompt_version,input_snapshot,result_payload)
+                values (?,?,'PRACTICE_PROBLEMS',?,'SUCCEEDED','TEST','test','ai-practice-v2',?::jsonb,'{"questions":[1,2,3,4,5]}'::jsonb) returning id
+                """, Long.class, b.user, budget, "test-ai-practice-" + practice, "{\"contentId\":\"" + practice + "\"}");
+        for (int number = 1; number <= 4; number++) {
+            jdbc.update("""
+                    insert into daily_career.ai_practice_attempt(user_id,ai_job_id,question_no,answer_no,correct)
+                    values (?,?,?,?,false)
+                    """, b.user, job, number, 1);
+        }
+        error(b.post("/learning-contents/" + practice + "/complete", null, null), 422, "CONTENT_PROBLEMS_INCOMPLETE");
+        jdbc.update("""
+                insert into daily_career.ai_practice_attempt(user_id,ai_job_id,question_no,answer_no,correct)
+                values (?,?,?,?,false)
+                """, b.user, job, 5, 1);
+        ok(b.post("/learning-contents/" + practice + "/complete", null, null), 200);
     }
 
     @Test void inputValidationAndIdempotencyReplay() throws Exception {
@@ -328,6 +362,25 @@ class LearningOperationsIT {
         assertThatThrownBy(()->jdbc.update("update daily_career.assigned_content set user_id=? where id=?",b.user,Long.parseLong(content))).isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
     }
 
+    @Test void successfullyGradedSubmissionIsNotAnActiveExam() throws Exception {
+        var b=new Browser();long course=data(b.create()).get("curriculumId").asLong();
+        long attempt=jdbc.queryForObject("""
+                insert into daily_career.test_attempt(user_id,user_curriculum_id,test_version_id,attempt_no,status,started_at,deadline_at,submitted_at,submit_reason,submission_digest)
+                values (?,?,?,1,'SUBMITTED',clock_timestamp(),clock_timestamp()+interval '10 minutes',clock_timestamp(),'USER',repeat('a',64)) returning id
+                """,Long.class,b.user,course,fixture.testVersion);
+        long run=jdbc.queryForObject("""
+                insert into daily_career.grading_run(user_id,test_attempt_id,run_no,status,grader_type,rule_version,input_digest)
+                values (?,?,1,'QUEUED','RULE','fixture',repeat('a',64)) returning id
+                """,Long.class,b.user,attempt);
+        var waiting=data(b.get("/tests")).get("content");assertThat(waiting).hasSize(1);
+        assertThat(waiting.get(0).get("activeAttemptId").asText()).isEqualTo(Long.toString(attempt));
+
+        jdbc.update("update daily_career.grading_run set status='SUCCEEDED',is_current=true,finished_at=clock_timestamp() where id=?",run);
+        var completed=data(b.get("/tests")).get("content");assertThat(completed).hasSize(1);
+        assertThat(completed.get(0).get("activeAttemptId").isNull()).isTrue();
+        assertThat(completed.get(0).get("attemptCount").asInt()).isEqualTo(1);
+    }
+
     @Test void practiceSubmissionGradesImmutableVersionAndDrivesWrongAnswerReview() throws Exception {
         var b=new Browser();var other=new Browser();ok(b.create(),201);String session=firstSession(b,"2026-09-21");
         var contents=data(b.get("/learning-sessions/"+session+"/contents"));String content=contents.get(1).get("contentId").asText();
@@ -381,6 +434,462 @@ class LearningOperationsIT {
             assertThat(jdbc.queryForObject("select count(*) from daily_career."+table+" where user_id=?",Integer.class,b.user)).as(table).isZero();
         assertThat(jdbc.queryForObject("select count(*) from daily_career.idempotency_record where user_id=? and operation_scope='ATTEMPT-001'",Integer.class,b.user)).isZero();
         ok(b.post("/problem-attempts","{\"problemId\":\""+problem+"\",\"answer\":\"2\",\"contentId\":\""+contentId+"\"}",requestKey),201);
+    }
+
+    @Test void restartStartsFreshAndReusesMatchingAiQuestionsWithoutAnswers() throws Exception {
+        var b=new Browser();var created=b.create();ok(created,201);
+        long oldCourse=data(created).get("curriculumId").asLong();
+        String oldSession=firstSession(b,"2026-09-21");
+        ok(b.post("/learning-sessions/"+oldSession+"/start",null,null),200);
+        String oldContent=data(b.get("/learning-sessions/"+oldSession+"/contents")).get(1).get("contentId").asText();
+        String oldProblem=data(b.get("/learning-contents/"+oldContent)).get("problems").get(0).get("problemId").asText();
+        var oldWrong=data(b.post("/problem-attempts",JSON.createObjectNode().put("problemId",oldProblem).put("contentId",oldContent).put("answer","2").toString(),key()));
+        assertThat(oldWrong.get("correct").asBoolean()).isFalse();
+        String oldWrongId=oldWrong.get("wrongAnswerId").asText();
+         int minutes=jdbc.queryForObject("""
+                 select s.estimated_minutes from daily_career.assigned_content a
+                 join daily_career.assigned_session_detail s on s.learning_day_item_id=a.learning_day_item_id
+                 where a.id=?
+                 """,Integer.class,Long.parseLong(oldContent));
+         assertThat(data(b.get("/ai/practice-sets/by-content/"+oldContent)).get("generationAvailable").asBoolean()).isTrue();
+        var plan=AiPracticePlan.forMinutes(minutes,4);
+        var snapshot=JSON.createObjectNode().put("contentId",oldContent).put("sessionId",oldSession)
+                .put("questionCount",plan.questionCount()).put("targetDifficulty",4).put("generationSequence",1);
+        snapshot.set("difficultyLevels",JSON.valueToTree(plan.difficulties()));
+        var result=JSON.createObjectNode().put("contentId",oldContent).put("sessionId",oldSession);
+        var questions=result.putArray("questions");
+        for(int i=0;i<plan.questionCount();i++) questions.addObject().put("prompt","Fixture question "+i)
+                .put("answer",1).put("explanation","Fixture explanation").putArray("choices")
+                .add("A").add("B").add("C").add("D");
+        long budget=jdbc.queryForObject("""
+                insert into daily_career.ai_budget(user_id,period_start,period_end,limit_amount)
+                values (?,'2026-09-21','2026-09-22',0) returning id
+                """,Long.class,b.user);
+        long oldJob=jdbc.queryForObject("""
+                insert into daily_career.ai_job(user_id,budget_id,job_type,dedupe_key,status,provider,
+                  model,prompt_version,input_snapshot,result_payload)
+                values (?,?,'PRACTICE_PROBLEMS',?,'SUCCEEDED','OPENAI','fixture','ai-practice-v2',?::jsonb,?::jsonb)
+                returning id
+                """,Long.class,b.user,budget,"fixture:"+key(),snapshot.toString(),result.toString());
+        jdbc.update("insert into daily_career.ai_practice_attempt(user_id,ai_job_id,question_no,answer_no,correct) values (?,?,1,1,true)",b.user,oldJob);
+        long oldTest=jdbc.queryForObject("""
+                insert into daily_career.test_attempt(user_id,user_curriculum_id,test_version_id,attempt_no,started_at,deadline_at)
+                values (?,?,?,1,now(),now()+interval '10 minutes') returning id
+                """,Long.class,b.user,oldCourse,fixture.testVersion);
+        int revision=data(b.get("/curriculums/current")).get("scheduleRevision").asInt();
+        String restartKey=key();
+        var restarted=b.postMatch("/curriculums/"+oldCourse+"/restart","{\"startDate\":\"2026-09-22\"}",restartKey,revision);
+        ok(restarted,201);
+        long newCourse=data(restarted).get("curriculumId").asLong();
+        var replay=b.postMatch("/curriculums/"+oldCourse+"/restart","{\"startDate\":\"2026-09-22\"}",restartKey,revision);
+        ok(replay,201);
+        assertThat(data(replay).get("curriculumId").asLong()).isEqualTo(newCourse);
+        assertThat(newCourse).isNotEqualTo(oldCourse);
+        assertThat(data(restarted).get("startDate").asText()).isEqualTo("2026-09-22");
+        assertThat(data(restarted).get("completedRequiredSessions").asInt()).isZero();
+         assertThat(jdbc.queryForObject("select status from daily_career.user_curriculum where id=?",String.class,oldCourse)).isEqualTo("CANCELED");
+         assertThat(data(b.get("/curriculums/"+oldCourse)).get("status").asText()).isEqualTo("CANCELED");
+         var oldPractice=data(b.get("/ai/practice-sets/by-content/"+oldContent));
+         assertThat(oldPractice.get("generationAvailable").asBoolean()).isFalse();
+         assertThat(oldPractice.get("availableDifficulties")).isEmpty();
+        assertThat(jdbc.queryForObject("select status from daily_career.test_attempt where id=?",String.class,oldTest)).isEqualTo("VOIDED");
+        String newSession=firstSession(b,"2026-09-22");
+        assertThat(data(b.get("/learning-sessions/"+newSession)).get("status").asText()).isEqualTo("NOT_STARTED");
+        String newContent=data(b.get("/learning-sessions/"+newSession+"/contents")).get(1).get("contentId").asText();
+        var latest=data(b.get("/ai/practice-sets/by-content/"+newContent));
+        assertThat(latest.get("status").asText()).isEqualTo("SUCCESS");
+        long newJob=latest.get("jobId").asLong();
+        assertThat(newJob).isNotEqualTo(oldJob);
+        assertThat(jdbc.queryForObject("select reused_from_job_id from daily_career.ai_job where id=?",Long.class,newJob)).isEqualTo(oldJob);
+        assertThat(data(b.get("/ai/practice-sets/"+newJob)).get("questions").get(0).get("submittedAnswer").isNull()).isTrue();
+        assertThat(jdbc.queryForObject("select count(*) from daily_career.ai_practice_attempt where ai_job_id=?",Integer.class,newJob)).isZero();
+        ok(b.post("/ai/practice-sets/"+oldJob+"/answers","{\"questionNo\":2,\"answerNo\":2}",null),200);
+        assertThat(data(b.get("/ai/wrong-notes")).get(0).get("jobId").asText()).isEqualTo(Long.toString(oldJob));
+        assertThat(data(b.get("/wrong-answers")).get("content").get(0).get("wrongAnswerId").asText()).isEqualTo(oldWrongId);
+        var activity=data(b.get("/learning-progress"));
+        assertThat(activity.get("aiPracticeAttemptCount").asInt()).isEqualTo(2);
+        assertThat(activity.get("aiPracticeCorrectCount").asInt()).isEqualTo(1);
+        assertThat(data(b.get("/ai/usage")).get("usedRequestCount").asInt()).isEqualTo(1);
+    }
+
+    @Test void switchingToReviewedCoursePreservesOldWorkAndStartsARealFirstDay() throws Exception {
+        var b=new Browser();var created=b.create();ok(created,201);
+        long oldCourse=data(created).get("curriculumId").asLong();
+        String oldSession=firstSession(b,"2026-09-21");
+        ok(b.post("/learning-sessions/"+oldSession+"/start",null,null),200);
+        String oldContent=data(b.get("/learning-sessions/"+oldSession+"/contents")).get(1).get("contentId").asText();
+        String oldProblem=data(b.get("/learning-contents/"+oldContent)).get("problems").get(0).get("problemId").asText();
+        ok(b.post("/problem-attempts",JSON.createObjectNode().put("problemId",oldProblem)
+                .put("contentId",oldContent).put("answer","2").toString(),key()),201);
+        long testAttempt=jdbc.queryForObject("""
+                insert into daily_career.test_attempt(user_id,user_curriculum_id,test_version_id,attempt_no,started_at,deadline_at)
+                values (?,?,?,1,now(),now()+interval '10 minutes') returning id
+                """,Long.class,b.user,oldCourse,fixture.testVersion);
+
+        var manuscript=manuscript();var draft=imports.importDraft(manuscript.toString());
+        long target=Long.parseLong(draft.templateId());
+        imports.publishReviewed(target,draft.digest(),"Automated switch integration fixture");
+        int revision=data(b.get("/curriculums/current")).get("scheduleRevision").asInt();
+        String body="{\"templateId\":\""+target+"\",\"startDate\":\"2026-09-22\"}";
+        error(b.postMatch("/curriculums/"+oldCourse+"/switch",body,key(),revision+1),412,"PRECONDITION_FAILED");
+        assertThat(jdbc.queryForObject("select status from daily_career.user_curriculum where id=?",String.class,oldCourse)).isEqualTo("ACTIVE");
+        error(b.postMatch("/curriculums/"+oldCourse+"/switch",
+                "{\"templateId\":\""+fixture.template+"\",\"startDate\":\"2026-09-22\"}",key(),revision),400,"VALIDATION_FAILED");
+        var other=new Browser();
+        error(other.postMatch("/curriculums/"+oldCourse+"/switch",body,key(),revision),404,"RESOURCE_NOT_FOUND");
+
+        String switchKey=key();
+        var switched=b.postMatch("/curriculums/"+oldCourse+"/switch",body,switchKey,revision);ok(switched,201);
+        long newCourse=data(switched).get("curriculumId").asLong();
+        var replay=b.postMatch("/curriculums/"+oldCourse+"/switch",body,switchKey,revision);ok(replay,201);
+        assertThat(data(replay).get("curriculumId").asLong()).isEqualTo(newCourse);
+        assertThat(data(switched).get("templateId").asLong()).isEqualTo(target);
+        assertThat(data(switched).get("totalLearningDays").asInt()).isEqualTo(20);
+        assertThat(data(switched).get("completedRequiredSessions").asInt()).isZero();
+        assertThat(jdbc.queryForObject("select status from daily_career.user_curriculum where id=?",String.class,oldCourse)).isEqualTo("CANCELED");
+        assertThat(data(b.get("/curriculums/"+oldCourse)).get("status").asText()).isEqualTo("CANCELED");
+        assertThat(jdbc.queryForObject("select status from daily_career.test_attempt where id=?",String.class,testAttempt)).isEqualTo("VOIDED");
+        assertThat(jdbc.queryForObject("select count(*) from daily_career.problem_attempt where user_curriculum_id=?",Integer.class,oldCourse)).isOne();
+        assertThat(jdbc.queryForObject("select count(*) from daily_career.problem_attempt where user_curriculum_id=?",Integer.class,newCourse)).isZero();
+        String newSession=firstSession(b,"2026-09-22");
+        String newContent=data(b.get("/learning-sessions/"+newSession+"/contents")).get(0).get("contentId").asText();
+        var firstLesson=data(b.get("/learning-contents/"+newContent));
+        assertThat(firstLesson.get("body").asText().length()).isGreaterThan(500);
+        assertThat(firstLesson.get("problems").size()).isEqualTo(10);
+    }
+
+    @Test void publishedRealCourseHidesDevelopmentFixtureFromNewEnrollmentAndExtraLearning() throws Exception {
+        var demo=new LearningFixture(jdbc,catalog,true,1,"BACKEND-FOUNDATIONS-6M");
+        assertThat(catalog.templates()).noneMatch(t->t.templateId()==demo.template);
+        assertThatThrownBy(()->catalog.plan(demo.template,true))
+                .isInstanceOf(dev.dailycareer.common.api.ApiException.class)
+                .hasMessageContaining("TEMPLATE_NOT_PUBLISHED");
+        var learner=new Browser();ok(learner.create(),201);
+        var topics=data(learner.get("/extra-learning/topics?mode=EXPLORE"));
+        assertThat(topics.toString()).contains("\"contentVersionId\":\""+fixture.readVersion+"\"")
+                .doesNotContain("\"contentVersionId\":\""+demo.readVersion+"\"")
+                .doesNotContain("\"contentVersionId\":\""+demo.practiceVersion+"\"");
+        var categories=new java.util.HashSet<String>();
+        topics.forEach(topic->categories.add(topic.path("category").asText()));
+        assertThat(categories).contains("SPRING","SQL","ALGORITHM","FINANCE","INTERVIEW").hasSize(6);
+        for(var topic:topics) {
+            if(!java.util.Set.of("SPRING","SQL","ALGORITHM","FINANCE","INTERVIEW")
+                    .contains(topic.path("category").asText()))continue;
+            String selected=topic.path("contentVersionId").asText();
+            String start=JSON.createObjectNode().put("mode","EXPLORE")
+                    .put("contentVersionId",selected).put("targetMinutes",60).toString();
+            var created=learner.post("/extra-learning",start,key());ok(created,200);
+            String session=data(created).path("sessionId").asText();
+            String content=data(learner.get("/learning-sessions/"+session+"/contents")).get(0).path("contentId").asText();
+            var lesson=data(learner.get("/learning-contents/"+content));
+            assertThat(lesson.path("body").asText().codePointCount(0,lesson.path("body").asText().length())).isGreaterThan(800);
+            assertThat(lesson.path("problems")).hasSize(3);
+            assertThat(data(learner.get("/ai/practice-sets/by-content/"+content)).path("generationAvailable").asBoolean()).isTrue();
+            for(var problem:lesson.path("problems")) {
+                String attempt=JSON.createObjectNode().put("problemId",problem.path("problemId").asText())
+                        .put("answer","1").put("contentId",content).toString();
+                ok(learner.post("/problem-attempts",attempt,key()),201);
+            }
+            ok(learner.post("/learning-contents/"+content+"/complete",null,null),200);
+            ok(learner.post("/learning-sessions/"+session+"/complete","{\"actualMinutes\":null}",key()),200);
+        }
+        String request=JSON.createObjectNode().put("mode","EXPLORE")
+                .put("contentVersionId",Long.toString(demo.practiceVersion))
+                .put("targetMinutes",30).toString();
+        error(learner.post("/extra-learning",request,key()),404,"RESOURCE_NOT_FOUND");
+    }
+
+    private com.fasterxml.jackson.databind.node.ObjectNode manuscript() throws Exception {
+        var source=java.nio.file.Path.of(System.getProperty("catalog.test-file","../content/java-four-week-v1/course.json"));
+        var node=(com.fasterxml.jackson.databind.node.ObjectNode)JSON.readTree(java.nio.file.Files.readString(source));
+        node.put("code","TEST-4W-"+UUID.randomUUID().toString().toUpperCase(Locale.ROOT));
+        return node;
+    }
+
+    @Test void fourWeekPracticeCanBeConfirmedWithoutQuestionAttempts() throws Exception {
+        var source=manuscript();source.put("code","JAVA-CORE-4W");
+        var imported=imports.importDraft(source.toString());
+        imports.publishReviewed(Long.parseLong(imported.templateId()),imported.digest(),
+                "Automated integration fixture: hands-on lesson completion policy checked");
+        var request=(com.fasterxml.jackson.databind.node.ObjectNode)JSON.readTree(createBody("2026-09-21"));
+        request.put("templateId",imported.templateId());
+        var learner=new Browser();ok(learner.post("/curriculums",request.toString(),key()),201);
+        String session=firstSession(learner,"2026-09-21");
+        String content=data(learner.get("/learning-sessions/"+session+"/contents")).get(0).get("contentId").asText();
+        assertThat(data(learner.get("/learning-contents/"+content)).get("completionRule").asText()).isEqualTo("READ_ACK");
+        ok(learner.post("/learning-sessions/"+session+"/start",null,null),200);
+        ok(learner.post("/learning-contents/"+content+"/complete",null,null),200);
+        ok(learner.post("/learning-sessions/"+session+"/complete","{\"actualMinutes\":null}",key()),200);
+        assertThat(data(learner.get("/learning-sessions/"+session)).get("status").asText()).isEqualTo("COMPLETED");
+    }
+
+    @Test void reviewedFourWeekCourseSupportsARealLearnerJourneyAndKeepsExistingRelease() throws Exception {
+        var source=manuscript();int originalCourses=jdbc.queryForObject("select count(*) from daily_career.user_curriculum",Integer.class);
+        var imported=imports.importDraft(source.toString());long template=Long.parseLong(imported.templateId());
+        assertThat(imported.status()).isEqualTo("DRAFT");assertThat(imported.reused()).isFalse();
+        assertThat(imports.importDraft(source.toPrettyString()).templateId()).isEqualTo(imported.templateId());
+        assertThat(catalog.templates()).noneMatch(t->t.templateId()==template);
+        assertThatThrownBy(()->catalog.publish(template)).isInstanceOf(dev.dailycareer.common.api.ApiException.class);
+        assertThatThrownBy(()->imports.publishReviewed(template,"0".repeat(64),"Official references and executable examples checked")).isInstanceOf(IllegalArgumentException.class);
+        var published=imports.publishReviewed(template,imported.digest(),"Automated integration fixture: manuscript and DB digest verified");
+        assertThat(published.status()).isEqualTo("PUBLISHED");
+        assertThat(imports.publishReviewed(template,imported.digest(),"Idempotent replay of the same reviewed fixture").reused()).isTrue();
+        assertThat(catalog.plan(template,true).durationMonths()).isEqualTo(1);
+        assertThat(catalog.plan(fixture.template,true).durationMonths()).isEqualTo(6);
+        assertThat(jdbc.queryForObject("select count(*) from daily_career.user_curriculum",Integer.class)).isEqualTo(originalCourses);
+        assertThatThrownBy(()->jdbc.update("update daily_career.curriculum_release set title='changed' where curriculum_version_id=?",template)).isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
+        var request=(com.fasterxml.jackson.databind.node.ObjectNode)JSON.readTree(createBody("2026-09-21"));
+        request.put("templateId",imported.templateId());
+        var b=new Browser();var created=b.post("/curriculums",request.toString(),key());
+        ok(created,201);var course=data(created);contract("Curriculum",course);
+        assertThat(course.get("durationMonths").asInt()).isEqualTo(1);
+        assertThat(course.get("nominalEndDate").asText()).isEqualTo("2026-10-20");
+        assertThat(course.get("endDate").asText()).isEqualTo("2026-10-16");
+        assertThat(course.get("totalLearningDays").asInt()).isEqualTo(20);
+        assertThat(course.get("totalRequiredSessions").asInt()).isEqualTo(20);
+        String session=firstSession(b,"2026-09-21");ok(b.post("/learning-sessions/"+session+"/start",null,null),200);
+        String content=data(b.get("/learning-sessions/"+session+"/contents")).get(0).get("contentId").asText();
+        var lesson=data(b.get("/learning-contents/"+content));assertThat(lesson.get("problems")).hasSize(10);
+        assertThat(lesson.get("body").asText()).contains("직접 해보기","완료 기준","공식 참고 자료").doesNotContain("reviewerGuide");
+        error(b.post("/learning-contents/"+content+"/complete",null,null),422,"CONTENT_PROBLEMS_INCOMPLETE");
+        String wrongId=null,firstAttempt=null;int index=0;
+        for(var problem:lesson.get("problems")) {
+            String id=problem.get("problemId").asText();int correct=source.get("days").get(0).get("questions").get(index).get("answer").asInt();
+            String body=JSON.createObjectNode().put("problemId",id).put("contentId",content).put("answer",Integer.toString(index==0?correct%3+1:correct)).toString();
+            var response=b.post("/problem-attempts",body,key());ok(response,201);
+            if(index++==0){wrongId=data(response).get("wrongAnswerId").asText();
+                var retry=b.post("/problem-attempts",JSON.createObjectNode().put("problemId",id).put("contentId",content).put("answer",Integer.toString(correct)).toString(),key());ok(retry,201);firstAttempt=data(retry).get("attemptId").asText();}
+        }
+        ok(b.post("/wrong-answers/"+wrongId+"/resolve",JSON.createObjectNode().put("resolutionType","CORRECT_RETRY").put("attemptId",firstAttempt).toString(),key()),200);
+        ok(b.post("/learning-contents/"+content+"/complete",null,null),200);
+        ok(b.post("/learning-sessions/"+session+"/complete","{\"actualMinutes\":90}",key()),200);
+        var recent=data(b.get("/dashboard")).get("recentSessions");
+        assertThat(recent).hasSize(1);
+        assertThat(recent.get(0).get("sessionId").asText()).isEqualTo(session);
+        assertThat(recent.get(0).get("status").asText()).isEqualTo("COMPLETED");
+        assertThat(recent.get(0).get("scheduledDate").asText()).isEqualTo("2026-09-21");
+        assertThat(data(b.get("/curriculums/current")).get("completedRequiredSessions").asInt()).isEqualTo(1);
+        var progress=data(b.get("/learning-progress"));
+        assertThat(progress.get("totalRequiredSessions").asInt()).isEqualTo(20);
+        assertThat(progress.get("completedRequiredSessions").asInt()).isEqualTo(1);
+        assertThat(progress.get("completionRate").asDouble()).isEqualTo(5.0);
+        assertThat(progress.get("totalStudyMinutes").asInt()).isEqualTo(90);
+        assertThat(progress.get("streakDays").asInt()).isEqualTo(1);
+        var daily=data(b.get("/learning-progress/daily?date=2026-09-21"));
+        assertThat(daily.get("totalSessionCount").asInt()).isEqualTo(1);
+        assertThat(daily.get("status").asText()).isEqualTo("COMPLETED");
+        assertThat(daily.get("actualMinutes").asInt()).isEqualTo(90);
+        assertThat(data(b.get("/learning-progress/categories")).get(0).get("totalSessionCount").asInt()).isEqualTo(20);
+        var exams=data(b.get("/tests?size=50"));assertThat(exams.get("totalElements").asInt()).isEqualTo(26);
+        String exam=null;for(var e:exams.get("content"))if(e.get("type").asText().equals("DAILY") && e.get("scheduledDate").asText().equals("2026-09-21"))exam=e.get("testId").asText();
+        assertThat(exam).isNotNull();var started=b.post("/tests/"+exam+"/attempts",null,key());ok(started,201);
+        String attempt=data(started).get("attemptId").asText();var attemptView=data(b.get("/test-attempts/"+attempt));assertThat(attemptView.get("problems")).hasSize(2);
+        int q=10;for(var problem:attemptView.get("problems")) {
+            var answer=b.send("PUT","/test-attempts/"+attempt+"/answers/"+problem.get("problemId").asText(),
+                    JSON.createObjectNode().put("answer",Integer.toString(source.get("days").get(0).get("questions").get(q++).get("answer").asInt())).toString(),null,true,"\""+problem.get("answerRevision").asInt()+"\"");ok(answer,200);
+        }
+        var submitted=b.post("/test-attempts/"+attempt+"/submit",null,key());assertThat(submitted.statusCode()).isIn(200,202);
+        assertThat(data(submitted).get("gradingStatus").asText()).isEqualTo("WAITING");
+        // Poll the real grading worker with a bounded deadline, without assuming immediate completion.
+        HttpResponse<String> result=null;for(int i=0;i<50;i++){result=b.get("/test-attempts/"+attempt+"/result");if(result.statusCode()==200)break;Thread.sleep(100);}
+        ok(result,200);assertThat(data(result).get("score").asInt()).isEqualTo(100);
+        assertThat(data(b.get("/learning-sessions/"+session)).get("status").asText()).isEqualTo("COMPLETED");
+        // Advance the test clock through the remaining assigned days, using the same public APIs.
+        Map<String,Integer> answers=new HashMap<>();
+        for(var day:source.get("days"))for(var question:day.get("questions"))answers.put(question.get("id").asText(),question.get("answer").asInt());
+        LocalDate assigned=LocalDate.of(2026,9,21);
+        for(int dayIndex=1;dayIndex<20;dayIndex++){
+            do{assigned=assigned.plusDays(1);}while(Set.of(DayOfWeek.SATURDAY,DayOfWeek.SUNDAY).contains(assigned.getDayOfWeek()));
+            NOW.set(assigned.atTime(9,0).atZone(ZoneId.of("Asia/Seoul")).toInstant());
+            String nextSession=firstSession(b,assigned.toString());
+            ok(b.post("/learning-sessions/"+nextSession+"/start",null,null),200);
+            String nextContent=data(b.get("/learning-sessions/"+nextSession+"/contents")).get(0).get("contentId").asText();
+            var nextLesson=data(b.get("/learning-contents/"+nextContent));int questionIndex=0;
+            for(var problem:nextLesson.get("problems")){
+                int correct=source.get("days").get(dayIndex).get("questions").get(questionIndex++).get("answer").asInt();
+                ok(b.post("/problem-attempts",JSON.createObjectNode().put("problemId",problem.get("problemId").asText()).put("contentId",nextContent).put("answer",Integer.toString(correct)).toString(),key()),201);
+            }
+            ok(b.post("/learning-contents/"+nextContent+"/complete",null,null),200);
+            ok(b.post("/learning-sessions/"+nextSession+"/complete","{\"actualMinutes\":90}",key()),200);
+            for(var planned:data(b.get("/tests?size=50")).get("content")){
+                if(!planned.get("scheduledDate").asText().equals(assigned.toString()))continue;
+                JsonNode definition=null;for(var candidate:source.get("assessments"))if(candidate.get("title").asText().equals(planned.get("title").asText()))definition=candidate;
+                assertThat(definition).isNotNull();
+                var examStart=b.post("/tests/"+planned.get("testId").asText()+"/attempts",null,key());ok(examStart,201);
+                String examAttempt=data(examStart).get("attemptId").asText();int examIndex=0;
+                for(var question:data(examStart).get("problems")){
+                    String correct=Integer.toString(answers.get(definition.get("questions").get(examIndex++).asText()));
+                    ok(b.send("PUT","/test-attempts/"+examAttempt+"/answers/"+question.get("problemId").asText(),JSON.createObjectNode().put("answer",correct).toString(),null,true,"\""+question.get("answerRevision").asInt()+"\""),200);
+                }
+                assertThat(b.post("/test-attempts/"+examAttempt+"/submit",null,key()).statusCode()).isIn(200,202);
+                HttpResponse<String> graded=null;for(int poll=0;poll<50;poll++){graded=b.get("/test-attempts/"+examAttempt+"/result");if(graded.statusCode()==200)break;Thread.sleep(100);}
+                ok(graded,200);assertThat(data(graded).get("score").asInt()).isEqualTo(100);
+            }
+        }
+        var finished=data(b.get("/curriculums/current"));
+        assertThat(finished.get("status").asText()).isEqualTo("COMPLETED");
+        assertThat(finished.get("completedRequiredSessions").asInt()).isEqualTo(20);
+        var finishedProgress=data(b.get("/learning-progress"));
+        assertThat(finishedProgress.get("completionRate").asDouble()).isEqualTo(100.0);
+        assertThat(finishedProgress.get("totalStudyMinutes").asInt()).isEqualTo(1800);
+        assertThat(finishedProgress.get("streakDays").asInt()).isEqualTo(20);
+        assertThat(data(b.get("/tests?status=COMPLETED&size=50")).get("totalElements").asInt()).isEqualTo(26);
+    }
+
+    @Test void manuscriptRevisionRequiresANewReleaseAndRejectsTampering() throws Exception {
+        var source=manuscript();var first=imports.importDraft(source.toString());
+        ((com.fasterxml.jackson.databind.node.ObjectNode)source.get("days").get(0)).put("labTask","수정된 실습 과제를 검증하고 결과를 설명하세요.");
+        assertThatThrownBy(()->imports.importDraft(source.toString())).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("new version");
+        source.put("version","2026.09.2");var second=imports.importDraft(source.toString());assertThat(second.templateId()).isNotEqualTo(first.templateId());
+        long version=jdbc.queryForObject("select (imported_ids->'problems'->>'d01-q01')::bigint from daily_career.catalog_import where curriculum_version_id=?",Long.class,Long.parseLong(second.templateId()));
+        jdbc.update("update daily_career.problem_version set explanation_markdown='tampered explanation' where id=?",version);
+        assertThatThrownBy(()->imports.publishReviewed(Long.parseLong(second.templateId()),second.digest(),"Review cannot authorize changed database payload")).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("DB content changed");
+        assertThat(jdbc.queryForObject("select status from daily_career.curriculum_version where id=?",String.class,Long.parseLong(second.templateId()))).isEqualTo("DRAFT");
+    }
+
+    @Test void malformedManuscriptsAndLateDatabaseFailureLeaveNoPartialImport() throws Exception {
+        var source=manuscript();int before=jdbc.queryForObject("select count(*) from daily_career.problem",Integer.class);
+        var broken=source.deepCopy();((com.fasterxml.jackson.databind.node.ObjectNode)broken.get("days").get(0).get("questions").get(0)).put("answer",9);
+        assertThatThrownBy(()->imports.importDraft(broken.toString())).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("answer");
+        var incomplete=source.deepCopy();((com.fasterxml.jackson.databind.node.ArrayNode)incomplete.get("days")).remove(19);
+        assertThatThrownBy(()->imports.importDraft(incomplete.toString())).isInstanceOf(IllegalArgumentException.class);
+        var missing=source.deepCopy();((com.fasterxml.jackson.databind.node.ArrayNode)missing.get("assessments").get(0).get("questions")).set(0,JSON.getNodeFactory().textNode("missing-question"));
+        assertThatThrownBy(()->imports.importDraft(missing.toString())).isInstanceOf(IllegalArgumentException.class);
+        jdbc.execute("alter table daily_career.catalog_import add constraint fixture_reject_catalog check(false) not valid");
+        try {assertThatThrownBy(()->imports.importDraft(source.toString())).isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);}
+        finally {jdbc.execute("alter table daily_career.catalog_import drop constraint fixture_reject_catalog");}
+        assertThat(jdbc.queryForObject("select count(*) from daily_career.problem",Integer.class)).isEqualTo(before);
+        assertThat(jdbc.queryForObject("select count(*) from daily_career.curriculum where code=?",Integer.class,source.get("code").asText())).isZero();
+        assertThat(imports.importDraft(source.toString()).status()).isEqualTo("DRAFT");
+    }
+
+    @Test void extraLearningCompletesWithoutRecordingEstimatedDurationAsActualTime() throws Exception {
+        var b=new Browser();ok(b.create(),201);
+        String body=JSON.createObjectNode().put("mode","EXPLORE").put("contentVersionId",Long.toString(fixture.readVersion))
+                .putNull("sourceSessionId").put("targetMinutes",30).toString();
+        String session=data(b.post("/extra-learning",body,key())).get("sessionId").asText();
+        String content=data(b.get("/learning-sessions/"+session+"/contents")).get(0).get("contentId").asText();
+        ok(b.post("/learning-contents/"+content+"/complete",null,null),200);
+        String completionKey=key();
+        ok(b.post("/learning-sessions/"+session+"/complete","{\"actualMinutes\":null}",completionKey),200);
+        ok(b.post("/learning-sessions/"+session+"/complete","{\"actualMinutes\":null}",completionKey),200);
+        var completed=data(b.get("/learning-sessions/"+session));
+        assertThat(completed.get("status").asText()).isEqualTo("COMPLETED");
+        assertThat(completed.get("estimatedMinutes").asInt()).isEqualTo(30);
+        assertThat(completed.get("actualMinutes").asInt()).isZero();
+        assertThat(completed.get("timeSource").asText()).isEqualTo("NOT_RECORDED");
+        var progress=data(b.get("/learning-progress"));
+        assertThat(progress.get("totalStudyMinutes").asInt()).isZero();
+        assertThat(progress.get("completedEstimatedMinutes").asInt()).isEqualTo(30);
+        assertThat(progress.get("extraLearningCount").asInt()).isEqualTo(1);
+        assertThat(progress.get("completedExtraLearningCount").asInt()).isEqualTo(1);
+    }
+
+    @Test void extraLearningKeepsRequiredProgressAndHasIndependentAttemptsAndActivityDates() throws Exception {
+        var b=new Browser();var other=new Browser();ok(b.create(),201);
+        long course=data(b.get("/curriculums/current")).get("curriculumId").asLong();
+        submit(b.user,course); // A previous regular attempt must not complete a new practice session.
+        finish(b,firstSession(b,"2026-09-21"));
+        String body=JSON.createObjectNode().put("mode","EXPLORE").put("contentVersionId",Long.toString(fixture.practiceVersion)).putNull("sourceSessionId").put("targetMinutes",15).toString();
+        String startKey=key();var first=b.post("/extra-learning",body,startKey);ok(first,200);
+        String session=data(first).get("sessionId").asText();
+        assertThat(data(b.post("/extra-learning",body,startKey)).get("sessionId").asText()).isEqualTo(session);
+        var duplicate=concurrent(()->b.post("/extra-learning",body,key()));
+        for(var response:duplicate){ok(response,200);assertThat(data(response).get("sessionId").asText()).isEqualTo(session);}
+        assertThat(data(b.get("/learning-days/today")).get("totalSessionCount").asInt()).isEqualTo(1);
+        assertThat(data(b.get("/curriculums/current")).get("completedRequiredSessions").asInt()).isEqualTo(1);
+        assertThat(data(b.get("/learning-days/today")).get("status").asText()).isEqualTo("COMPLETED");
+        String content=data(b.get("/learning-sessions/"+session+"/contents")).get(0).get("contentId").asText();
+        String problem=data(b.get("/learning-contents/"+content)).get("problems").get(0).get("problemId").asText();
+        assertThat(data(b.get("/problems/"+problem+"?contentId="+content)).get("answered").asBoolean()).isFalse();
+        error(b.post("/learning-contents/"+content+"/complete",null,null),422,"CONTENT_PROBLEMS_INCOMPLETE");
+        error(other.get("/extra-learning/"+session),404,"RESOURCE_NOT_FOUND");
+        error(other.get("/problems/"+problem+"?contentId="+content),404,"RESOURCE_NOT_FOUND");
+        String timeKey=key();ok(b.post("/extra-learning/"+session+"/time","{\"actualMinutes\":11}",timeKey),200);
+        ok(b.post("/extra-learning/"+session+"/time","{\"actualMinutes\":11}",timeKey),200);
+        assertThat(data(b.get("/learning-progress")).get("totalStudyMinutes").asInt()).isEqualTo(41);
+        NOW.set(Instant.parse("2026-09-21T15:00:00Z"));
+        ok(b.post("/problem-attempts",JSON.createObjectNode().put("problemId",problem).put("contentId",content).put("answer","1").toString(),key()),201);
+        ok(b.post("/learning-contents/"+content+"/complete",null,null),200);
+        String completeKey=key();ok(b.post("/learning-sessions/"+session+"/complete","{\"actualMinutes\":7}",completeKey),200);
+        ok(b.post("/learning-sessions/"+session+"/complete","{\"actualMinutes\":7}",completeKey),200);
+        assertThat(data(b.get("/extra-learning/"+session)).get("recordedMinutes").asInt()).isEqualTo(18);
+        assertThat(data(b.get("/extra-learning/"+session)).get("todayMinutes").asInt()).isEqualTo(7);
+        var progress=data(b.get("/learning-progress"));assertThat(progress.get("totalStudyMinutes").asInt()).isEqualTo(48);
+        assertThat(progress.get("extraPracticeAttemptCount").asInt()).isEqualTo(1);
+        assertThat(progress.get("completedRequiredSessions").asInt()).isEqualTo(1);
+        assertThat(jdbc.queryForObject("select minutes from daily_career.extra_learning_time where session_id=? and activity_date='2026-09-21'",Integer.class,Long.parseLong(session))).isEqualTo(11);
+    }
+
+    @Test void aheadLearningKeepsOriginalAssignmentAndCountsTimeOnlyOnActualDay() throws Exception {
+        var b=new Browser();ok(b.create(),201);long course=data(b.get("/curriculums/current")).get("curriculumId").asLong();
+        var topic=data(b.get("/extra-learning/topics?mode=AHEAD")).get(0);String session=topic.get("sourceSessionId").asText();
+        error(b.post("/learning-sessions/"+session+"/start",null,null),409,"LEARNING_NOT_AVAILABLE");
+        String body=JSON.createObjectNode().put("mode","AHEAD").putNull("contentVersionId").put("sourceSessionId",session).put("targetMinutes",30).toString();
+        ok(b.post("/extra-learning",body,key()),200);submit(b.user,course);
+        for(var c:data(b.get("/learning-sessions/"+session+"/contents")))ok(b.post("/learning-contents/"+c.get("contentId").asText()+"/complete",null,null),200);
+        ok(b.post("/learning-sessions/"+session+"/complete","{\"actualMinutes\":12}",key()),200);
+        var original=data(b.get("/learning-sessions/"+session));assertThat(original.get("scheduledDate").asText()).isEqualTo("2026-09-22");
+        assertThat(data(b.get("/curriculums/current")).get("completedRequiredSessions").asInt()).isEqualTo(1);
+        assertThat(data(b.get("/learning-progress")).get("totalStudyMinutes").asInt()).isEqualTo(12);
+        NOW.set(Instant.parse("2026-09-21T15:00:00Z"));
+        assertThat(data(b.get("/learning-days/today")).get("status").asText()).isEqualTo("COMPLETED");
+        assertThat(data(b.get("/learning-days/today")).get("actualMinutes").asInt()).isZero();
+        assertThat(data(b.get("/learning-sessions/"+session)).get("status").asText()).isEqualTo("COMPLETED");
+        assertThat(data(b.get("/extra-learning/"+session)).get("todayMinutes").asInt()).isZero();
+        assertThat(data(b.get("/learning-progress")).get("totalStudyMinutes").asInt()).isEqualTo(12);
+    }
+
+    @Test void extraLearningIsAvailableOnRestAndUnassignedDaysWithoutChangingThePlan() throws Exception {
+        var b=new Browser();ok(b.create(),201);
+        int total=data(b.get("/curriculums/current")).get("totalRequiredSessions").asInt();
+        String body=JSON.createObjectNode().put("mode","EXPLORE").put("contentVersionId",Long.toString(fixture.readVersion)).putNull("sourceSessionId").put("targetMinutes",60).toString();
+        NOW.set(Instant.parse("2026-09-25T15:00:00Z"));
+        assertThat(data(b.get("/learning-days/today")).get("kind").asText()).isEqualTo("REST");
+        var created=b.post("/extra-learning",body,key());ok(created,200);String session=data(created).get("sessionId").asText();
+        ok(b.post("/extra-learning/"+session+"/time","{\"actualMinutes\":30}",key()),200);
+        for(var c:data(b.get("/learning-sessions/"+session+"/contents")))ok(b.post("/learning-contents/"+c.get("contentId").asText()+"/complete",null,null),200);
+        ok(b.post("/learning-sessions/"+session+"/complete","{\"actualMinutes\":0}",key()),200);
+        assertThat(data(b.get("/learning-days/today")).get("kind").asText()).isEqualTo("REST");
+        NOW.set(Instant.parse("2026-10-10T15:00:00Z"));
+        var after=b.post("/extra-learning",body,key());ok(after,200);
+        assertThat(data(b.get("/learning-days/today")).get("kind").asText()).isEqualTo("NONE");
+        assertThat(data(b.get("/curriculums/current")).get("totalRequiredSessions").asInt()).isEqualTo(total);
+        assertThat(data(b.get("/learning-progress")).get("totalLearningDays").asInt()).isEqualTo(6);
+        assertThat(data(b.get("/curriculums/current")).get("completedRequiredSessions").asInt()).isZero();
+    }
+
+    @Test void extraLearningOnRestDaySurvivesPolicyRefreshAndRestRemoval() throws Exception {
+        var b=new Browser();long course=data(b.create()).get("curriculumId").asLong();
+        NOW.set(Instant.parse("2026-09-25T15:00:00Z"));
+        String body=JSON.createObjectNode().put("mode","EXPLORE").put("contentVersionId",Long.toString(fixture.readVersion)).put("targetMinutes",15).toString();
+        String session=data(b.post("/extra-learning",body,key())).get("sessionId").asText();
+        ok(b.post("/extra-learning/"+session+"/time","{\"actualMinutes\":5}",key()),200);
+        int revision=data(b.get("/curriculums/current")).get("scheduleRevision").asInt();
+        String policy="{\"dailyStudyMinutes\":90,\"restDaysPerWeek\":2,\"restWeekdays\":[\"SATURDAY\",\"SUNDAY\"]}";
+        var prepared=b.postMatch("/curriculums/"+course+"/reschedule-preview",preview("POLICY_APPLY","2026-09-26","null","null",policy),key(),revision);ok(prepared,201);var p=data(prepared);
+        ok(b.postMatch("/curriculums/"+course+"/reschedule","{\"previewId\":\""+p.get("previewId").asText()+"\"}",key(),revision),200);
+        revision++;
+        assertThat(data(b.get("/learning-days/today")).get("kind").asText()).isEqualTo("REST");
+        var removal=b.postMatch("/curriculums/"+course+"/reschedule-preview",preview("REST_REMOVE","2026-09-26","\"2026-09-26\"","null","null"),key(),revision);ok(removal,201);var remove=data(removal);
+        ok(b.deleteMatch("/rest-days/2026-09-26?previewId="+remove.get("previewId").asText(),key(),revision),200);
+        assertThat(data(b.get("/learning-days/today")).get("kind").asText()).isEqualTo("STUDY");
+        assertThat(data(b.get("/extra-learning/"+session)).get("recordedMinutes").asInt()).isEqualTo(5);
+        assertThat(data(b.get("/learning-progress")).get("totalStudyMinutes").asInt()).isEqualTo(5);
+        assertThat(data(b.get("/learning-days/today")).get("totalSessionCount").asInt()).isEqualTo(1);
+    }
+
+    @Test void optionalPracticeDoesNotLockAnUnstartedRegularDayAgainstRescheduling() throws Exception {
+        var b=new Browser();long course=data(b.create()).get("curriculumId").asLong();
+        String body=JSON.createObjectNode().put("mode","DEEPEN").put("contentVersionId",Long.toString(fixture.readVersion)).put("targetMinutes",15).toString();
+        var started=b.post("/extra-learning",body,key());ok(started,200);String session=data(started).get("sessionId").asText();
+        ok(b.post("/extra-learning/"+session+"/time","{\"actualMinutes\":5}",key()),200);
+        int revision=data(b.get("/curriculums/current")).get("scheduleRevision").asInt();
+        var p=b.postMatch("/curriculums/"+course+"/reschedule-preview",preview("REST_ADD","2026-09-21","\"2026-09-21\"","\"PERSONAL\"","null"),key(),revision);ok(p,201);
+        ok(b.postMatch("/rest-days","{\"date\":\"2026-09-21\",\"reason\":\"PERSONAL\",\"previewId\":\""+data(p).get("previewId").asText()+"\"}",key(),revision),200);
+        assertThat(data(b.get("/learning-days/today")).get("kind").asText()).isEqualTo("REST");
+        assertThat(data(b.get("/extra-learning/"+session)).get("todayMinutes").asInt()).isEqualTo(5);
+        assertThat(data(b.get("/curriculums/current")).get("completedRequiredSessions").asInt()).isZero();
     }
 
     private void finish(Browser b,String s) throws Exception {

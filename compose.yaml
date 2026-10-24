@@ -26,6 +26,35 @@ services:
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       GOOGLE_ALLOWED_EMAILS: ${GOOGLE_ALLOWED_EMAILS:-}
       APP_ORIGIN: ${APP_ORIGIN:-http://localhost:8080}
+      DEV_AUTH_BYPASS: ${DEV_AUTH_BYPASS:-false}
+      DEV_AUTH_USER_ID: ${DEV_AUTH_USER_ID:-}
+      AI_PROVIDER_ENDPOINT: ${AI_PROVIDER_ENDPOINT:-}
+      AI_PROVIDER_API_KEY: ${AI_PROVIDER_API_KEY:-}
+      AI_PROVIDER_MODEL: ${AI_PROVIDER_MODEL:-}
+      AI_PROVIDER_TYPE: ${AI_PROVIDER_TYPE:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-6-luna}
+      INTEGRATION_CREDENTIAL_KEY: ${INTEGRATION_CREDENTIAL_KEY:-}
+      SLACK_CLIENT_ID: ${SLACK_CLIENT_ID:-}
+      SLACK_CLIENT_SECRET: ${SLACK_CLIENT_SECRET:-}
+      SLACK_REDIRECT_URI: ${SLACK_REDIRECT_URI:-}
+      OPENROUTER_REDIRECT_URI: ${OPENROUTER_REDIRECT_URI:-}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-}
+      APP_WEB_PUSH_PUBLIC_KEY: ${WEB_PUSH_PUBLIC_KEY:-}
+      APP_WEB_PUSH_PRIVATE_KEY: ${WEB_PUSH_PRIVATE_KEY:-}
+      APP_WEB_PUSH_SUBSCRIPTION_KEY: ${WEB_PUSH_SUBSCRIPTION_KEY:-}
+      APP_WEB_PUSH_KEY_ID: ${WEB_PUSH_KEY_ID:-}
+      APP_WEB_PUSH_SUBJECT: ${WEB_PUSH_SUBJECT:-}
+      APP_WEB_PUSH_ALLOWED_HOSTS: ${WEB_PUSH_ALLOWED_HOSTS:-}
+      APP_SLACK_CREDENTIAL_REF: ${SLACK_CREDENTIAL_REF:-}
+      APP_SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL:-}
+      APP_SLACK_CHANNEL_NAME: ${SLACK_CHANNEL_NAME:-}
+      APP_SLACK_ALLOWED_HOSTS: ${SLACK_ALLOWED_HOSTS:-hooks.slack.com,hooks.slack-gov.com}
+      APP_NOTION_CLIENT_ID: ${NOTION_CLIENT_ID:-}
+      APP_NOTION_CLIENT_SECRET: ${NOTION_CLIENT_SECRET:-}
+      APP_NOTION_REDIRECT_URI: ${NOTION_REDIRECT_URI:-}
+      APP_NOTION_CREDENTIAL_KEY: ${NOTION_CREDENTIAL_KEY:-}
+      APP_NOTION_KEY_ID: ${NOTION_KEY_ID:-notion-local-v1}
     healthcheck:
       test: ["CMD", "java", "-cp", "/app/probe", "dev.dailycareer.infrastructure.HealthProbe"]
       interval: 10s
@@ -40,12 +69,16 @@ services:
     build:
       context: ./frontend
       target: development
+      additional_contexts:
+        course_examples: ./content/java-four-week-v1/examples
     volumes:
       # Bind only source: host node_modules and .next never enter the container.
       - ./frontend/src:/app/src:ro
     environment:
       BACKEND_HEALTH_URL: http://backend:9090/actuator/health
       NGINX_ORIGIN: http://nginx
+      DEV_AUTH_BYPASS: ${DEV_AUTH_BYPASS:-false}
+      APP_HTTPS_HOST: ${APP_HTTPS_HOST:-}
     depends_on:
       backend:
         condition: service_healthy
@@ -60,7 +93,8 @@ services:
     image: nginx:1.28-alpine@sha256:a8b39bd9cf0f83869a2162827a0caf6137ddf759d50a171451b335cecc87d236
     environment:
       APP_DOMAIN: ${APP_DOMAIN:-localhost}
-      NGINX_ENVSUBST_FILTER: ^APP_DOMAIN$
+      APP_HTTPS_HOST: ${APP_HTTPS_HOST:-}
+      NGINX_ENVSUBST_FILTER: ^(APP_DOMAIN|APP_HTTPS_HOST)$
     ports:
       - "${HTTP_BIND_ADDRESS:-127.0.0.1}:${HTTP_PORT:-8080}:80"
     volumes:

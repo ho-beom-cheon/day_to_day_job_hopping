@@ -25,7 +25,8 @@ public class LearningCommandService {
                          @NotNull @Size(max=6) List<@NotNull DayOfWeek> restWeekdays) {}
     public record Create(@NotNull @JsonId Long templateId,@NotNull @Pattern(regexp="\\d{4}-\\d{2}-\\d{2}") String startDate,
                          @NotNull @Valid Policy studyPolicy) {}
-    public record Complete(@NotNull @Min(1) @Max(480) Integer actualMinutes) {}
+    // Omitted minutes use the session's planned duration. Explicit minutes remain for older clients.
+    public record Complete(@Min(0) @Max(480) Integer actualMinutes) {}
     private final JdbcTemplate jdbc; private final UserAccountService users; private final LearningCatalog catalog;
     private final LearningQueryService queries; private final IdempotencyService idempotency; private final ObjectMapper json;
     public LearningCommandService(JdbcTemplate jdbc,UserAccountService users,LearningCatalog catalog,LearningQueryService queries,IdempotencyService idempotency,ObjectMapper json) {
@@ -45,6 +46,10 @@ public class LearningCommandService {
                 throw new ApiException(CURRICULUM_ALREADY_ACTIVE);
             jdbc.queryForList("select id from daily_career.curriculum_version where id=? for update",input.templateId());
             Plan plan=catalog.plan(input.templateId(),true);
+            boolean selfPracticeCourse=Boolean.TRUE.equals(jdbc.queryForObject("""
+                    select c.code='JAVA-CORE-4W' from daily_career.curriculum_version v
+                    join daily_career.curriculum c on c.id=v.curriculum_id where v.id=?
+                    """,Boolean.class,plan.id()));
             var schedule=new LinkedHashMap<LocalDate,Day>();LocalDate date=start;
             for(Day d:plan.days()) {
                 while(p.restWeekdays().contains(date.getDayOfWeek())) date=date.plusDays(1);
@@ -55,7 +60,7 @@ public class LearningCommandService {
             long course=insert("""
                     insert into daily_career.user_curriculum(user_id,curriculum_version_id,start_date,target_end_date,projected_end_date,status,schedule_revision)
                     values (?,?,?,?,?,?,1) returning id
-                    """,user,plan.id(),start,start.plusMonths(6).minusDays(1),end,start.isAfter(queries.today())?"PLANNED":"ACTIVE");
+                    """,user,plan.id(),start,start.plusMonths(plan.durationMonths()).minusDays(1),end,start.isAfter(queries.today())?"PLANNED":"ACTIVE");
             long policy=insert("""
                     insert into daily_career.schedule_policy(user_id,user_curriculum_id,effective_from,weekly_rest_count,study_minutes)
                     values (?,?,?,?,?) returning id
@@ -88,7 +93,8 @@ public class LearningCommandService {
                     for(Content c:item.contents()) jdbc.update("""
                             insert into daily_career.assigned_content(user_id,learning_day_item_id,content_version_id,sequence,required,content_type,completion_rule)
                             values (?,?,?,?,?,?,?)
-                            """,user,session,c.versionId(),c.sequence(),c.required(),c.type(),c.rule());
+                            """,user,session,c.versionId(),c.sequence(),c.required(),c.type(),
+                            selfPracticeCourse && "PRACTICE".equals(c.type()) ? "READ_ACK" : c.rule());
                 }
             }
             event(user,"CURRICULUM_ASSIGNED",course,1,Map.of("curriculumId",Long.toString(course)));
@@ -101,7 +107,7 @@ public class LearningCommandService {
     public Session start(long user,long session) {
         var row=lockSession(user,session);
         if("COMPLETED".equals(row.get("status")))throw new ApiException(SESSION_ALREADY_COMPLETED);
-        if(queries.today().isBefore(date(row,"local_date")))throw new ApiException(LEARNING_NOT_AVAILABLE);
+        if(queries.today().isBefore(date(row,"local_date")) && !isExtra(session))throw new ApiException(LEARNING_NOT_AVAILABLE);
         if(!"READY".equals(row.get("content_status")))throw new ApiException(CONTENT_NOT_READY);
         if("NOT_STARTED".equals(row.get("status"))) {
             bumpSession(session);
@@ -118,12 +124,32 @@ public class LearningCommandService {
         if(current.completedAt()==null) {
             if(!"IN_PROGRESS".equals(row.get("status")))throw new ApiException(SESSION_NOT_STARTED);
             if(current.completionRule().equals("ALL_PROBLEMS_ATTEMPTED")) {
-                int missing=jdbc.queryForObject("""
+                int missing;
+                if(isExtra(before.sessionId()) && !Boolean.TRUE.equals(row.get("required"))) {
+                    missing=(int)current.problems().stream().filter(p->jdbc.queryForObject("""
+                        select count(*) from daily_career.problem_attempt a join daily_career.problem_version v on v.id=a.problem_version_id
+                        where a.user_id=? and v.problem_id=? and a.status='SUBMITTED' and a.answer_payload->>'contentId'=?
+                        """,Integer.class,user,p.problemId(),Long.toString(content))==0).count();
+                } else missing=jdbc.queryForObject("""
                         select count(*) from daily_career.learning_content_problem cp where cp.content_version_id=? and not exists (
                             select 1 from daily_career.problem_attempt a where a.problem_version_id=cp.problem_version_id
-                            and a.user_id=? and a.user_curriculum_id=? and a.status='SUBMITTED')
+                            and a.user_id=? and a.user_curriculum_id=? and a.status='SUBMITTED'
+                            and not exists(select 1 from daily_career.assigned_content ac join daily_career.extra_learning e on e.session_id=ac.learning_day_item_id
+                              where ac.id::text=a.answer_payload->>'contentId' and e.mode<>'AHEAD'))
                         """,Integer.class,current.contentVersionId(),user,id(row,"user_curriculum_id"));
-                if(missing>0)throw new ApiException(CONTENT_PROBLEMS_INCOMPLETE);
+                if(missing>0) {
+                    Boolean aiCompleted=jdbc.queryForObject("""
+                            select exists (
+                                select 1 from daily_career.ai_job j
+                                where j.user_id=? and j.job_type='PRACTICE_PROBLEMS' and j.status='SUCCEEDED'
+                                  and j.input_snapshot->>'contentId'=?
+                                  and (select count(*) from daily_career.ai_practice_attempt a
+                                       where a.user_id=? and a.ai_job_id=j.id)
+                                      = jsonb_array_length(j.result_payload->'questions')
+                            )
+                            """,Boolean.class,user,Long.toString(content),user);
+                    if(!Boolean.TRUE.equals(aiCompleted))throw new ApiException(CONTENT_PROBLEMS_INCOMPLETE);
+                }
             }
             jdbc.update("update daily_career.assigned_content set completed_at=clock_timestamp() where id=? and user_id=? and completed_at is null",content,user);
             bumpSession(before.sessionId());
@@ -137,28 +163,33 @@ public class LearningCommandService {
         queries.session(user,session); // Replays also require current account status and resource ownership.
         return idempotency.execute(user,"SESSION-003",key,json.valueToTree(Map.of("sessionId",Long.toString(session),"body",input)),()->{
             var row=lockSession(user,session);var before=queries.session(user,session);
+            boolean extra=isExtra(session);
+            int minutes=input.actualMinutes()==null ? 0 : input.actualMinutes();
             if(before.status().equals("COMPLETED")) {
-                if(!before.actualMinutes().equals(input.actualMinutes()))throw new ApiException(SESSION_ALREADY_COMPLETED);
+                if(!extra && input.actualMinutes()!=null && !before.actualMinutes().equals(input.actualMinutes()))throw new ApiException(SESSION_ALREADY_COMPLETED);
                 return completedReply(user,session);
             }
+            if(input.actualMinutes()!=null && minutes==0 && (!extra || before.actualMinutes()==0))throw new ApiException(VALIDATION_FAILED);
             if(!before.status().equals("IN_PROGRESS"))throw new ApiException(SESSION_NOT_STARTED);
             if(!before.requiredContentCount().equals(before.completedRequiredContentCount()))throw new ApiException(SESSION_CONTENT_INCOMPLETE);
             int dayMinutes=jdbc.queryForObject("""
                     select coalesce(sum(s.actual_minutes),0) from daily_career.assigned_session_detail s
                     join daily_career.learning_day_item i on i.id=s.learning_day_item_id where i.learning_day_id=?
                     """,Integer.class,before.learningDayId());
-            if(dayMinutes+input.actualMinutes()>10000)throw new ApiException(VALIDATION_FAILED);
+            if(dayMinutes+minutes>10000)throw new ApiException(VALIDATION_FAILED);
             bumpSession(session);
             jdbc.update("update daily_career.learning_day_item set status='COMPLETED',completed_at=clock_timestamp() where id=?",session);
-            jdbc.update("update daily_career.assigned_session_detail set actual_minutes=? where learning_day_item_id=?",input.actualMinutes(),session);
+            if(extra) {
+                if(minutes>0) ExtraLearningService.addTime(jdbc,user,session,queries.today(),minutes);
+            } else if(minutes>0) jdbc.update("update daily_career.assigned_session_detail set actual_minutes=?,time_source='SELF_REPORTED' where learning_day_item_id=?",minutes,session);
             long course=id(row,"user_curriculum_id");bumpCourse(course);
             var curriculum=queries.curriculum(user,course);
             if(curriculum.status().equals("COMPLETED")) jdbc.update("update daily_career.user_curriculum set status='COMPLETED',completed_at=coalesce(completed_at,clock_timestamp()) where id=?",course);
             var after=queries.session(user,session);
-            event(user,"SESSION_COMPLETED",session,after.revision(),Map.of("sessionId",Long.toString(session),"curriculumId",Long.toString(course),"actualMinutes",input.actualMinutes()));
+            event(user,"SESSION_COMPLETED",session,after.revision(),Map.of("sessionId",Long.toString(session),"curriculumId",Long.toString(course),"actualMinutes",minutes));
             var day=queries.day(user,course,after.scheduledDate());
-            if(day.status().equals("COMPLETED"))event(user,"LEARNING_DAY_COMPLETED",day.learningDayId(),curriculum.scheduleRevision(),Map.of("learningDayId",day.learningDayId().toString()));
-            if(curriculum.status().equals("COMPLETED"))event(user,"CURRICULUM_COMPLETED",course,curriculum.scheduleRevision(),Map.of("curriculumId",Long.toString(course)));
+            if(before.required() && day.status().equals("COMPLETED"))event(user,"LEARNING_DAY_COMPLETED",day.learningDayId(),curriculum.scheduleRevision(),Map.of("learningDayId",day.learningDayId().toString()));
+            if(before.required() && curriculum.status().equals("COMPLETED"))event(user,"CURRICULUM_COMPLETED",course,curriculum.scheduleRevision(),Map.of("curriculumId",Long.toString(course)));
             return completedReply(user,session);
         });
     }
@@ -173,6 +204,7 @@ public class LearningCommandService {
         jdbc.queryForList("select id from daily_career.learning_day_item where id=? and user_id=? for update",session,user);
         return queries.sessionRow(user,session);
     }
+    private boolean isExtra(long session) {return jdbc.queryForObject("select exists(select 1 from daily_career.extra_learning where session_id=?)",Boolean.class,session);}
     private void lockUser(long user) {
         // Idempotency inserts hold FK KEY SHARE locks on this row. NO KEY UPDATE serializes
         // user operations without a mutual lock-upgrade deadlock between different keys.

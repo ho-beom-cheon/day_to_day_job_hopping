@@ -33,6 +33,7 @@ class BusinessSchemaIT {
     static JdbcTemplate jdbc;
     static int upgradeCount;
     static String v1Checksum;
+    static long legacyNotificationUser;
 
     @BeforeAll static void upgradeFromV1() {
         dataSource = new SingleConnectionDataSource(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword(), true);
@@ -45,15 +46,23 @@ class BusinessSchemaIT {
                 """);
         jdbc.update("insert into public.spring_session_attributes values ('00000000-0000-0000-0000-000000000001','fixture',decode('010203','hex'))");
         upgradeCount = Flyway.configure().dataSource(dataSource).defaultSchema("public").target("3").load().migrate().migrationsExecuted;
-        jdbc.update("insert into daily_career.app_user(display_name) values (?)", "legacy-" + "x".repeat(70));
+        legacyNotificationUser = jdbc.queryForObject("insert into daily_career.app_user(display_name) values (?) returning id", Long.class, "legacy-" + "x".repeat(70));
+        upgradeCount += Flyway.configure().dataSource(dataSource).defaultSchema("public").target("8").load().migrate().migrationsExecuted;
+        jdbc.update("insert into daily_career.user_setting(user_id) values (?)", legacyNotificationUser);
         upgradeCount += Flyway.configure().dataSource(dataSource).defaultSchema("public").load().migrate().migrationsExecuted;
     }
 
     @AfterAll static void closeConnection() { if (dataSource != null) dataSource.destroy(); }
 
     @Test void upgradesV1WithoutLosingSessionsAndCanRunAgain() {
-        assertThat(upgradeCount).isEqualTo(5);
+        assertThat(upgradeCount).isEqualTo(19);
+        assertThat(jdbc.queryForObject("select scheduled_reminders_enabled from daily_career.user_setting where user_id=?", Boolean.class, legacyNotificationUser)).isFalse();
         assertThat(jdbc.queryForObject("select count(*) from daily_career.app_user where display_name=? and email is null and profile_image_url is null", Integer.class, "legacy-" + "x".repeat(70))).isEqualTo(1);
+        assertThat(jdbc.queryForObject("select notification_settings #>> '{testReminder,beforeMinutes}' from daily_career.user_setting where user_id=?", String.class, legacyNotificationUser)).isEqualTo("30");
+        assertThat(jdbc.queryForObject("select notification_settings #> '{testReminder,minutesBefore}' is null from daily_career.user_setting where user_id=?", Boolean.class, legacyNotificationUser)).isTrue();
+        assertThat(jdbc.queryForMap("select daily_goal_minutes,rest_days_per_week,rest_weekdays,weekday_study_start_time,weekend_study_start_time,theme from daily_career.user_setting where user_id=?", legacyNotificationUser))
+                .containsEntry("daily_goal_minutes", 60).containsEntry("rest_days_per_week", 2)
+                .containsEntry("weekday_study_start_time", "19:30").containsEntry("weekend_study_start_time", "10:00").containsEntry("theme", "SYSTEM");
         assertThat(jdbc.queryForObject("select checksum::text from public.flyway_schema_history where version='1'", String.class)).isEqualTo(v1Checksum);
         assertThat(jdbc.queryForObject("select encode(attribute_bytes,'hex') from public.spring_session_attributes where attribute_name='fixture'", String.class)).isEqualTo("010203");
         // Use a fresh connection as on application restart, after $user schema now exists.
@@ -63,7 +72,7 @@ class BusinessSchemaIT {
         assertThat(flyway.migrate().migrationsExecuted).isZero();
         assertThat(jdbc.queryForObject("select count(*) from pg_tables where tablename='flyway_schema_history' and schemaname='public'", Integer.class)).isEqualTo(1);
         assertThat(jdbc.queryForObject("select count(*) from pg_tables where tablename='flyway_schema_history' and schemaname='daily_career'", Integer.class)).isZero();
-        assertThat(jdbc.queryForList("select version from public.flyway_schema_history order by installed_rank", String.class)).containsExactly("1", "2", "3", "4", "5", "6");
+        assertThat(jdbc.queryForList("select version from public.flyway_schema_history order by installed_rank", String.class)).containsExactly("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20");
     }
 
     @Test void catalogMatchesEveryArchivedColumnConstraintAndIndex() throws Exception {
@@ -96,6 +105,28 @@ class BusinessSchemaIT {
                 definitions.add("resolution_type varchar(32)");
                 definitions.add("resolution_attempt_id bigint");
             }
+            if (name.equals("user_setting")) {
+                definitions.add("notification_settings jsonb default '{\"pushEnabled\": false, \"testReminder\": {\"enabled\": true, \"beforeMinutes\": 30}, \"weeklyReport\": {\"time\": \"20:00\", \"enabled\": true, \"dayOfWeek\": \"SUNDAY\"}, \"studyReminder\": {\"time\": \"19:30\", \"enabled\": true}, \"streakReminder\": {\"time\": \"21:00\", \"enabled\": true}}'::jsonb not null");
+                definitions.add("notification_revision bigint default 0 not null");
+                definitions.add("rest_days_per_week smallint default 2 not null");
+                definitions.add("rest_weekdays varchar(16)[] default ARRAY['SATURDAY'::character varying(16), 'SUNDAY'::character varying(16)] not null");
+                definitions.add("weekday_study_start_time varchar(5) default '19:30'::character varying not null");
+                definitions.add("weekend_study_start_time varchar(5) default '10:00'::character varying not null");
+                definitions.add("theme varchar(16) default 'SYSTEM'::character varying not null");
+                definitions.add("scheduled_reminders_enabled boolean default false not null");
+                definitions.add("scheduled_reminders_enabled_at timestamp with time zone");
+            }
+            if (name.equals("ai_job")) {
+                definitions.add("browser_credential_ref uuid");
+                definitions.add("reused_from_job_id bigint");
+            }
+            if (name.equals("grading_run")) {
+                definitions.add("error_code varchar(80)");
+            }
+            if (name.equals("push_subscription")) {
+                definitions.add("device_id uuid");
+                definitions.add("expiration_at timestamp with time zone");
+            }
             for (var check : table.get("checks")) {
                 String expression = check.asText();
                 if (name.equals("test") && expression.startsWith("test_type IN")) {
@@ -104,6 +135,9 @@ class BusinessSchemaIT {
                 if (name.equals("problem_version") && expression.startsWith("question_type IN")) {
                     expression = "question_type IN ('SINGLE_CHOICE', 'TRUE_FALSE', 'MULTI_CHOICE', 'SHORT_ANSWER', 'ESSAY', 'CODE', 'INTERVIEW')";
                 }
+                if (name.equals("user_setting") && expression.startsWith("daily_goal_minutes BETWEEN")) {
+                    expression = "daily_goal_minutes BETWEEN 15 AND 480";
+                }
                 definitions.add("constraint ck_" + name + "_" + String.format("%02d", ++checkNo) + " check (" + expression + ")");
             }
             if (name.equals("wrong_answer")) {
@@ -111,6 +145,17 @@ class BusinessSchemaIT {
                 definitions.add("constraint ck_wrong_answer_04 check ((status = 'MASTERED' AND mastered_at IS NOT NULL AND resolution_type IN ('MANUAL', 'CORRECT_RETRY')) OR (status <> 'MASTERED' AND mastered_at IS NULL AND resolution_type IS NULL AND resolution_attempt_id IS NULL))");
                 definitions.add("constraint ck_wrong_answer_05 check ((resolution_type = 'MANUAL' AND resolution_attempt_id IS NULL) OR (resolution_type = 'CORRECT_RETRY' AND resolution_attempt_id IS NOT NULL) OR resolution_type IS NULL)");
             }
+            if (name.equals("user_setting")) {
+                definitions.add("constraint ck_user_setting_notification_revision check (notification_revision >= 0)");
+                definitions.add("constraint ck_scheduled_reminder_consent check (scheduled_reminders_enabled = (scheduled_reminders_enabled_at is not null))");
+                definitions.add("constraint ck_user_setting_04 check (rest_days_per_week between 0 and 6)");
+                definitions.add("constraint ck_user_setting_05 check (cardinality(rest_weekdays) = rest_days_per_week)");
+                definitions.add("constraint ck_user_setting_06 check (rest_weekdays <@ array['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY']::varchar(16)[])");
+                definitions.add("constraint ck_user_setting_07 check (weekday_study_start_time ~ '^([01][0-9]|2[0-3]):[0-5][0-9]$')");
+                definitions.add("constraint ck_user_setting_08 check (weekend_study_start_time ~ '^([01][0-9]|2[0-3]):[0-5][0-9]$')");
+                definitions.add("constraint ck_user_setting_09 check (theme in ('LIGHT','DARK','SYSTEM'))");
+            }
+            if (name.equals("grading_run")) definitions.add("constraint ck_grading_run_07 check (((status = 'FAILED'::text) = (error_code IS NOT NULL)))");
             jdbc.execute("create temporary table expected_dictionary (" + String.join(",", definitions) + ")");
             try {
                 assertThat(columns("daily_career." + name)).as(name + " columns/types/defaults/nullability/identity")
@@ -120,7 +165,13 @@ class BusinessSchemaIT {
                 assertThat(constraints("daily_career." + name, "p")).as(name + " PK")
                         .containsExactly(Map.of("definition", "PRIMARY KEY (" + table.get("primaryKey").asText() + ")"));
                 var uniques = new ArrayList<Map<String, Object>>();
-                for (var key : table.get("uniqueKeys")) uniques.add(Map.of("definition", "UNIQUE (" + key.asText() + ")"));
+                for (var key : table.get("uniqueKeys")) {
+                    String columns = key.asText();
+                    // V18 scopes retry numbering to a course so a restarted course can take the same exam.
+                    if (name.equals("test_attempt") && columns.equals("user_id, test_version_id, attempt_no"))
+                        columns = "user_id, user_curriculum_id, test_version_id, attempt_no";
+                    uniques.add(Map.of("definition", "UNIQUE (" + columns + ")"));
+                }
                 assertThat(constraints("daily_career." + name, "u")).as(name + " UNIQUE").containsExactlyInAnyOrderElementsOf(uniques);
                 var foreignKeys = new ArrayList<Map<String, Object>>();
                 for (var fk : table.get("foreignKeys")) {
@@ -128,6 +179,7 @@ class BusinessSchemaIT {
                             + fk.get("targetTable").asText() + "(" + fk.get("targetColumns").asText() + ") ON DELETE " + fk.get("onDelete").asText()));
                 }
                 if (name.equals("wrong_answer")) foreignKeys.add(Map.of("definition", "FOREIGN KEY (resolution_attempt_id, user_id) REFERENCES daily_career.problem_attempt(id, user_id) ON DELETE RESTRICT"));
+                if (name.equals("ai_job")) foreignKeys.add(Map.of("definition", "FOREIGN KEY (reused_from_job_id) REFERENCES daily_career.ai_job(id) ON DELETE RESTRICT"));
                 assertThat(constraints("daily_career." + name, "f")).as(name + " FK targets/columns/deletion")
                         .containsExactlyInAnyOrderElementsOf(foreignKeys);
                 for (var index : table.get("indexes")) {
@@ -139,7 +191,31 @@ class BusinessSchemaIT {
                             .isEqualTo(indexDefinition("pg_temp.expected_index"));
                     jdbc.execute("drop index pg_temp.expected_index");
                 }
-                int expectedIndexes = 1 + table.get("uniqueKeys").size() + table.get("indexes").size();
+                if (name.equals("push_subscription")) {
+                    jdbc.execute("create unique index expected_index on expected_dictionary (user_id, device_id) where device_id is not null and status = 'ACTIVE'");
+                    assertThat(indexDefinition("daily_career.uq_push_subscription_device")).as("push_subscription uq_push_subscription_device")
+                            .isEqualTo(indexDefinition("pg_temp.expected_index"));
+                    jdbc.execute("drop index pg_temp.expected_index");
+                }
+                if (name.equals("notification_delivery")) {
+                    jdbc.execute("create unique index expected_index on expected_dictionary (notification_id, push_subscription_id) where channel = 'WEB_PUSH'");
+                    assertThat(indexDefinition("daily_career.uq_notification_delivery_push_target")).as("notification_delivery push dedupe")
+                            .isEqualTo(indexDefinition("pg_temp.expected_index"));
+                    jdbc.execute("drop index pg_temp.expected_index");
+                    jdbc.execute("create unique index expected_index on expected_dictionary (notification_id, integration_connection_id) where channel = 'SLACK'");
+                    assertThat(indexDefinition("daily_career.uq_notification_delivery_slack_target")).as("notification_delivery slack dedupe")
+                            .isEqualTo(indexDefinition("pg_temp.expected_index"));
+                    jdbc.execute("drop index pg_temp.expected_index");
+                }
+                if (name.equals("ai_job")) {
+                    jdbc.execute("create index expected_index on expected_dictionary (reused_from_job_id) where reused_from_job_id is not null");
+                    assertThat(indexDefinition("daily_career.ix_ai_job_reused_from")).as("ai_job reused origin lookup")
+                            .isEqualTo(indexDefinition("pg_temp.expected_index"));
+                    jdbc.execute("drop index pg_temp.expected_index");
+                }
+                int expectedIndexes = 1 + table.get("uniqueKeys").size() + table.get("indexes").size()
+                        + (name.equals("push_subscription") ? 1 : 0) + (name.equals("notification_delivery") ? 2 : 0)
+                        + (name.equals("ai_job") ? 1 : 0);
                 assertThat(jdbc.queryForObject("select count(*) from pg_index where indrelid=?::regclass", Integer.class, "daily_career." + name))
                         .as(name + " no missing or extra indexes").isEqualTo(expectedIndexes);
                 for (var column : table.get("columns")) {
@@ -150,14 +226,19 @@ class BusinessSchemaIT {
                 jdbc.execute("drop table pg_temp.expected_dictionary");
             }
         }
+        names.addAll(List.of("browser_connection", "browser_oauth_state"));
         names.add("schedule_preview");
         names.add("oidc_login_state");
         names.addAll(List.of("curriculum_release","curriculum_unit_detail","learning_content_detail","learning_content_problem",
                 "curriculum_item_content","assigned_learning_day","assigned_session_detail","assigned_content","problem_report"));
+        names.addAll(List.of("notion_oauth_state","notion_credential","notion_revocation","notion_target_set",
+                "notion_target","notion_sync_batch","notion_sync_item"));
+        names.addAll(List.of("ai_practice_attempt","ai_practice_run","ai_practice_run_answer","ai_practice_wrong_note","catalog_import"));
         assertThat(jdbc.queryForList("select tablename from pg_tables where schemaname='daily_career'", String.class))
                 .containsExactlyInAnyOrderElementsOf(names);
-        assertThat(jdbc.queryForObject("select count(*) from information_schema.columns where table_schema='daily_career'", Integer.class)).isEqualTo(631);
-        assertThat(jdbc.queryForObject("select count(*) from pg_constraint where connamespace='daily_career'::regnamespace and contype='f'", Integer.class)).isEqualTo(123);
+        // V15–V20: practice/reuse, catalog import, and explicit reminder consent.
+        assertThat(jdbc.queryForObject("select count(*) from information_schema.columns where table_schema='daily_career'", Integer.class)).isEqualTo(779);
+        assertThat(jdbc.queryForObject("select count(*) from pg_constraint where connamespace='daily_career'::regnamespace and contype='f'", Integer.class)).isEqualTo(145);
     }
 
     @Test void problemPracticeExtensionHasReportOwnershipAndImmutableVersionLink() {
@@ -278,7 +359,7 @@ class BusinessSchemaIT {
     }
 
     private static long run(long user, long attempt, int number, String status, boolean current) {
-        return id("insert into daily_career.grading_run(user_id,test_attempt_id,run_no,grader_type,rule_version,input_digest,status,is_current) values (?,?,?,'RULE','fixture','fixture',?,?) returning id", user, attempt, number, status, current);
+        return id("insert into daily_career.grading_run(user_id,test_attempt_id,run_no,grader_type,rule_version,input_digest,status,is_current,error_code) values (?,?,?,'RULE','fixture','fixture',?,?,?) returning id", user, attempt, number, status, current, status.equals("FAILED") ? "FIXTURE_FAILURE" : null);
     }
 
     private static void outbox(long user, String key) {

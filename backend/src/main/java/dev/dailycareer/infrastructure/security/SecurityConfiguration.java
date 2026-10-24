@@ -4,6 +4,7 @@ import dev.dailycareer.common.api.ApiErrorCode;
 import dev.dailycareer.common.api.ApiErrorWriter;
 import dev.dailycareer.common.api.ApiResponses;
 import dev.dailycareer.auth.GoogleLogin;
+import dev.dailycareer.auth.DevAuthenticationBypassFilter;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -39,13 +40,19 @@ public class SecurityConfiguration {
 
     @Bean
     @Order(2)
-    SecurityFilterChain securityFilterChain(HttpSecurity http, ApiErrorWriter writer, ObjectProvider<GoogleLogin> google) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, ApiErrorWriter writer, ObjectProvider<GoogleLogin> google,
+                                            ObjectProvider<DevAuthenticationBypassFilter> devBypass) throws Exception {
         GoogleLogin login = google.getIfAvailable();
         if (login != null) login.configure(http);
         else http.addFilterBefore(new GoogleLogin.Boundary(false), CsrfFilter.class);
+        DevAuthenticationBypassFilter bypass = devBypass.getIfAvailable();
+        if (bypass != null) http.addFilterBefore(bypass, CsrfFilter.class);
         return http.authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/csrf", "/oauth2/authorization/google", "/login/oauth2/code/google").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/users/me").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/csrf", "/oauth2/authorization/google", "/login/oauth2/code/google",
+                                "/api/v1/integrations/notion/callback", "/api/v1/integrations/browser/*/callback").permitAll()
+                        .requestMatchers("/api/v1/integrations/browser/slack", "/api/v1/integrations/browser/openrouter",
+                                "/api/v1/integrations/browser/*/authorization-requests", "/api/v1/integrations/notion/setup", "/api/v1/integrations/notion/available-targets").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/me", "/api/v1/common-codes", "/api/v1/dashboard", "/api/v1/settings").authenticated()
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/users/me").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/logout").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/curriculum-templates", "/api/v1/curriculums/current",
@@ -53,14 +60,39 @@ public class SecurityConfiguration {
                                 "/api/v1/curriculums/*/weeks", "/api/v1/curriculums/*/weeks/*", "/api/v1/learning-days",
                                 "/api/v1/learning-days/*", "/api/v1/learning-days/*/sessions", "/api/v1/learning-sessions/*",
                                 "/api/v1/learning-sessions/*/contents", "/api/v1/learning-contents/*", "/api/v1/problems/*",
-                                "/api/v1/problem-attempts/*", "/api/v1/wrong-answers", "/api/v1/wrong-answers/*").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/curriculums", "/api/v1/learning-sessions/*/start",
+                                "/api/v1/problem-attempts", "/api/v1/problem-attempts/*", "/api/v1/wrong-answers", "/api/v1/wrong-answers/*",
+                                "/api/v1/study-evaluations", "/api/v1/study-evaluations/*",
+                                "/api/v1/tests", "/api/v1/tests/*", "/api/v1/test-attempts", "/api/v1/test-attempts/*",
+                                "/api/v1/test-attempts/*/result",
+                                "/api/v1/learning-progress", "/api/v1/learning-progress/*", "/api/v1/learning-calendar", "/api/v1/evaluations/monthly",
+                                "/api/v1/evaluations/*", "/api/v1/notifications", "/api/v1/notifications/settings", "/api/v1/push/config", "/api/v1/push/subscriptions",
+                                "/api/v1/integrations/notion", "/api/v1/integrations/notion/targets", "/api/v1/integrations/notion/sync-history",
+                                "/api/v1/integrations/notion/sync-jobs/*", "/api/v1/integrations/slack", "/api/v1/integrations/slack/deliveries", "/api/v1/integrations/slack/deliveries/*",
+                                "/api/v1/ai/jobs", "/api/v1/ai/jobs/*", "/api/v1/ai/usage", "/api/v1/ai/learning-topics",
+                                "/api/v1/ai/practice-sets", "/api/v1/ai/practice-sets/*", "/api/v1/ai/practice-sets/by-content/*",
+                                "/api/v1/ai/practice-runs", "/api/v1/ai/practice-runs/*",
+                                "/api/v1/ai/wrong-notes", "/api/v1/ai/wrong-notes/*/*").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/study-program", "/api/v1/study-program/preview").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/extra-learning", "/api/v1/extra-learning/topics", "/api/v1/extra-learning/*").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/extra-learning", "/api/v1/extra-learning/*/time").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/curriculums", "/api/v1/curriculums/*/restart", "/api/v1/curriculums/*/switch", "/api/v1/learning-sessions/*/start",
                                 "/api/v1/curriculums/*/reschedule-preview", "/api/v1/curriculums/*/reschedule",
                                 "/api/v1/rest-days", "/api/v1/learning-sessions/*/complete", "/api/v1/learning-contents/*/complete",
                                 "/api/v1/problem-attempts", "/api/v1/problems/*/reports", "/api/v1/wrong-answers/*/resolve",
-                                "/api/v1/wrong-answers/*/reopen").authenticated()
-                        .requestMatchers(HttpMethod.PATCH, "/api/v1/wrong-answers/*").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/rest-days/*").authenticated()
+                                "/api/v1/study-evaluations", "/api/v1/study-evaluations/*/parts/*/generate", "/api/v1/study-evaluations/*/parts/*/start", "/api/v1/study-evaluations/*/parts/*/submit", "/api/v1/study-evaluations/*/parts/*/grade",
+                                "/api/v1/wrong-answers/*/reopen", "/api/v1/tests/*/attempts", "/api/v1/test-attempts/*/submit",
+                                "/api/v1/evaluations/monthly", "/api/v1/ai/explanations", "/api/v1/ai/practice-problems", "/api/v1/ai/learning-topics",
+                                "/api/v1/ai/wrong-answer-reviews", "/api/v1/ai/daily-feedback", "/api/v1/ai/monthly-reviews",
+                                "/api/v1/ai/practice-sets/*/answers", "/api/v1/ai/practice-sets/*/runs",
+                                "/api/v1/ai/practice-sets/*/reports",
+                                "/api/v1/ai/practice-runs/*/answers",
+                                "/api/v1/notifications/*/read", "/api/v1/notifications/read-all", "/api/v1/push/subscriptions").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/integrations/notion/authorization-requests", "/api/v1/integrations/notion/sync",
+                                "/api/v1/integrations/notion/sync-jobs/*/retry", "/api/v1/integrations/slack/test-messages").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/wrong-answers/*", "/api/v1/ai/wrong-notes/*/*").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/settings", "/api/v1/notifications/settings", "/api/v1/integrations/slack").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/study-evaluations/*/parts/*/answers", "/api/v1/test-attempts/*/answers/*", "/api/v1/integrations/notion/targets").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/rest-days/*", "/api/v1/push/subscriptions/*", "/api/v1/integrations/notion").authenticated()
                         .anyRequest().denyAll())
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)

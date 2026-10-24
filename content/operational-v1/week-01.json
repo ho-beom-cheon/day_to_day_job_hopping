@@ -1,0 +1,199 @@
+{
+  "status": "EDITORIAL_DRAFT",
+  "curriculumCode": "BACKEND-CAREER-6M-V1",
+  "subjectCode": "JAVA",
+  "weekNo": 1,
+  "monthNo": 1,
+  "title": "Java 값과 동등성",
+  "audience": "Java/Spring 경력 5년 이상",
+  "dailyEstimatedMinutes": 105,
+  "dailyPlan": "1~4일차: 학습 80분, 일간 시험 10분, 회고 15분. 5일차: 학습 55분, 일간 시험 10분, 주간 시험 30분, 회고 10분",
+  "contentType": "PRACTICE",
+  "completionRule": "ALL_PROBLEMS_ATTEMPTED",
+  "learningGoals": [
+    "참조 동일성과 값 동등성을 구분한다.",
+    "동등성 규칙과 해시 기반 컬렉션의 관계를 설명한다.",
+    "변경에 안전한 값 객체를 설계한다."
+  ],
+  "lessons": [
+    {
+      "dayNo": 1,
+      "title": "참조 동일성과 값 동등성",
+      "estimatedMinutes": 80,
+      "objective": "두 객체가 같은 인스턴스인지와 같은 값을 나타내는지 구분하고 비교 방법을 선택한다.",
+      "keyPoints": [
+        "객체의 ==는 두 참조가 같은 객체를 가리키는지 검사한다.",
+        "Object.equals의 기본 구현은 참조 동일성이며, String 등은 값 비교로 재정의한다.",
+        "null 가능성이 있으면 Objects.equals(a, b)로 안전하게 비교할 수 있다."
+      ],
+      "interviewPoints": ["==와 equals의 결과가 달라지는 예와 그 이유를 설명한다."],
+      "bodyMarkdown": "# 두 가지 '같다'\n\n객체 변수에는 객체 자체가 아니라 참조가 들어 있다. `a == b`는 두 참조가 동일한 객체를 가리키는지 본다. 업무에서는 별도로 만들어진 두 객체가 같은 값을 뜻할 수도 있다. 이때는 그 타입이 정의한 `equals`를 사용한다. `Object`의 기본 `equals`는 참조 비교이므로, 사용자 정의 클래스가 값 동등성을 원한다면 규칙을 직접 구현해야 한다.\n\n```java\nString a = new String(\"same\");\nString b = new String(\"same\");\nboolean sameReference = a == b;       // false\nboolean sameValue = a.equals(b);      // true\n```\n\n문자열 리터럴의 풀링 여부에 기대어 `==`를 값 비교에 사용하지 않는다. 비교할 값이 `null`일 수 있다면 `Objects.equals(a, b)`를 사용하거나 입력 경계에서 null을 금지한다. 도메인 식별자와 표시 이름 중 무엇을 동등성 기준으로 삼을지도 먼저 정해야 한다.",
+      "sourceReferences": [
+        {"title": "Java SE 21 Object.equals", "url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html"},
+        {"title": "Java SE 21 Objects.equals", "url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Objects.html"}
+      ],
+      "lab": {
+        "task": "주문 ID, 외부 요청 ID, 표시명을 가진 작은 주문 서비스를 작성한다. 각 비교의 의미를 표로 정리하고, 변경 가능한 표시명을 식별자로 사용한 버전을 안정적인 ID 기반으로 고친다.",
+        "acceptanceCriteria": ["동일 인스턴스·별도 인스턴스 동일 값·null의 세 경우를 테스트한다.", "식별자와 표시값의 동등성 기준을 구분해 설명한다."],
+        "reviewerGuide": "중복 요청 판정에는 외부 요청 ID의 값 비교와 명시적인 null 정책을 사용한다. 표시 이름을 안정적인 식별자로 취급하지 않는다."
+      },
+      "question": {
+        "id": "W01-D01-Q1",
+        "type": "SINGLE_CHOICE",
+        "difficulty": 2,
+        "prompt": "서로 다른 요청에서 역직렬화한 두 `externalOrderId`가 모두 문자열 `A-17`이다. 중복 요청 검사에 `firstId == secondId`를 사용한 코드의 가장 적절한 리뷰 의견은?",
+        "choices": [
+          {"id": "A", "text": "String은 불변이므로 ==가 항상 값 비교를 수행한다."},
+          {"id": "B", "text": "intern을 호출해 모든 외부 ID를 전역 풀에 넣는다."},
+          {"id": "C", "text": "hashCode가 같으면 같은 주문 ID로 확정한다."},
+          {"id": "D", "text": "ID의 null 정책을 정하고 equals 또는 Objects.equals로 값을 비교한다."}
+        ],
+        "answer": "D",
+        "explanation": "역직렬화한 값의 참조 동일성은 요청 중복의 기준이 아니다. ID 값과 null 허용 여부를 명시하고 값 동등성으로 판단한다."
+      }
+    },
+    {
+      "dayNo": 2,
+      "title": "equals와 hashCode의 계약",
+      "estimatedMinutes": 80,
+      "objective": "값 동등성을 구현할 때 해시 기반 컬렉션의 필수 계약을 함께 지킨다.",
+      "keyPoints": [
+        "equals가 true인 두 객체는 같은 hashCode를 반환해야 한다.",
+        "hashCode가 같은 두 객체가 반드시 equals인 것은 아니다.",
+        "동등성 판단에 쓰는 필드와 해시 계산에 쓰는 필드를 일치시킨다."
+      ],
+      "interviewPoints": ["equals만 재정의하고 hashCode를 그대로 두면 HashSet에서 어떤 문제가 생기는지 설명한다."],
+      "bodyMarkdown": "# 값 비교와 해시 탐색을 함께 설계한다\n\n`HashMap`과 `HashSet`은 먼저 해시값으로 탐색 범위를 좁히고 그 안에서 동등성을 확인한다. 따라서 두 객체가 `equals`로 같다면 `hashCode`도 같아야 한다. 반대는 성립하지 않는다. 서로 다른 객체의 해시 충돌은 허용되며, 그때 최종 판단은 `equals`가 한다.\n\n예를 들어 주문 식별자를 기준으로 두 `OrderKey`를 같다고 정했다면 해시값도 주문 식별자에서 계산한다. 금액처럼 변경될 수 있는 값을 해시에 추가하면서 `equals`에는 포함하지 않으면 계약이 깨진다. 구현 후에는 별도 인스턴스로 같은 값을 만들어 `equals`, `hashCode`, `HashSet.contains`를 함께 테스트한다.",
+      "sourceReferences": [
+        {"title": "Java SE 21 Object.hashCode and equals", "url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html"}
+      ],
+      "lab": {
+        "task": "주문 식별자 값 객체의 equals·hashCode를 구현하고 HashSet 및 HashMap을 사용하는 테스트를 작성한다. 일부러 두 객체의 hashCode가 충돌하는 사례도 추가해 최종 비교가 equals로 이뤄짐을 확인한다.",
+        "acceptanceCriteria": ["동등한 별도 인스턴스의 해시값이 같다.", "서로 다른 값이 해시 충돌하더라도 잘못된 동등성 결과가 나오지 않는다."],
+        "reviewerGuide": "주문 ID가 동등성 기준이면 equals와 hashCode 모두 같은 주문 ID에서 계산한다. 충돌 테스트는 다른 주문 ID에 같은 해시값을 의도적으로 반환하는 별도 테스트 타입으로 구성한다."
+      },
+      "question": {
+        "id": "W01-D02-Q1",
+        "type": "SINGLE_CHOICE",
+        "difficulty": 3,
+        "prompt": "`CacheKey(tenantId, userId)`의 equals는 userId만 비교하고 hashCode는 두 필드를 모두 사용한다. 서로 다른 tenantId에 같은 userId가 있을 때 가장 중요한 결함은?",
+        "choices": [
+          {"id": "A", "text": "equals와 hashCode가 다른 필드를 사용해 계약이 깨지고, 테넌트 식별 정책도 모호하다."},
+          {"id": "B", "text": "해시 충돌이 없어져 조회가 빨라진다."},
+          {"id": "C", "text": "Map이 tenantId를 자동으로 보완해 올바른 키를 만든다."},
+          {"id": "D", "text": "toString만 재정의하면 두 메서드가 자동으로 일치한다."}
+        ],
+        "answer": "A",
+        "explanation": "같다고 판단한 두 키의 해시값은 같아야 한다. 테넌트 경계가 식별자의 일부인지 먼저 결정하고 equals와 hashCode에 같은 규칙을 적용해야 한다."
+      }
+    },
+    {
+      "dayNo": 3,
+      "title": "가변 객체를 Map 키로 쓰는 위험",
+      "estimatedMinutes": 80,
+      "objective": "해시 기반 컬렉션에 넣은 뒤 키의 동등성 필드를 변경하면 조회가 깨질 수 있음을 설명한다.",
+      "keyPoints": [
+        "해시를 결정하는 상태가 변경되면 저장 당시와 조회 당시의 탐색 위치가 달라질 수 있다.",
+        "키에는 불변 식별자 또는 변경 불가능한 값 객체를 사용한다.",
+        "가변 객체를 사용할 수밖에 없다면 키로 삼는 필드는 변경하지 않는 규칙을 강제한다."
+      ],
+      "interviewPoints": ["HashMap에 넣은 객체를 수정한 뒤 containsKey가 false가 되는 이유를 설명한다."],
+      "bodyMarkdown": "# 저장한 키를 바꾸지 않는다\n\n해시 기반 Map은 `put`할 때 계산한 해시값을 바탕으로 항목을 배치한다. 이후 키의 `equals`·`hashCode`에 쓰이는 값이 바뀌면 같은 객체를 들고 조회해도 새 해시값으로 다른 위치를 찾을 수 있다. 항목은 Map 안에 남아 있지만 정상적인 키 조회가 실패하는 상황이다.\n\n사용자 계정의 표시 이름은 바뀔 수 있지만 사용자 ID는 안정적이다. 따라서 캐시 키나 집합 요소를 표시 이름 기반 가변 객체로 만들기보다 안정적인 ID 또는 불변 값 객체로 만든다. 동등성 필드가 변경되지 않는다는 가정을 코드와 테스트에서 확인한다.",
+      "sourceReferences": [
+        {"title": "Java SE 21 HashMap", "url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/HashMap.html"},
+        {"title": "Java SE 21 Object.hashCode", "url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html"}
+      ],
+      "lab": {
+        "task": "가변 필드를 키 동등성에 포함한 최소 재현 코드를 작성한다. 저장 뒤 해당 필드를 변경해 조회 실패를 관찰하고, 불변 키로 교체한 버전과 결과를 비교한다.",
+        "acceptanceCriteria": ["문제 재현 테스트가 수정 전 실패하고 수정 후 통과한다.", "키의 변경 가능성을 어디서 통제하는지 코드 리뷰 메모로 남긴다."],
+        "reviewerGuide": "키의 hashCode 입력인 status를 변경하는 재현 코드를 작성한다. 수정안은 변경되지 않는 invoiceId를 키로 쓰고 status를 값의 속성으로 분리한다."
+      },
+      "question": {
+        "id": "W01-D03-Q1",
+        "type": "SINGLE_CHOICE",
+        "difficulty": 2,
+        "prompt": "`Map<InvoiceKey, Invoice>`에 키를 넣은 뒤 키의 `status`를 바꾸자 같은 키 객체로 조회해도 null이 나왔다. status가 hashCode 입력인 현재 설계에서 가장 적절한 수정은?",
+        "choices": [
+          {"id": "A", "text": "조회 전에 status를 원래 값으로 임시 변경한다."},
+          {"id": "B", "text": "조회 실패 시 Map 전체를 순회하는 코드를 기본 경로로 둔다."},
+          {"id": "C", "text": "hashCode에 현재 시각을 더해 키 분포를 넓힌다."},
+          {"id": "D", "text": "변경되지 않는 invoiceId 기반의 불변 키로 교체한다."}
+        ],
+        "answer": "D",
+        "explanation": "키의 해시 입력 상태가 변경되면 저장 위치와 조회 위치가 달라질 수 있다. 안정적인 식별자를 키로 사용해 변경 가능한 상태와 분리한다."
+      }
+    },
+    {
+      "dayNo": 4,
+      "title": "record의 값 모델과 얕은 불변성",
+      "estimatedMinutes": 80,
+      "objective": "record가 생성하는 메서드와 참조 필드의 변경 가능성을 구분한다.",
+      "keyPoints": [
+        "record는 컴포넌트 기반 생성자·접근자·equals·hashCode·toString을 제공한다.",
+        "컴포넌트 참조를 다시 대입할 수 없어도 참조한 객체 자체는 변경 가능할 수 있다.",
+        "컬렉션을 받는 값 모델은 방어적 복사와 유효성 검사를 고려한다."
+      ],
+      "interviewPoints": ["List를 컴포넌트로 가진 record가 완전히 불변인지는 예를 들어 판단한다."],
+      "bodyMarkdown": "# record가 보장하는 범위를 확인한다\n\n`record OrderLine(String sku, int quantity)`는 컴포넌트에 맞는 생성자와 접근자, 값 기반 `equals`·`hashCode` 등을 자동으로 제공한다. 값 전달 객체를 간결하게 표현할 수 있지만, 컴포넌트가 참조하는 객체까지 자동으로 불변이 되는 것은 아니다.\n\n```java\nrecord Order(String id, List<String> items) {\n    Order { items = List.copyOf(items); }\n}\n```\n\n이 예에서는 생성 시 전달받은 리스트를 복사해 외부 변경을 차단한다. 요소 자체가 변경 가능한 객체라면 요소의 변경 가능성도 별도로 검토해야 한다. `record`라는 문법만으로 모든 도메인 불변식이 보장된다고 설명하지 않는다.",
+      "sourceReferences": [
+        {"title": "Dev.java Using Records to Model Immutable Data", "url": "https://dev.java/learn/records/"},
+        {"title": "Java SE 21 List.copyOf", "url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html"}
+      ],
+      "lab": {
+        "task": "외부 요청 DTO와 도메인 값 객체를 각각 record로 작성한다. 가변 List 전달, null 요소, 수정 가능한 요소 객체를 넣어 방어적 복사의 한계를 테스트한다.",
+        "acceptanceCriteria": ["원본 List 변경이 생성된 값 객체에 영향을 주지 않는다.", "요소가 가변일 때 추가 복사가 필요한지 설계 판단을 기록한다."],
+        "reviewerGuide": "컬렉션 구조는 List.copyOf로 보호한다. 요소까지 불변으로 만들거나 별도 불변 DTO로 복사해야 하는지 요소 타입별로 판단한다."
+      },
+      "question": {
+        "id": "W01-D04-Q1",
+        "type": "SINGLE_CHOICE",
+        "difficulty": 2,
+        "prompt": "`record Basket(List<Line> lines)`에서 생성자에 `lines = List.copyOf(lines)`를 추가했다. `Line`은 변경 가능한 클래스다. 이 설계의 남은 위험은?",
+        "choices": [
+          {"id": "A", "text": "record에는 List 컴포넌트를 사용할 수 없다."},
+          {"id": "B", "text": "List.copyOf가 Line을 자동으로 깊은 복사한다."},
+          {"id": "C", "text": "Line 상태가 바뀌면 Basket의 관찰 가능한 값과 해시가 바뀔 수 있다."},
+          {"id": "D", "text": "List 구조가 변경되면 Basket도 항상 함께 변경된다."}
+        ],
+        "answer": "C",
+        "explanation": "List.copyOf는 컬렉션 구조의 변경을 막지만 가변 Line 자체를 복사하지 않는다. 요소 변경이 동등성과 해시에 영향을 줄 수 있다."
+      }
+    },
+    {
+      "dayNo": 5,
+      "title": "금액 값 객체의 동등성 규칙",
+      "estimatedMinutes": 55,
+      "objective": "금액과 통화를 함께 모델링하고 소수 표현·비교 정책을 명시한다.",
+      "keyPoints": [
+        "금액에는 임의 정밀도 십진수와 통화 단위를 함께 보관한다.",
+        "BigDecimal.equals는 값뿐 아니라 scale도 비교하며 compareTo는 수치적 크기를 비교한다.",
+        "도메인 동등성, 허용 소수 자릿수, 반올림 정책을 명시하고 입력 경계에서 검증한다."
+      ],
+      "interviewPoints": ["1.0과 1.00의 비교 결과가 다를 수 있는 이유와 금액 도메인의 해결책을 설명한다."],
+      "bodyMarkdown": "# 금액의 의미를 코드로 고정한다\n\n`BigDecimal`은 정확한 십진 표현을 제공하지만 비교 규칙을 대신 결정해 주지는 않는다. `new BigDecimal(\"1.0\")`과 `new BigDecimal(\"1.00\")`은 `compareTo`로 비교하면 수치상 같고, `equals`로 비교하면 scale이 달라 다르다. 이를 Map 키나 값 객체의 동등성 규칙으로 사용할 때 예상과 다른 결과가 나올 수 있다.\n\n금액 값 객체에는 통화를 함께 넣고, 해당 통화와 업무 규칙이 허용하는 소수 자릿수·반올림 방식을 입력 경계에서 검증한다. 예를 들어 KRW 결제 금액을 정수 원 단위로만 받는 정책이라면 그 정책을 명시적으로 검사한다. 모든 통화에 동일한 자릿수를 강제하거나 `double`에서 바로 금액을 만드는 규칙을 암묵적으로 두지 않는다.\n\n실무 질문: 같은 수치이지만 scale이 다른 금액을 같은 값으로 볼 것인가? 답은 도메인 계약에 따라 정하고, 정규화 방식과 `equals`·`hashCode`·DB 저장 형식이 충돌하지 않게 테스트한다.",
+      "sourceReferences": [
+        {"title": "Java SE 21 BigDecimal", "url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/math/BigDecimal.html"},
+        {"title": "Java SE 21 Currency", "url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Currency.html"}
+      ],
+      "lab": {
+        "task": "통화와 BigDecimal을 가진 Money 값 객체를 설계한다. 1.0/1.00, 음수, 서로 다른 통화, 허용하지 않는 자릿수의 입력을 테스트하고, 정규화 시점과 반올림 정책을 문서화한다.",
+        "acceptanceCriteria": ["동등성·해시·DB 저장 표현이 같은 정책을 따른다.", "정책에 없는 통화·자릿수 가정을 코드에 암묵적으로 넣지 않는다."],
+        "reviewerGuide": "BigDecimal 입력·scale 정책을 생성 시점에 검증하거나 정규화하고 통화를 동등성에 포함한다. 1.0과 1.00, 서로 다른 통화, 잘못된 자릿수의 기대 결과를 정책 표로 먼저 고정한다."
+      },
+      "question": {
+        "id": "W01-D05-Q1",
+        "type": "SINGLE_CHOICE",
+        "difficulty": 2,
+        "prompt": "`record Money(BigDecimal amount, Currency currency)`의 기본 equals를 사용한다. 업무는 `1.0 KRW`와 `1.00 KRW`를 같은 금액으로 본다. 가장 적절한 수정은?",
+        "choices": [
+          {"id": "A", "text": "입력에서 허용 scale과 정규화 규칙을 정하고 동등성·해시·저장 표현을 일치시킨다."},
+          {"id": "B", "text": "기본 equals가 수치만 비교하므로 그대로 둔다."},
+          {"id": "C", "text": "통화를 무시하고 amount.compareTo만 사용한다."},
+          {"id": "D", "text": "amount를 double로 바꿔 비교한다."}
+        ],
+        "answer": "A",
+        "explanation": "BigDecimal.equals는 scale을 구분한다. 업무가 수치적 동등성을 요구한다면 허용 자릿수와 정규화 규칙을 명시하고 통화를 포함한 동등성·해시·DB 표현을 함께 맞춘다."
+      }
+    }
+  ]
+}

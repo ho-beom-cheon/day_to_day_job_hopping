@@ -43,6 +43,6 @@ public class GoogleLoginConfiguration {
                 .tokenUri("https://oauth2.googleapis.com/token")
                 .jwkSetUri("https://www.googleapis.com/oauth2/v3/certs")
                 .issuerUri("https://accounts.google.com").userNameAttributeName("sub").build();
-        return new GoogleLogin(new InMemoryClientRegistrationRepository(google), new ExpiringAuthorizationRequests(jdbc), users, allowed);
+        return new GoogleLogin(new InMemoryClientRegistrationRepository(google), new ExpiringAuthorizationRequests(jdbc), users, allowed, base);
     }
 }

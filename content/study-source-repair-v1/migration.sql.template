@@ -1,0 +1,36 @@
+-- Additive evidence only. Original sources, assignments, attempts and goals stay immutable.
+CREATE TABLE daily_career.study_source_review (
+    content_digest varchar(64) PRIMARY KEY CHECK (content_digest ~ '^[0-9a-f]{64}$'),
+    body_sha256 varchar(64) NOT NULL CHECK (body_sha256 ~ '^[0-9a-f]{64}$'),
+    assessment_body text CHECK (assessment_body IS NULL OR length(assessment_body)>=200),
+    review_origin varchar(60) NOT NULL,
+    review_note text NOT NULL,
+    reviewed_at timestamptz NOT NULL DEFAULT clock_timestamp()
+);
+COMMENT ON TABLE daily_career.study_source_review IS '원본 digest와 실제 본문 SHA-256에 묶인 평가 근거. 기존 교재/진도 변경 또는 사람 검수 주장이 아님.';
+INSERT INTO daily_career.study_source_review(content_digest,body_sha256,assessment_body,review_origin,review_note)
+SELECT content_digest,body_sha256,assessment_body,review_origin,review_note
+FROM jsonb_to_recordset('{{RECORDS}}'::jsonb)
+AS r(content_digest text,body_sha256 text,assessment_body text,review_origin text,review_note text);
+
+-- One policy for visible optional topics and completed-learning assessments.
+CREATE VIEW daily_career.study_source_readiness AS
+WITH evidence AS (
+    SELECT v.id content_version_id,c.owner_user_id,
+      coalesce(r.assessment_body,v.body_markdown) body_markdown,
+      v.version_no::text || ':' || v.content_digest || ':' ||
+        encode(sha256(convert_to(coalesce(r.assessment_body,v.body_markdown),'UTF8')),'hex') source_version,
+      v.status IN ('PUBLISHED','RETIRED') published,
+      (r.content_digest IS NOT NULL
+        OR EXISTS(SELECT 1 FROM daily_career.study_topic_detail t WHERE t.content_version_id=v.id)
+        OR EXISTS(SELECT 1 FROM daily_career.ai_learning_topic t WHERE t.content_version_id=v.id AND t.user_id=c.owner_user_id)
+        OR EXISTS(SELECT 1 FROM daily_career.curriculum_item_content ci
+          JOIN daily_career.curriculum_unit cu ON cu.id=ci.curriculum_unit_id
+          JOIN daily_career.catalog_import imp ON imp.curriculum_version_id=cu.curriculum_version_id
+          WHERE ci.content_version_id=v.id AND imp.reviewed_at IS NOT NULL)) reviewed
+    FROM daily_career.learning_content_version v
+    JOIN daily_career.learning_content c ON c.id=v.learning_content_id
+    LEFT JOIN daily_career.study_source_review r ON r.content_digest=v.content_digest
+      AND r.body_sha256=encode(sha256(convert_to(v.body_markdown,'UTF8')),'hex')
+)
+SELECT *,reviewed AND published AND length(body_markdown)>=200 ready FROM evidence;

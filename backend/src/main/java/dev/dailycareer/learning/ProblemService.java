@@ -30,6 +30,8 @@ public class ProblemService {
 
     @Transactional(readOnly=true)
     public Problem problem(long user,long problem) {return view(access(user,problem,null));}
+    @Transactional(readOnly=true)
+    public Problem problem(long user,long problem,Long content) {return view(access(user,problem,content));}
 
     @Transactional
     public StoredReply submit(long user,AttemptRequest input,UUID key) {
@@ -43,8 +45,8 @@ public class ProblemService {
         long course=id(p,"user_curriculum_id"),version=id(p,"problem_version_id");Long session=nullableId(p,"learning_session_id");
         int attemptNo=jdbc.queryForObject("""
                 select count(*)+1 from daily_career.problem_attempt a join daily_career.problem_version v on v.id=a.problem_version_id
-                where a.user_id=? and v.problem_id=? and a.status='SUBMITTED'
-                """,Integer.class,user,id(p,"problem_id"));
+                where a.user_id=? and a.user_curriculum_id=? and v.problem_id=? and a.status='SUBMITTED'
+                """,Integer.class,user,course,id(p,"problem_id"));
         Map<String,Object> answerPayload=new LinkedHashMap<>();answerPayload.put("answer",input.answer());
         answerPayload.put("contentId",input.contentId()==null?null:Long.toString(input.contentId()));
         long attempt=insert("""
@@ -83,7 +85,8 @@ public class ProblemService {
                 select a.id,a.problem_version_id,v.problem_id,a.answer_payload->>'answer' answer,a.answer_payload->>'contentId' content_id,a.submitted_at,
                   v.question_type,v.choices::text,v.answer_key::text,v.explanation_markdown,r.is_correct,
                   (select count(*) from daily_career.problem_attempt x join daily_career.problem_version xv on xv.id=x.problem_version_id
-                    where x.user_id=a.user_id and xv.problem_id=v.problem_id and x.status='SUBMITTED'
+                    where x.user_id=a.user_id and x.user_curriculum_id=a.user_curriculum_id
+                    and xv.problem_id=v.problem_id and x.status='SUBMITTED'
                     and (x.submitted_at<a.submitted_at or (x.submitted_at=a.submitted_at and x.id<=a.id))) attempt_no,
                   w.id wrong_id,(o.id=(select min(o2.id) from daily_career.wrong_answer_occurrence o2 where o2.wrong_answer_id=w.id and o2.status='VALID')) wrong_created
                 from daily_career.problem_attempt a join daily_career.grading_run g on g.problem_attempt_id=a.id and g.is_current
@@ -93,10 +96,31 @@ public class ProblemService {
                 left join daily_career.wrong_answer w on w.id=o.wrong_answer_id
                 where a.id=? and a.user_id=?
                 """,attempt,user);
-        if(rows.isEmpty())throw new ApiException(RESOURCE_NOT_FOUND);var r=rows.getFirst();Answer key=answer(r,(String)r.get("answer"));
-        Long content=r.get("content_id")==null?null:Long.valueOf((String)r.get("content_id"));
-        return new Attempt(id(r,"id"),id(r,"problem_id"),content,(String)r.get("answer"),(Boolean)r.get("is_correct"),key.correctAnswer,
-                (String)r.get("explanation_markdown"),number(r,"attempt_no"),nullableId(r,"wrong_id"),Boolean.TRUE.equals(r.get("wrong_created")),time(r,"submitted_at"));
+        if(rows.isEmpty())throw new ApiException(RESOURCE_NOT_FOUND);return attempt(rows.getFirst());
+    }
+
+    @Transactional(readOnly=true)
+    public AttemptPage attempts(long user,Long problemId,int page,int size,String sort) {
+        users.current(user);if(page<0||size<1||size>100)throw new ApiException(VALIDATION_FAILED);String order=switch(sort==null?"submittedAt,desc":sort){case "submittedAt,desc"->"a.submitted_at desc,a.id";case "submittedAt,asc"->"a.submitted_at,a.id";default->throw new ApiException(INVALID_SORT_FIELD);};long problem=problemId==null?0:problemId;
+        var all=jdbc.queryForList("""
+                select a.id,a.problem_version_id,v.problem_id,a.answer_payload->>'answer' answer,a.answer_payload->>'contentId' content_id,a.submitted_at,
+                  v.question_type,v.choices::text,v.answer_key::text,v.explanation_markdown,r.is_correct,
+                  (select count(*) from daily_career.problem_attempt x join daily_career.problem_version xv on xv.id=x.problem_version_id
+                    where x.user_id=a.user_id and x.user_curriculum_id=a.user_curriculum_id
+                    and xv.problem_id=v.problem_id and x.status='SUBMITTED'
+                    and (x.submitted_at<a.submitted_at or (x.submitted_at=a.submitted_at and x.id<=a.id))) attempt_no,
+                  w.id wrong_id,(o.id=(select min(o2.id) from daily_career.wrong_answer_occurrence o2 where o2.wrong_answer_id=w.id and o2.status='VALID')) wrong_created
+                from daily_career.problem_attempt a join daily_career.grading_run g on g.problem_attempt_id=a.id and g.is_current
+                join daily_career.grading_result r on r.grading_run_id=g.id and r.problem_attempt_id=a.id
+                join daily_career.problem_version v on v.id=a.problem_version_id
+                left join daily_career.wrong_answer_occurrence o on o.grading_result_id=r.id and o.status='VALID'
+                left join daily_career.wrong_answer w on w.id=o.wrong_answer_id
+                where a.user_id=? and a.context_type='PRACTICE' and a.status='SUBMITTED'
+                  and exists (select 1 from daily_career.user_curriculum c where c.id=a.user_curriculum_id
+                              and c.user_id=a.user_id and c.status in ('PLANNED','ACTIVE','PAUSED','COMPLETED'))
+                  and (?=0 or v.problem_id=?)
+                """+" order by "+order,user,problem,problem);
+        int total=all.size(),from=Math.min(page*size,total),to=Math.min(from+size,total);return new AttemptPage(all.subList(from,to).stream().map(this::attempt).toList(),page,size,total,total==0?0:(total+size-1)/size);
     }
 
     @Transactional
@@ -152,6 +176,8 @@ public class ProblemService {
         }return wrong(user,wrong);
     }
 
+    private Attempt attempt(Map<String,Object> row){Answer key=answer(row,(String)row.get("answer"));Long content=row.get("content_id")==null?null:Long.valueOf((String)row.get("content_id"));return new Attempt(id(row,"id"),id(row,"problem_id"),content,(String)row.get("answer"),(Boolean)row.get("is_correct"),key.correctAnswer,(String)row.get("explanation_markdown"),number(row,"attempt_no"),nullableId(row,"wrong_id"),Boolean.TRUE.equals(row.get("wrong_created")),time(row,"submitted_at"));}
+
     private void validateResolution(long user,Map<String,Object> w,ResolveRequest input) {
         if(input.resolutionType()==ResolutionType.MANUAL) {if(input.attemptId()!=null)throw new ApiException(WRONG_RESOLUTION_EVIDENCE_INVALID);return;}
         if(input.attemptId()==null)throw new ApiException(WRONG_RESOLUTION_EVIDENCE_INVALID);
@@ -171,12 +197,19 @@ public class ProblemService {
                   (select ls.id from daily_career.learning_session ls where ls.user_id=a.user_id and ls.learning_day_item_id=a.learning_day_item_id
                     order by ls.started_at desc,ls.id desc limit 1) learning_session_id,
                   (select count(*) from daily_career.problem_attempt x join daily_career.problem_version xv on xv.id=x.problem_version_id
-                    where x.user_id=a.user_id and xv.problem_id=p.id and x.status='SUBMITTED') attempt_count
+                    where x.user_id=a.user_id and x.user_curriculum_id=i.user_curriculum_id
+                      and xv.problem_id=p.id and x.status='SUBMITTED'
+                      and (case when exists(select 1 from daily_career.extra_learning e where e.session_id=i.id and e.mode<>'AHEAD')
+                        then x.answer_payload->>'contentId'=a.id::text
+                        else not exists(select 1 from daily_career.assigned_content ac join daily_career.extra_learning e on e.session_id=ac.learning_day_item_id
+                          where ac.id::text=x.answer_payload->>'contentId' and e.mode<>'AHEAD') end)) attempt_count
                 from daily_career.problem_version v join daily_career.problem p on p.id=v.problem_id join daily_career.subject s on s.id=p.subject_id
                 join daily_career.learning_content_problem cp on cp.problem_version_id=v.id
                 join daily_career.assigned_content a on a.content_version_id=cp.content_version_id and a.user_id=?
                 join daily_career.learning_day_item i on i.id=a.learning_day_item_id and i.user_id=a.user_id
-                where p.id=? and v.status='PUBLISHED' and p.enabled and (p.owner_user_id is null or p.owner_user_id=?)
+                join daily_career.user_curriculum c on c.id=i.user_curriculum_id and c.user_id=i.user_id
+                where p.id=? and c.status in ('PLANNED','ACTIVE','PAUSED','COMPLETED')
+                  and v.status='PUBLISHED' and p.enabled and (p.owner_user_id is null or p.owner_user_id=?)
                 """+(content==null?"":" and a.id=? ")+"""
                 order by a.completed_at nulls first,a.id limit 1
                 """;
@@ -204,8 +237,9 @@ public class ProblemService {
               from daily_career.wrong_answer_occurrence o
               join daily_career.grading_result r on r.id=o.grading_result_id
               join daily_career.problem_attempt a on a.id=r.problem_attempt_id
+              join daily_career.user_curriculum c on c.id=a.user_curriculum_id and c.user_id=a.user_id
               join daily_career.problem_version v on v.id=a.problem_version_id
-              where o.status='VALID'
+              where o.status='VALID' and c.status in ('PLANNED','ACTIVE','PAUSED','COMPLETED','CANCELED')
             )
             select w.*,p.id problem_id,s.code category,o.prompt_markdown,o.difficulty,o.answer_key,o.choices,o.question_type,o.explanation_markdown,
               o.wrong_count,o.created_at last_wrong_at,o.my_last_answer

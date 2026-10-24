@@ -9,6 +9,8 @@
 | # | Screen | Normalized file | Source file |
 |---:|---|---|---|
 | 1 | 오늘 홈 / 대시보드 | `core/01_today_home_dashboard.png` | `hobeom_학습_대시보드_화면.png` |
+| 1A | 오늘 홈 / 대시보드 PC 상단 (승인) | `core/01a_today_home_dashboard_pc_top.png` | 2026-09-21 사용자 승인 생성 시안 |
+| 1B | 오늘 홈 / 대시보드 PC 스크롤 하단 (승인) | `core/01b_today_home_dashboard_pc_scrolled.png` | 2026-09-21 사용자 승인 생성 시안 |
 | 2 | 6개월 커리큘럼 / 로드맵 | `core/02_six_month_curriculum_roadmap.png` | `호범_6개월_학습_로드맵.png` |
 | 3 | 오늘 학습 상세 | `core/03_today_learning_detail.png` | `java_컬렉션_학습_화면.png` |
 | 4 | 문제 풀이 | `core/04_practice_question.png` | `한국어_퀴즈_문제_풀이_화면.png` |

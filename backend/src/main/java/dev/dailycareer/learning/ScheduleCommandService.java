@@ -126,7 +126,8 @@ public class ScheduleCommandService {
         if(base.isBefore(queries.today()) || (target!=null && !target.equals(base)))throw new ApiException(VALIDATION_FAILED);
         List<DayRow> all=jdbc.query("""
                 select d.id,d.local_date,a.day_no,d.source,d.day_type,
-                  exists(select 1 from daily_career.learning_day_item i where i.learning_day_id=d.id and
+                  exists(select 1 from daily_career.learning_day_item i where i.learning_day_id=d.id
+                    and not exists(select 1 from daily_career.extra_learning e where e.session_id=i.id and e.mode<>'AHEAD') and
                     (i.status<>'NOT_STARTED' or (i.test_version_id is not null and exists(select 1 from daily_career.test_attempt t where t.user_id=i.user_id and t.user_curriculum_id=i.user_curriculum_id and t.test_version_id=i.test_version_id)))) locked
                 from daily_career.learning_day d join daily_career.assigned_learning_day a on a.learning_day_id=d.id
                 where d.user_id=? and d.user_curriculum_id=? order by a.day_no
@@ -134,7 +135,7 @@ public class ScheduleCommandService {
         if(all.isEmpty())throw new ApiException(RESOURCE_NOT_FOUND);
         if(target!=null && request.action()==Action.REST_ADD && all.stream().anyMatch(d->d.date().equals(target)&&d.locked()))throw new ApiException(RESCHEDULE_LOCKED_DAY);
         Set<LocalDate> manualRest=new HashSet<>(jdbc.queryForList("select local_date from daily_career.learning_day where user_id=? and user_curriculum_id=? and source='MANUAL' and day_type='REST'",LocalDate.class,user,course.id()));
-        Set<LocalDate> manualStudy=new HashSet<>(jdbc.queryForList("select local_date from daily_career.learning_day where user_id=? and user_curriculum_id=? and source='MANUAL' and day_type='STUDY'",LocalDate.class,user,course.id()));
+        Set<LocalDate> manualStudy=new HashSet<>(jdbc.queryForList("select local_date from daily_career.learning_day d where user_id=? and user_curriculum_id=? and source='MANUAL' and day_type='STUDY' and exists(select 1 from daily_career.assigned_learning_day a where a.learning_day_id=d.id)",LocalDate.class,user,course.id()));
         if(request.action()==Action.REST_ADD) {manualRest.add(target);manualStudy.remove(target);}
         if(request.action()==Action.REST_REMOVE) {manualRest.remove(target);manualStudy.add(target);}
         if(target!=null && request.action()==Action.REST_REMOVE) {
@@ -169,6 +170,7 @@ public class ScheduleCommandService {
         for(DayRow d:plan.days()) {
             if(d.date().isBefore(base)||d.locked())continue;
             LocalDate destination=plan.destinations().get(d.id());
+            mergeExtraDay(user,course.id(),d.id(),destination);
             String source=plan.manualStudy().contains(destination)?"MANUAL":"POLICY";
             jdbc.update("update daily_career.learning_day set local_date=?,day_type='STUDY',source=?,schedule_policy_id=?,planned_minutes=?,rest_reason=null,updated_at=clock_timestamp(),revision=revision+1 where id=?",
                     destination,source,policyId,plan.policy().dailyStudyMinutes(),d.id());
@@ -179,7 +181,26 @@ public class ScheduleCommandService {
             if(manual || (policyRest&&!plan.manualStudy().contains(date)))jdbc.update("""
                     insert into daily_career.learning_day(user_id,user_curriculum_id,local_date,day_type,source,schedule_policy_id,planned_minutes,rest_reason)
                     values (?,?,?,'REST',?,?,0,?)
+                    on conflict(user_curriculum_id,local_date) do update set day_type='REST',source=excluded.source,
+                      schedule_policy_id=excluded.schedule_policy_id,planned_minutes=0,rest_reason=excluded.rest_reason
                     """,user,course.id(),date,manual?"MANUAL":"POLICY",policyId,manual&&request.date()!=null&&date.equals(parseDate(request.date()))?request.reason().name():null);
+        }
+    }
+
+    private void mergeExtraDay(long user,long course,long assignedDay,LocalDate destination) {
+        // A rest/unassigned date can already contain optional practice. Keep its sessions and activity records.
+        var days=jdbc.queryForList("""
+                select d.id from daily_career.learning_day d where d.user_id=? and d.user_curriculum_id=?
+                  and d.local_date=? and d.id<>?
+                  and not exists(select 1 from daily_career.assigned_learning_day a where a.learning_day_id=d.id)
+                  and not exists(select 1 from daily_career.learning_day_item i where i.learning_day_id=d.id
+                    and not exists(select 1 from daily_career.extra_learning e where e.session_id=i.id and e.mode<>'AHEAD'))
+                """,Long.class,user,course,destination,assignedDay);
+        for(long day:days) {
+            int order=jdbc.queryForObject("select coalesce(max(order_no),0) from daily_career.learning_day_item where learning_day_id=?",Integer.class,assignedDay);
+            for(long session:jdbc.queryForList("select id from daily_career.learning_day_item where learning_day_id=? order by order_no,id",Long.class,day))
+                jdbc.update("update daily_career.learning_day_item set learning_day_id=?,order_no=? where id=?",assignedDay,++order,session);
+            jdbc.update("delete from daily_career.learning_day where id=?",day);
         }
     }
 

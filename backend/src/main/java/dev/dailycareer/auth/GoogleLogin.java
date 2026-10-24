@@ -7,6 +7,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,15 +34,21 @@ public final class GoogleLogin {
     private final ExpiringAuthorizationRequests requests;
     private final UserAccountService users;
     private final Set<String> allowedEmails;
+    private final URI appOrigin;
     public GoogleLogin(ClientRegistrationRepository clients, ExpiringAuthorizationRequests requests,
                        UserAccountService users, Set<String> allowedEmails) {
+        this(clients, requests, users, allowedEmails, null);
+    }
+    public GoogleLogin(ClientRegistrationRepository clients, ExpiringAuthorizationRequests requests,
+                       UserAccountService users, Set<String> allowedEmails, URI appOrigin) {
         this.clients = clients; this.requests = requests; this.users = users; this.allowedEmails = allowedEmails;
+        this.appOrigin = appOrigin;
     }
 
     public void configure(HttpSecurity http) throws Exception {
         var resolver = new DefaultOAuth2AuthorizationRequestResolver(clients, "/oauth2/authorization");
         resolver.setAuthorizationRequestCustomizer(OAuth2AuthorizationRequestCustomizers.withPkce());
-        http.addFilterBefore(new Boundary(true), OAuth2AuthorizationRequestRedirectFilter.class);
+        http.addFilterBefore(new Boundary(true, appOrigin), OAuth2AuthorizationRequestRedirectFilter.class);
         http.oauth2Login(login -> login.clientRegistrationRepository(clients)
                 .authorizedClientService(new OAuth2AuthorizedClientService() {
                     @Override public <T extends OAuth2AuthorizedClient> T loadAuthorizedClient(String id, String name) { return null; }
@@ -79,7 +86,9 @@ public final class GoogleLogin {
 
     public static final class Boundary extends OncePerRequestFilter {
         private final boolean enabled;
-        public Boundary(boolean enabled) { this.enabled = enabled; }
+        private final URI appOrigin;
+        public Boundary(boolean enabled) { this(enabled, null); }
+        public Boundary(boolean enabled, URI appOrigin) { this.enabled = enabled; this.appOrigin = appOrigin; }
         @Override protected boolean shouldNotFilter(HttpServletRequest request) {
             return !Set.of("/oauth2/authorization/google", "/login/oauth2/code/google").contains(request.getServletPath());
         }
@@ -90,12 +99,22 @@ public final class GoogleLogin {
             boolean start = request.getServletPath().equals("/oauth2/authorization/google");
             boolean valid = enabled && request.getMethod().equals("GET") && (start ? request.getParameterMap().isEmpty() : validCallback(request));
             if (!valid) { failure(request, response); return; }
+            if (start && appOrigin != null && !sameOrigin(request, appOrigin)) {
+                redirect(response, appOrigin.resolve("/oauth2/authorization/google").toString());
+                return;
+            }
             try { chain.doFilter(request, response); }
             catch (RuntimeException exception) {
                 // Never log exceptions carrying authorization codes, state, tokens or provider responses.
                 if (!response.isCommitted()) failure(request, response);
                 else throw new ServletException("Authentication response already committed");
             }
+        }
+        private static boolean sameOrigin(HttpServletRequest request, URI expected) {
+            int expectedPort = expected.getPort() >= 0 ? expected.getPort() : "https".equals(expected.getScheme()) ? 443 : 80;
+            return expected.getScheme().equalsIgnoreCase(request.getScheme())
+                    && expected.getHost().equalsIgnoreCase(request.getServerName())
+                    && expectedPort == request.getServerPort();
         }
         private static boolean validCallback(HttpServletRequest request) {
             if (!single(request, "state", 16, 1024)) return false;

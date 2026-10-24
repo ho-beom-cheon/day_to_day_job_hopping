@@ -14,6 +14,7 @@ public final class ProblemViews {
             @JsonId Long attemptId,@JsonId Long problemId,@JsonId Long contentId,String answer,Boolean correct,
             String correctAnswer,String explanation,Integer attemptNo,@JsonId Long wrongAnswerId,
             Boolean wrongAnswerCreated,OffsetDateTime submittedAt) {}
+    public record AttemptPage(List<Attempt> content,Integer page,Integer size,Integer totalElements,Integer totalPages) {}
     public record Report(@JsonId Long reportId,@JsonId Long problemId,String status,OffsetDateTime createdAt) {}
     public record WrongSummary(@JsonId Long wrongAnswerId,@JsonId Long problemId,String category,String question,
                                Integer wrongCount,String status,OffsetDateTime lastWrongAt,Integer reviewCount) {}

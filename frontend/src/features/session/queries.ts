@@ -13,3 +13,26 @@ export const currentSessionQuery = queryOptions({
   },
   staleTime: 60_000,
 });
+
+export async function updateCurrentUser({ nickname, revision }: { nickname: string; revision: number }) {
+  return (await api.request({
+    path: "/api/v1/users/me",
+    method: "PATCH",
+    body: { nickname },
+    etag: `"${revision}"`,
+    decode: value => decodeEnvelope(value, decodeCurrentUser).data,
+  })).data;
+}
+
+export async function logout() {
+  return (await api.request({
+    path: "/api/v1/auth/logout",
+    method: "POST",
+    decode: value => decodeEnvelope(value, decodeLogout).data,
+  })).data;
+}
+
+function decodeLogout(value: unknown): { loggedOut: true } {
+  if (!value || typeof value !== "object" || (value as { loggedOut?: unknown }).loggedOut !== true) throw new TypeError("Expected a logout response");
+  return { loggedOut: true };
+}

@@ -4,6 +4,8 @@
 핵심 시안 10종이 들어 있습니다.
 
 1. 01_today_home_dashboard.png
+   - 01a_today_home_dashboard_pc_top.png (현재 승인된 PC 상단 시안)
+   - 01b_today_home_dashboard_pc_scrolled.png (현재 승인된 PC 스크롤 하단 시안)
 2. 02_six_month_curriculum_roadmap.png
 3. 03_today_learning_detail.png
 4. 04_practice_question.png
@@ -25,3 +27,6 @@
 - character_hobeom_master_sheet.png
 
 Codex는 화면 구현 시 `core`를 우선 참고하고, 세부 상태나 보조 기능은 `extra`를 참고하세요.
+
+홈 화면은 기존 `01_today_home_dashboard.png`를 최초 기준으로 보존하되, PC 구현과 검수에는
+`01a_today_home_dashboard_pc_top.png`와 `01b_today_home_dashboard_pc_scrolled.png`를 한 쌍으로 우선 적용합니다.

@@ -266,6 +266,11 @@
           "minLength": 20,
           "maxLength": 35,
           "format": "date-time"
+        },
+        "durationMonths": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 6
         }
       },
       "required": [
@@ -286,7 +291,8 @@
         "completionRate",
         "studyPolicy",
         "scheduleRevision",
-        "createdAt"
+        "createdAt",
+        "durationMonths"
       ],
       "additionalProperties": false
     },
@@ -414,8 +420,7 @@
         },
         "durationMonths": {
           "type": "integer",
-          "description": "교육 목표 개월 수",
-          "minimum": 6,
+          "minimum": 1,
           "maximum": 6
         },
         "totalWeeks": {
@@ -943,7 +948,7 @@
         },
         "actualMinutes": {
           "type": "integer",
-          "description": "완료 전 0, 완료 후 자기보고 학습시간",
+          "description": "직접 입력된 학습시간. 예상 소요 시간은 포함하지 않으며 기록하지 않았다면 완료 후에도 0이다.",
           "minimum": 0,
           "maximum": 480
         },
@@ -951,7 +956,10 @@
           "type": "string",
           "description": "학습시간 원본",
           "enum": [
-            "SELF_REPORTED"
+            "NOT_RECORDED",
+            "SELF_REPORTED",
+            "ESTIMATED",
+            "MIXED"
           ]
         },
         "startedAt": {

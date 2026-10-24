@@ -16,9 +16,9 @@ import static dev.dailycareer.learning.LearningCommandService.parseDate;
 @RestController
 @RequestMapping("/api/v1")
 public class LearningController {
-    private final LearningCatalog catalog; private final LearningQueryService queries; private final LearningCommandService commands; private final ScheduleCommandService schedules; private final ProblemService problems; private final UserAccountService users;
-    public LearningController(LearningCatalog catalog,LearningQueryService queries,LearningCommandService commands,ScheduleCommandService schedules,ProblemService problems,UserAccountService users) {
-        this.catalog=catalog;this.queries=queries;this.commands=commands;this.schedules=schedules;this.problems=problems;this.users=users;
+    private final LearningCatalog catalog; private final LearningQueryService queries; private final LearningCommandService commands; private final CurriculumRestartService restarts; private final ScheduleCommandService schedules; private final ProblemService problems; private final UserAccountService users;
+    public LearningController(LearningCatalog catalog,LearningQueryService queries,LearningCommandService commands,CurriculumRestartService restarts,ScheduleCommandService schedules,ProblemService problems,UserAccountService users) {
+        this.catalog=catalog;this.queries=queries;this.commands=commands;this.restarts=restarts;this.schedules=schedules;this.problems=problems;this.users=users;
     }
     @GetMapping("/curriculum-templates")
     ResponseEntity<?> templates(@AuthenticationPrincipal AppPrincipal p,HttpServletRequest r) {users.current(user(p));return ApiResponses.ok(r,catalog.templates());}
@@ -33,6 +33,16 @@ public class LearningController {
     @GetMapping("/curriculums/{curriculumId}")
     ResponseEntity<?> course(@AuthenticationPrincipal AppPrincipal p,@PathVariable String curriculumId,HttpServletRequest r) {
         var c=queries.curriculum(user(p),Ids.parse(curriculumId));return ApiResponses.success(r,200,c,Revisions.etag(c.scheduleRevision()),null);
+    }
+    @PostMapping("/curriculums/{curriculumId}/restart")
+    ResponseEntity<?> restart(@AuthenticationPrincipal AppPrincipal p,@PathVariable String curriculumId,
+                              @Valid @RequestBody CurriculumRestartService.Restart body,HttpServletRequest r) {
+        return restarts.restart(user(p),Ids.parse(curriculumId),body,Revisions.required(r),IdempotencyService.requiredKey(r)).toResponse(r);
+    }
+    @PostMapping("/curriculums/{curriculumId}/switch")
+    ResponseEntity<?> switchCourse(@AuthenticationPrincipal AppPrincipal p,@PathVariable String curriculumId,
+                                   @Valid @RequestBody CurriculumRestartService.SwitchCourse body,HttpServletRequest r) {
+        return restarts.switchCourse(user(p),Ids.parse(curriculumId),body,Revisions.required(r),IdempotencyService.requiredKey(r)).toResponse(r);
     }
     @GetMapping("/curriculums/{curriculumId}/months")
     ResponseEntity<?> months(@AuthenticationPrincipal AppPrincipal p,@PathVariable String curriculumId,HttpServletRequest r) {
@@ -101,12 +111,18 @@ public class LearningController {
         noBody(r);return ApiResponses.ok(r,commands.completeContent(user(p),Ids.parse(contentId)));
     }
     @GetMapping("/problems/{problemId}")
-    ResponseEntity<?> problem(@AuthenticationPrincipal AppPrincipal p,@PathVariable String problemId,HttpServletRequest r) {
-        return ApiResponses.ok(r,problems.problem(user(p),Ids.parse(problemId)));
+    ResponseEntity<?> problem(@AuthenticationPrincipal AppPrincipal p,@PathVariable String problemId,@RequestParam(required=false) String contentId,HttpServletRequest r) {
+        return ApiResponses.ok(r,problems.problem(user(p),Ids.parse(problemId),optionalId(contentId)));
     }
     @PostMapping("/problem-attempts")
     ResponseEntity<?> submitProblem(@AuthenticationPrincipal AppPrincipal p,@Valid @RequestBody ProblemService.AttemptRequest body,HttpServletRequest r) {
         return problems.submit(user(p),body,IdempotencyService.requiredKey(r)).toResponse(r);
+    }
+    @GetMapping("/problem-attempts")
+    ResponseEntity<?> problemAttempts(@AuthenticationPrincipal AppPrincipal p,@RequestParam(required=false) String problemId,
+                                      @RequestParam(defaultValue="0") int page,@RequestParam(defaultValue="20") int size,
+                                      @RequestParam(defaultValue="submittedAt,desc") String sort,HttpServletRequest r) {
+        return ApiResponses.ok(r,problems.attempts(user(p),optionalId(problemId),page,size,sort));
     }
     @GetMapping("/problem-attempts/{attemptId}")
     ResponseEntity<?> problemAttempt(@AuthenticationPrincipal AppPrincipal p,@PathVariable String attemptId,HttpServletRequest r) {

@@ -1,0 +1,27 @@
+name: ${COMPOSE_PROJECT_NAME:-daily-career-prod}
+
+services:
+  postgres:
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  backend:
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DEV_AUTH_BYPASS: "false"
+      DEV_AUTH_USER_ID: ""
+      SESSION_COOKIE_SECURE: "true"
+
+  frontend:
+    build:
+      context: ./frontend
+      target: runtime
+    volumes: !reset []
+    environment:
+      BACKEND_HEALTH_URL: http://backend:9090/actuator/health
+      NGINX_ORIGIN: http://nginx
+      DEV_AUTH_BYPASS: "false"
+
+volumes:
+  postgres-data:
+    name: ${DB_VOLUME_NAME:-daily-career-prod-postgres}

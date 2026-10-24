@@ -1,0 +1,14 @@
+services:
+  backend:
+    environment:
+      DEV_AUTH_BYPASS: "false"
+      DEV_AUTH_USER_ID: ""
+      SESSION_COOKIE_SECURE: "true"
+
+  frontend:
+    build:
+      context: ./frontend
+      target: runtime
+    volumes: !reset []
+    environment:
+      DEV_AUTH_BYPASS: "false"

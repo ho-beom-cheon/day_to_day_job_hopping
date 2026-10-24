@@ -1,5 +1,36 @@
 # 구현 진행
 
+## 최신 진행 — 학습 루프 재설계 초안 (2026-10-24)
+
+- 실사용 기록(활성 `JAVA-CORE-4W` 완료 2일·일일 시험 0회, 90분 표기 대비 약 1,600자 본문, 옛 원문 혼입·중복 배정)을 근거로 학습 설계를 재검토했다.
+- [역량맵 + 매일 AI 과제 루프 설계](competency-daily-loop-design-20261024.md) 초안을 작성했다. 36개 역량, 하루 30~60분 과제 1개(사례 분석·코드 리뷰·면접 답변), 주간 목표, 면접 답변집, 신규 테이블 안을 담았다.
+- 같은 날 AI 비용 기준을 반영했다: 6개월 10만 원 예산 → 월 15,000원 하드 리밋, 횟수 제한 대신 폭주 방지, 실시간 꼬리질문, 대화형 모의 면접. 현재 `ai_usage`에 단가·비용이 기록되지 않는 결함을 P2 필수 작업으로 넣었다(설계 §7.3).
+- 추가 개선을 반영했다: 시트 5개로 먼저 1주 써 보는 얇은 버전(S1), 5분 카드 복습, 채점 일관성 회귀 검증, 과제 오류 신고, 코딩 테스트 기록, 경력기술서 초안 내보내기(P5). 목표 공고 연결·D-7 모드는 보류했다(설계 §13).
+- 이력서(2026-10-24)를 반영했다: 경력 사실 후보 10개, 역량맵 39개로 조정(C2 전문 연계·I4 협업 P1, D2 JPA P2, H4 신용정보·마이데이터와 H5 AML 추가), 이력서 검증 면접(§4.8), 원본 비저장 규칙(§7). S1 시트는 A1·A3·B1·C2·I1로 정했다.
+- 사용자 결정으로 기존 학습 기능·콘텐츠·문제·기록은 보존하지 않고 전부 초기화한다. 설계 §11.1에 R0 절차(커밋·태그 → DB 백업 → 데이터 삭제 → 코드·콘텐츠 삭제 → V34 테이블 DROP)와 삭제·유지 테이블 82개 분류를 기록했다. 실제 삭제는 아직 하지 않았다.
+- 코드·DB·화면 변경 없음. 같은 날 Docker build 단계에서 Backend 144개, Frontend 48개 파일 테스트·typecheck·lint·build 통과를 확인했다. 다음은 설계 §12 사용자 결정이다.
+
+## 최신 진행 — 설정·온보딩 연결 개선 (2026-09-24)
+
+- 이슈 #8 범위에서 사용자 학습 기본값 GET/PATCH를 설정 화면에 연결하고, 온보딩이 저장된 학습 시간·휴식일을 사용하도록 했다.
+- 수정 시작 revision 보존, 412 충돌 안내, 실패 시 입력 유지와 명시적 재조회 흐름을 추가했다. 현재 과정 일정은 자동 변경하지 않는다.
+- Notion·Slack 관리 링크를 연결하고 주간 리포트 요일 표시와 저장 중 중복 조작을 보완했다.
+- Frontend 129/129, typecheck/lint/production build 및 Compose smoke 통과. 실제 저장·새로고침·다중 화면 충돌과 PC/모바일 표시를 검증했다. [상세 결과](settings-completion-verification-20260924.md)
+- 새 사용자 과정 생성 실브라우저 E2E와 실제 외부 공급자·운영 HTTPS 검증은 이번 완료 범위에 포함하지 않는다.
+
+## 작업 18 AI 기능 및 피드백 UI — 공급자 실검증 대기 (2026-09-21)
+
+- OpenAPI AI-001~008 비동기 작업·사용량 API, HTTP provider adapter/worker와 `/assistant`를 구현했다.
+- Backend verify 40개, Frontend 76개, typecheck/lint/build, Compose healthy, 2560px/592px 브라우저 검증을 통과했다.
+- 실제 provider key와 승인된 과정 데이터가 없어 외부 AI 성공 결과는 미검증이다. [상세 결과](ai-stage18-verification-20260921.md)
+
+## 최신 진행 — 작업 20 디자인 시스템·전체 화면 보완 진행 중 (2026-09-21)
+
+- 홈 대시보드의 시안형 히어로·달력·오늘 학습·진행률·최근 활동·빠른 메뉴와 데스크톱/모바일 내비게이션을 적용했다.
+- 모바일 더보기 바텀시트, 울트라와이드 본문 폭, 전역 디자인 토큰·키보드 포커스·disabled·reduced-motion 규칙을 보완했다.
+- 핵심 시안 01–09와 현재 route를 매핑했고, 시안 10 AI와 연동 설정은 작업 18·19 미구현 의존성으로 확인했다. [채택 기준](contracts/design-stage20-alignment.md), [진행 검증](design-stage20-verification-20260921.md).
+- 이번 검증 범위는 통과했으나 AI·연동 화면과 실제 데이터 화면 전수 비교가 남아 있어 작업 20은 완료 처리하지 않는다.
+
 ## 최신 진행 — 작업 9 완료 (2026-09-21)
 
 - Next.js 공통 기반으로 OpenAPI 성공/오류 Envelope와 현재 사용자·CSRF runtime decoder를 구현했다. 64-bit ID는 문자열로 유지한다.
@@ -163,3 +194,21 @@ Phase 1의 원본 계약/런타임 게이트를 해소한 뒤 Phase 2 인증/세
 - [ ] 재시작/재생성 후 named volume의 DB 데이터 보존
 
 Docker Engine/WSL 실행 환경이 준비되면 README의 `docker compose up -d --build` 및 smoke 절차부터 재개한다. Phase 1 전체 완료나 Phase 2 완료로 승격하지 않는다.
+## 작업 19 — 알림·Notion·Slack·Web Push 설정 (2026-09-21)
+
+- OpenAPI와 기존 8개 알림·연동 테이블을 대조하고, V8에서 알림 설정 aggregate revision과 Push device ID를 롤포워드로 보완했다.
+- 알림 설정, Push 공개 설정, Notion 연결 진단, Slack 설정 API와 `/settings/integrations` UI를 구현했다.
+- 외부 자격증명이 없으면 연결/발송 성공으로 표시하지 않고 서버 준비 조건을 안내한다. 실제 외부 통신은 미검증 상태다.
+- Backend Java 21 Docker build와 테스트 40개, Frontend typecheck/lint/build 및 테스트 74개가 통과했다.
+
+### 작업 19 확장 — 외부 연동 내부 구현 완료 (2026-09-23)
+
+- V11 Web Push, V12 Slack, V13 Notion runtime과 누락 API·worker·실제 설정 UI를 구현해 OpenAPI 경로 대응을 91/91로 맞췄다.
+- Notion은 session-bound OAuth state, AES-GCM credential, 6종 target 검증, batch/item sync, 부분 실패·`UNKNOWN` 재시도, 연결 해제와 token 폐기를 지원한다.
+- Backend 단위 57/57, PostgreSQL 통합 58/58, Frontend 110/110, typecheck/lint/build가 통과했다.
+- 실제 Notion·Slack·Web Push 공급자 수신은 외부 자격정보와 HTTPS 조건이 없어 미검증이며, 로컬에서는 안전한 비활성·오류 상태를 확인했다.
+## 최신 진행 — 승인 커리큘럼·문제·시험 데이터 준비 완료 (2026-09-21)
+
+- 개발 전용 V8.1에 6개월 백엔드 기초 과정, 본문·객관식 문제 6개, DAILY/WEEKLY/MONTHLY/FINAL 시험 4개를 발행했다.
+- clean PostgreSQL에서 V1→V8.1, 카탈로그 전체 규칙, Flyway 재실행을 검증했다. 일반 테스트 40개와 전용 IT 2개가 통과했다. [상세 결과](approved-catalog-stage-verification-20260921.md)
+- 사용자 기록과 운영 profile은 변경하지 않았다. 로컬 `.env`에 `dev-seed`를 활성화했다.

@@ -85,8 +85,10 @@ Docker가 없으면 통합 프로필은 실패한다. `skip`을 성공처럼 처
 
 ## Docker Compose / 단일 VM
 
-현재 기본 Compose는 개발 전용이다. Frontend development stage와 source mount를 사용한다.
-운영용 Frontend runtime stage는 보존했지만 별도 운영 Compose/HTTPS 구성은 후속 배포 단계 범위다.
+기본 Compose는 개발 전용이다. Frontend development stage와 source mount를 사용한다.
+운영형 로컬 인수는 `compose.prod.yaml`을 겹쳐 Frontend runtime, source mount 제거, `prod` profile,
+개발 인증 우회 제거와 secure cookie 강제를 검증한다. 실행·백업·별도 volume 복원 절차는
+[운영형 Docker 로컬 실행 가이드](production-local-runbook.md)를 따른다.
 소스 반영, 주소, DB 보존 검증 절차는 [README](../README.md), 이번 검증 결과는
 [2단계 보고서](docker-development-stage2.md)를 따른다.
 
@@ -125,7 +127,9 @@ DB는 Docker 전용이다. 위 호스트 Maven/npm 명령은 선택적인 코드
 
 ### Seed / 독립 Volume
 
-`APP_PROFILES=dev,dev-seed`일 때만 `classpath:db/dev-seed`를 추가한다. 현재 확정 업무 데이터가 없어 SQL seed는 비워 둔다. 승인된 공통 fixtures가 생기면 이 경로에 멱등적인 migration을 추가하고 두 PC에서 같은 파일을 실행한다. 적용한 seed profile은 해당 개발 volume 수명 동안 유지한다. 중간에 profile을 제거하면 Flyway 이력 누락 오류가 생길 수 있으므로 seed 없는 개발 DB가 필요하면 폐기 가능한 개발 volume을 명시적으로 초기화한다. 운영에서 dev-seed를 활성화하지 않는다.
+V8.1은 승인된 개발용 6개월 백엔드 기초 과정, 학습 본문·확인 문제 6개, DAILY/WEEKLY/MONTHLY/FINAL 시험 4개를 발행한다. 사용자 데이터는 만들지 않는다.
+
+`APP_PROFILES=dev,dev-seed`일 때만 `classpath:db/dev-seed`를 추가한다. 적용한 seed profile은 해당 개발 volume 수명 동안 유지한다. 중간에 profile을 제거하면 Flyway 이력 누락 오류가 생길 수 있으므로 seed 없는 개발 DB가 필요하면 폐기 가능한 개발 volume을 명시적으로 초기화한다. 운영에서 dev-seed를 활성화하지 않는다.
 
 Named volume은 Docker host마다 독립적이다. 같은 PC에서 clone을 여러 개 운영하면 COMPOSE_PROJECT_NAME과 DB_VOLUME_NAME을 둘 다 다르게 지정한다. 운영 환경파일은 APP_PROFILES=prod, 고유 project/volume, 운영 password/domain, HTTPS용 cookie 값을 사용한다. 실제 파일은 Git 밖에 둔다. PostgreSQL 초기 계정 변수는 빈 volume 최초 생성에만 적용된다.
 
