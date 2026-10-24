@@ -16,12 +16,17 @@ import org.springframework.stereotype.Component;
 class LoopPrompts {
     static final String VERSION = "competency-loop-v1";
 
+    /**
+     * Reasoning effort per role (design §6.1): rare, off-screen work thinks hardest; the interactive follow-up stays quick.
+     * Output caps include reasoning tokens, so higher effort gets more room.
+     */
     enum Role {
-        TASK_GENERATE("task_generate", 10_000), GRADING("grading", 4_000), FOLLOWUP_TURN("followup_turn", 4_000),
-        CLAIM_REVIEW("claim_review", 3_000);
+        TASK_GENERATE("task_generate", 24_000, "xhigh"), GRADING("grading", 8_000, "high"),
+        FOLLOWUP_TURN("followup_turn", 4_000, "medium"), CLAIM_REVIEW("claim_review", 12_000, "xhigh");
         final String file;
         final int maxOutputTokens;
-        Role(String file, int maxOutputTokens) { this.file = file; this.maxOutputTokens = maxOutputTokens; }
+        final String effort;
+        Role(String file, int maxOutputTokens, String effort) { this.file = file; this.maxOutputTokens = maxOutputTokens; this.effort = effort; }
     }
 
     private final Map<Role, String> instructions = new EnumMap<>(Role.class);
@@ -37,7 +42,7 @@ class LoopPrompts {
     }
 
     AiRequest request(Role role, JsonNode input) {
-        return new AiRequest(instructions.get(role), role.file, schemas.get(role), input.toString(), role.maxOutputTokens);
+        return new AiRequest(instructions.get(role), role.file, schemas.get(role), input.toString(), role.maxOutputTokens, role.effort);
     }
 
     /** Fixed prompt overhead used when estimating the worst-case cost before queueing. */

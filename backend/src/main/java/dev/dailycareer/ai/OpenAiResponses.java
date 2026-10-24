@@ -32,6 +32,7 @@ public class OpenAiResponses implements AiModelClient {
         body.put("model", model);
         body.put("store", false);
         body.put("max_output_tokens", request.maxOutputTokens());
+        body.put("reasoning", Map.of("effort", request.reasoningEffort()));
         body.put("input", List.of(Map.of("role", "developer", "content", request.instructions()),
                 Map.of("role", "user", "content", request.input())));
         body.put("text", Map.of("format", Map.of("type", "json_schema", "name", request.schemaName(), "strict", true,
