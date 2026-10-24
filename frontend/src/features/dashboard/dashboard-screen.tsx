@@ -7,6 +7,7 @@ import {
   CalendarDays,
   CheckCircle2,
   ChevronRight,
+  Code2,
   Gauge,
   Loader2,
   NotebookPen,
@@ -22,6 +23,7 @@ import { useSyncExternalStore } from "react";
 import { Button } from "@/components/ui/button";
 import { StatePanel } from "@/components/ui/state-panel";
 import { claimsQuery, factsQuery } from "@/features/career/api";
+import { codingOverviewQuery } from "@/features/coding/api";
 import { failureMessage, formatLabel, type CardSummary, type TaskSummary, type Today } from "@/features/daily-task/contract";
 import { startToday, swapTask, taskKeys, todayQuery } from "@/features/daily-task/queries";
 import { currentMonthlyHero } from "./monthly-hero";
@@ -117,9 +119,17 @@ function WeekCard({ week, ai }: { week: Today["week"]; ai: Today["ai"] }) {
   return <section className={`${card} p-5 sm:p-6`}>
     <h2 className="font-black text-[#0a1837]">이번 주 진행 현황</h2>
     <div className="mt-5 flex items-center gap-5"><div className="grid size-24 shrink-0 place-items-center rounded-full" style={{ background: `conic-gradient(#2f7df6 ${rate * 3.6}deg,var(--progress-track) 0deg)` }}><div className="grid size-[72px] place-items-center rounded-full bg-white text-xl font-black text-[#0a1837] dark:bg-[#111827]">{rate}%</div></div><p className="text-xs leading-5 text-slate-500"><span>주간 목표 달성률</span><br/><strong className="text-sm text-[#0a1837]">{week.completed} / {week.target}</strong> 과제 완료</p></div>
+    <CodingWeek/>
     <Link href="/settings/ai-usage" className="mt-5 flex items-center justify-between gap-3 border-t border-slate-100 pt-4 text-xs dark:border-slate-700"><span className="flex items-center gap-2 font-semibold text-slate-500"><Gauge size={15} className="text-blue-600"/>이번 달 AI 예산</span><strong className="text-sm font-black text-[#0a1837]">{ai.enabled ? `${Math.floor(ai.remainingKrw).toLocaleString("ko-KR")}원 남음` : "AI 꺼짐"}</strong></Link>
     <p className="mt-1 text-[11px] text-slate-400">상한 {ai.limitKrw.toLocaleString("ko-KR")}원 · 상한에 닿으면 자가 채점으로 진행해요</p>
   </section>;
+}
+
+/** Counted apart from competency tasks and hidden while the coding track is off (design §4.7.1). */
+function CodingWeek() {
+  const coding = useQuery(codingOverviewQuery);
+  if (!coding.data || coding.data.weeklyTarget === 0) return null;
+  return <Link href="/coding-log" className="mt-5 flex items-center justify-between gap-3 border-t border-slate-100 pt-4 text-xs dark:border-slate-700"><span className="flex items-center gap-2 font-semibold text-slate-500"><Code2 size={15} className="text-blue-600"/>이번 주 코딩 테스트</span><strong className="text-sm font-black text-[#0a1837]">{coding.data.weekDone} / {coding.data.weeklyTarget}문제</strong></Link>;
 }
 
 function CalendarCard() {

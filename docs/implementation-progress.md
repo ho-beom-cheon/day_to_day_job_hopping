@@ -1,5 +1,13 @@
 # 구현 진행
 
+## 최신 진행 — 코딩 테스트 트랙 1차 (2026-10-25)
+
+- 대표 화면: [코딩 테스트](http://localhost:8080/coding-log). 홈 [대시보드](http://localhost:8080/workspace)의 "이번 주 진행 현황"에 코딩 진행 줄을 추가했다.
+- 사용자 요청으로 계획(S1 1주 후 P2·P3)보다 앞당겨 구현했다. 범위는 설계 §4.7의 메뉴, 주간 목표(기본 2, 0이면 메뉴 숨김), 링크 추천, 기록, 다시 풀기 일정이다. AI 풀이 회고·패턴 카드와 GitHub 동기화는 넣지 않았다.
+- Backend: V36(`user_setting.weekly_coding_target`, `coding_problem_link`, `coding_problem_hidden`, `coding_practice_log`), 프로그래머스 공개 문제 73개 seed(2026-10-25 링크를 열어 제목·레벨 확인, 문제 본문은 저장하지 않음), `/api/v1/coding` API.
+- 검증: Backend 단위 76 + PostgreSQL IT 42 통과(`CodingRulesTest` 5, `CodingTrackIT` 5 포함), Frontend Docker build 단계 22개 테스트 파일 102개·typecheck·lint·build 통과. 로컬 DB에 V36 적용과 seed 73개를 확인했다. 내장 브라우저에는 로그인 세션이 없어 로그인 후 화면은 직접 확인하지 못했다(경로는 로그인 안내까지 확인).
+- 배포 중 실수: 백엔드를 한 번 `compose.yaml`만으로 다시 띄웠다가 실행 중이던 구성(`compose.yaml` + `compose.public.yaml`)으로 되돌렸다. 두 서비스 모두 원래 구성으로 healthy.
+
 ## 최신 진행 — S1 얇은 버전 구현 완료 (2026-10-24)
 
 - 대표 화면: [오늘 과제](http://localhost:8080/workspace). [과제 화면 예](http://localhost:8080/tasks/1)(확인용 계정 소유), [경력·이력서](http://localhost:8080/career), [AI 사용량](http://localhost:8080/settings/ai-usage).

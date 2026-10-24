@@ -1,19 +1,21 @@
 "use client";
-import { useQueryClient } from "@tanstack/react-query";
-import { Bell, BriefcaseBusiness, ChevronDown, CircleHelp, Gauge, Home, LogOut, MoreHorizontal, Search, Settings, UserRound, X, type LucideIcon } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Bell, BriefcaseBusiness, ChevronDown, CircleHelp, Code2, Gauge, Home, LogOut, MoreHorizontal, Search, Settings, UserRound, X, type LucideIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { codingSettingsQuery } from "@/features/coding/api";
 import { logout } from "@/features/session/queries";
 import type { SessionViewModel } from "@/features/session/model";
 import { NotificationPopover } from "@/features/notifications/notification-popover";
 import { BrandLogo } from "@/components/brand-logo";
 import { cn } from "@/lib/utils";
 
-const navigation: ReadonlyArray<{ label: string; href: string; icon: LucideIcon; pending: boolean }> = [
+const navigationItems: ReadonlyArray<{ label: string; href: string; icon: LucideIcon; pending: boolean }> = [
   { label: "대시보드", href: "/workspace", icon: Home, pending: false },
   { label: "경력·이력서", href: "/career", icon: BriefcaseBusiness, pending: false },
+  { label: "코딩 테스트", href: "/coding-log", icon: Code2, pending: false },
   { label: "알림", href: "/notifications", icon: Bell, pending: false },
   { label: "AI 사용량", href: "/settings/ai-usage", icon: Gauge, pending: false },
 ];
@@ -24,8 +26,7 @@ const mobileNavigation: ReadonlyArray<{ label: string; href: string; icon: Lucid
   { label: "알림", href: "/notifications", icon: Bell },
 ];
 
-const searchablePages = [
-  ...navigation.filter(item => !item.pending),
+const supportPages = [
   { label: "설정", href: "/settings", icon: Settings },
   { label: "알림 및 외부 연동", href: "/settings/integrations", icon: Bell },
 ] as const;
@@ -34,6 +35,10 @@ export function AppShell({ session, children }: { session: SessionViewModel; chi
   const pathname = usePathname();
   const router = useRouter();
   const queryClient = useQueryClient();
+  // A weekly coding target of 0 turns the coding test track off, menu included (design §4.7.1, §9).
+  const coding = useQuery(codingSettingsQuery);
+  const navigation = navigationItems.filter(item => item.href !== "/coding-log" || coding.data?.weeklyTarget !== 0);
+  const searchablePages = [...navigation.filter(item => !item.pending), ...supportPages];
   const [moreOpen, setMoreOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
