@@ -1,0 +1,95 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "status",
+    "criteria",
+    "feedback",
+    "missingPoints",
+    "improvedAnswer",
+    "holdReason",
+    "followupQuestion",
+    "followupCheckPoints",
+    "cardDraft"
+  ],
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": [
+        "GRADED",
+        "HOLD"
+      ]
+    },
+    "criteria": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "criterionId",
+          "earnedPoints",
+          "reason"
+        ],
+        "properties": {
+          "criterionId": {
+            "type": "string"
+          },
+          "earnedPoints": {
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "feedback": {
+      "type": "string"
+    },
+    "missingPoints": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "improvedAnswer": {
+      "type": "string"
+    },
+    "holdReason": {
+      "type": "string"
+    },
+    "followupQuestion": {
+      "type": "string"
+    },
+    "followupCheckPoints": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "cardDraft": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "title",
+        "summary",
+        "interviewLine",
+        "reviewPrompt"
+      ],
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "interviewLine": {
+          "type": "string"
+        },
+        "reviewPrompt": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

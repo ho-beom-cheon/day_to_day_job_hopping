@@ -1,0 +1,55 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "status",
+    "issues",
+    "likelyQuestions",
+    "suggestedRevision"
+  ],
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": [
+        "NEEDS_FIX",
+        "NEEDS_EVIDENCE",
+        "OK"
+      ]
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "detail"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "NUMBER_MISMATCH",
+              "UNSUPPORTED_METRIC",
+              "TECHNICAL_DOUBT",
+              "ROLE_UNCLEAR",
+              "OTHER"
+            ]
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "likelyQuestions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "suggestedRevision": {
+      "type": "string"
+    }
+  }
+}

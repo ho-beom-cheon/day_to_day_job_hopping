@@ -25,6 +25,15 @@ describe("question content", () => {
     expect(screen.getByText("어떤 결과가 나오나요?").tagName).toBe("P");
   });
 
+  it("renders task material tables inside a horizontally scrollable region", () => {
+    const { container } = render(<QuestionContent body={"| 항목 | 관찰 |\n|---|---|\n| 실패 이력 | 확인되지 않음 |"} />);
+    const table = container.querySelector("table");
+    expect(table).not.toBeNull();
+    expect(table?.parentElement).toHaveAttribute("tabindex", "0");
+    expect(screen.getByText("실패 이력").tagName).toBe("TD");
+    expect(container.textContent).not.toContain("|---|");
+  });
+
   it("colors Java tokens while preserving whitespace and escaping source text", () => {
     const source = 'import java.util.*;\n\npublic class Example {\n    // output <script>\n    String value = "<script>";\n}\n';
     const { container } = render(<QuestionContent body={`\`\`\`java\n${source}\`\`\``} />);

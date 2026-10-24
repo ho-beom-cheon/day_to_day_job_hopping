@@ -1,6 +1,6 @@
 "use client";
 import { useQueryClient } from "@tanstack/react-query";
-import { Bell, ChevronDown, CircleHelp, Home, LogOut, MoreHorizontal, Search, Settings, UserRound, X, type LucideIcon } from "lucide-react";
+import { Bell, BriefcaseBusiness, ChevronDown, CircleHelp, Gauge, Home, LogOut, MoreHorizontal, Search, Settings, UserRound, X, type LucideIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -12,14 +12,16 @@ import { BrandLogo } from "@/components/brand-logo";
 import { cn } from "@/lib/utils";
 
 const navigation: ReadonlyArray<{ label: string; href: string; icon: LucideIcon; pending: boolean }> = [
-  { label: "홈", href: "/workspace", icon: Home, pending: false },
+  { label: "오늘 과제", href: "/workspace", icon: Home, pending: false },
+  { label: "경력·이력서", href: "/career", icon: BriefcaseBusiness, pending: false },
   { label: "알림", href: "/notifications", icon: Bell, pending: false },
+  { label: "AI 사용량", href: "/settings/ai-usage", icon: Gauge, pending: false },
 ];
 
 const mobileNavigation: ReadonlyArray<{ label: string; href: string; icon: LucideIcon }> = [
-  { label: "홈", href: "/workspace", icon: Home },
+  { label: "오늘", href: "/workspace", icon: Home },
+  { label: "경력", href: "/career", icon: BriefcaseBusiness },
   { label: "알림", href: "/notifications", icon: Bell },
-  { label: "설정", href: "/settings", icon: Settings },
 ];
 
 const searchablePages = [
@@ -39,7 +41,7 @@ export function AppShell({ session, children }: { session: SessionViewModel; chi
   const [query, setQuery] = useState("");
   const [signingOut, setSigningOut] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
-  const active = (href: string) => pathname === href || (href !== "/workspace" && pathname.startsWith(`${href}/`));
+  const active = (href: string) => pathname === href || (href === "/workspace" ? pathname.startsWith("/tasks/") : pathname.startsWith(`${href}/`));
   const results = searchablePages.filter(item => item.label.toLocaleLowerCase("ko").includes(query.trim().toLocaleLowerCase("ko")));
   const closeHeaderMenus = () => { setSearchOpen(false); setNotificationsOpen(false); setProfileOpen(false); };
   const openOnly = (menu: "search" | "notifications" | "profile") => {

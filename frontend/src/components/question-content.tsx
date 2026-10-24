@@ -1,5 +1,6 @@
 import { Children, isValidElement } from "react";
 import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { HighlightedCode } from "./highlighted-code";
 import styles from "./question-content.module.css";
 
@@ -19,10 +20,11 @@ export function QuestionSummary({ body }: { body: string }) {
   </span>;
 }
 
-/** Shared, non-interactive CommonMark for questions, radio choices and feedback. */
+/** Shared, non-interactive Markdown (with GFM tables) for task material, questions and feedback. */
 export function QuestionContent({ body, compact = false }: { body: string; compact?: boolean }) {
   return <div className={`${styles.content}${compact ? ` ${styles.compact}` : ""}`}>
-    <Markdown skipHtml disallowedElements={["img"]} components={{
+    <Markdown skipHtml remarkPlugins={[remarkGfm]} disallowedElements={["img"]} components={{
+      table: ({ children }) => <div className={styles.tableScroll} tabIndex={0}><table>{children}</table></div>,
       // Question content must never create another page title or an interactive link inside a choice.
       h1: ({ children }) => <h3>{children}</h3>,
       h2: ({ children }) => <h3>{children}</h3>,

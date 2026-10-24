@@ -63,6 +63,14 @@ public class SecurityConfiguration {
                                 "/api/v1/integrations/slack/test-messages").authenticated()
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/settings", "/api/v1/notifications/settings", "/api/v1/integrations/slack").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/push/subscriptions/*", "/api/v1/integrations/notion").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/today", "/api/v1/tasks/*", "/api/v1/career/facts", "/api/v1/career/claims",
+                                "/api/v1/ai/usage").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/today", "/api/v1/tasks/*/start", "/api/v1/tasks/*/turns/*/submit",
+                                "/api/v1/tasks/*/self-grade", "/api/v1/tasks/*/finish", "/api/v1/tasks/*/swap", "/api/v1/tasks/*/feedback",
+                                "/api/v1/tasks/*/reports", "/api/v1/career/facts", "/api/v1/career/facts/*/confirm", "/api/v1/career/claims",
+                                "/api/v1/career/claims/*/review", "/api/v1/career/claims/*/interview").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/tasks/*/turns/*/answer", "/api/v1/tasks/*/card").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/career/facts/*", "/api/v1/career/claims/*").authenticated()
                         .anyRequest().denyAll())
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)

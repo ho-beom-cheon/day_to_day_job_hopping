@@ -1,0 +1,59 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "feedback",
+    "scoreDelta",
+    "checkPointsMet",
+    "nextQuestion",
+    "nextCheckPoints",
+    "cardDraft"
+  ],
+  "properties": {
+    "feedback": {
+      "type": "string"
+    },
+    "scoreDelta": {
+      "type": "integer"
+    },
+    "checkPointsMet": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "nextQuestion": {
+      "type": "string"
+    },
+    "nextCheckPoints": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "cardDraft": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "title",
+        "summary",
+        "interviewLine",
+        "reviewPrompt"
+      ],
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "interviewLine": {
+          "type": "string"
+        },
+        "reviewPrompt": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

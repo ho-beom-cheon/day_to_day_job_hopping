@@ -26,7 +26,10 @@ class BusinessSchemaIT {
     private static final List<String> KEPT_TABLES = List.of("ai_budget", "ai_job", "ai_usage", "app_user", "audit_event",
             "browser_connection", "browser_oauth_state", "idempotency_record", "integration_connection", "notification",
             "notification_delivery", "notification_preference", "notion_credential", "notion_oauth_state", "notion_revocation",
-            "oidc_login_state", "outbox_event", "push_subscription", "user_identity", "user_setting");
+            "oidc_login_state", "outbox_event", "push_subscription", "user_identity", "user_setting",
+            "ai_model_price", "competency_map_version", "competency", "competency_sheet_version", "career_fact", "resume_claim",
+            "user_competency", "task_bank_item", "daily_task", "daily_task_turn", "daily_task_result", "answer_card",
+            "task_feedback", "task_issue_report");
     private static final List<String> DROPPED_TABLES = List.of("curriculum", "user_curriculum", "learning_day", "learning_content",
             "problem", "test", "wrong_answer", "extra_learning", "study_evaluation", "ai_practice_run", "ai_conversation",
             "notion_sync_batch", "notion_target", "integration_mapping", "sync_job", "subject");
@@ -66,7 +69,7 @@ class BusinessSchemaIT {
     @AfterAll static void closeConnection() { if (dataSource != null) dataSource.destroy(); }
 
     @Test void upgradesV1WithoutLosingSessionsAndCanRunAgain() {
-        assertThat(upgradeCount).isEqualTo(33);
+        assertThat(upgradeCount).isEqualTo(34);
         assertThat(jdbc.queryForObject("select scheduled_reminders_enabled from daily_career.user_setting where user_id=?", Boolean.class, legacyUser)).isFalse();
         assertThat(jdbc.queryForObject("select count(*) from daily_career.app_user where display_name=? and email is null and profile_image_url is null", Integer.class, "legacy-" + "x".repeat(70))).isEqualTo(1);
         assertThat(jdbc.queryForMap("select daily_goal_minutes,rest_days_per_week,weekday_study_start_time,weekend_study_start_time,theme from daily_career.user_setting where user_id=?", legacyUser))
@@ -82,7 +85,7 @@ class BusinessSchemaIT {
         assertThat(jdbc.queryForObject("select count(*) from pg_tables where tablename='flyway_schema_history' and schemaname='public'", Integer.class)).isEqualTo(1);
         assertThat(jdbc.queryForObject("select count(*) from pg_tables where tablename='flyway_schema_history' and schemaname='daily_career'", Integer.class)).isZero();
         assertThat(jdbc.queryForList("select version from public.flyway_schema_history order by installed_rank", String.class))
-                .containsExactlyElementsOf(IntStream.rangeClosed(1, 34).mapToObj(Integer::toString).toList());
+                .containsExactlyElementsOf(IntStream.rangeClosed(1, 35).mapToObj(Integer::toString).toList());
     }
 
     @Test void resetRemovesLegacyLearningAndKeepsAccountsSettingsAndIntegrations() {

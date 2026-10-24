@@ -62,4 +62,9 @@
 }
 .content pre:focus-visible { outline: 2px solid var(--app-primary); outline-offset: -3px; }
 .exampleBody { padding: 1rem; }
+.tableScroll { max-width: 100%; margin: 1.25em 0; overflow-x: auto; border: 1px solid var(--app-border); border-radius: 0.875rem; }
+.tableScroll table { min-width: 100%; border-collapse: collapse; font-size: 0.875rem; line-height: 1.6; }
+.tableScroll th, .tableScroll td { padding: 0.55rem 0.8rem; border-bottom: 1px solid var(--app-border); text-align: left; vertical-align: top; word-break: keep-all; overflow-wrap: normal; }
+.tableScroll th { background: var(--app-primary-soft); font-weight: 700; white-space: nowrap; }
+.tableScroll tr:last-child td { border-bottom: 0; }
 @media (min-width: 640px) { .content:not(.compact) { font-size: 1.0625rem; } }

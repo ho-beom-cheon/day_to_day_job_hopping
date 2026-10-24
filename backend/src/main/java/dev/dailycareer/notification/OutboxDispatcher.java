@@ -138,6 +138,9 @@ public class OutboxDispatcher {
 
     static Message messageFor(String eventType) {
         return switch (eventType) {
+            case "AI_BUDGET_50" -> new Message("AI_BUDGET", "이번 달 AI 예산의 50%를 썼어요", "평소 사용량보다 많아요. AI 사용량을 확인해 보세요.", "/settings/ai-usage");
+            case "AI_BUDGET_80" -> new Message("AI_BUDGET", "이번 달 AI 예산의 80%를 썼어요", "상한에 닿으면 자가 채점으로 바뀌어요. AI 사용량을 확인해 보세요.", "/settings/ai-usage");
+            case "DAILY_TASK_READY" -> new Message("STUDY_REMINDER", "오늘 과제가 준비됐어요", "준비된 과제를 확인해 보세요.", "/workspace");
             default -> null;
         };
     }

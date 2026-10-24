@@ -48,6 +48,12 @@ public enum ApiErrorCode {
     INTERNAL_SERVER_ERROR(500, "요청을 처리하지 못했습니다."),
     SERVICE_UNAVAILABLE(503, "현재 서비스를 이용할 수 없습니다.", true, null),
     AI_DISABLED(503, "AI 공급자 설정이 준비되지 않았습니다."),
+    AI_PRICE_UNAVAILABLE(503, "AI 비용을 계산할 수 없어 AI 기능을 중지했습니다."),
+    AI_BUDGET_EXCEEDED(409, "이번 달 AI 예산 상한에 닿았습니다. 다음 달 1일까지 자가 채점으로 진행합니다."),
+    TASK_STATE_CONFLICT(409, "지금 과제 상태에서는 할 수 없는 작업입니다."),
+    TASK_ALREADY_OPEN(409, "진행 중인 과제를 먼저 마쳐 주세요."),
+    COMPETENCY_NOT_READY(409, "준비된 역량 시트가 없습니다."),
+    CAREER_FACT_NOT_CONFIRMED(422, "확인한 경력 사실만 면접 과제에 사용할 수 있습니다."),
     PUSH_DISABLED(503, "웹 푸시 서버 설정이 준비되지 않았습니다.");
 
     private final int status;
