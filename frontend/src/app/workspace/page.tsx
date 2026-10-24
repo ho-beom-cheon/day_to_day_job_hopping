@@ -1,3 +1,3 @@
-import { TodayScreen } from "@/features/daily-task/today-screen";
+import { DashboardScreen } from "@/features/dashboard/dashboard-screen";
 
-export default function WorkspacePage() { return <TodayScreen />; }
+export default function WorkspacePage() { return <DashboardScreen />; }

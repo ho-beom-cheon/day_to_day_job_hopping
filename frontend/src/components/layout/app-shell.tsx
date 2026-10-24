@@ -12,14 +12,14 @@ import { BrandLogo } from "@/components/brand-logo";
 import { cn } from "@/lib/utils";
 
 const navigation: ReadonlyArray<{ label: string; href: string; icon: LucideIcon; pending: boolean }> = [
-  { label: "오늘 과제", href: "/workspace", icon: Home, pending: false },
+  { label: "대시보드", href: "/workspace", icon: Home, pending: false },
   { label: "경력·이력서", href: "/career", icon: BriefcaseBusiness, pending: false },
   { label: "알림", href: "/notifications", icon: Bell, pending: false },
   { label: "AI 사용량", href: "/settings/ai-usage", icon: Gauge, pending: false },
 ];
 
 const mobileNavigation: ReadonlyArray<{ label: string; href: string; icon: LucideIcon }> = [
-  { label: "오늘", href: "/workspace", icon: Home },
+  { label: "홈", href: "/workspace", icon: Home },
   { label: "경력", href: "/career", icon: BriefcaseBusiness },
   { label: "알림", href: "/notifications", icon: Bell },
 ];
