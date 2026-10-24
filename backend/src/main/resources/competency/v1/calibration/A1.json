@@ -1,0 +1,66 @@
+{
+  "code": "A1",
+  "sheetVersion": 1,
+  "task": {
+    "format": "CASE",
+    "title": "이체 실패 이력이 남지 않는 문제",
+    "situation": "가상의 은행 이체 서비스에서 '계정계 입금 호출이 실패한 건의 실패 이력이 하나도 남지 않는다'는 운영 문의가 들어왔다. 실패 이력은 본 거래가 롤백되더라도 반드시 남아야 하는 요구사항이다. 스택은 Spring Boot + MyBatis + Oracle이고 트랜잭션 매니저는 DataSourceTransactionManager, 기본 프록시 모드다. 커넥션 풀 최대 크기는 20, 피크 시 동시 이체 요청은 약 15건이다.\n\n[코드]\n@Service\npublic class TransferService {\n    @Transactional\n    public void transfer(TransferRequest req) {\n        ledgerMapper.insertWithdraw(req);          // 출금 원장 INSERT\n        try {\n            coreClient.deposit(req);               // 외부 계정계 입금 호출 (평균 300ms, 최대 5초)\n        } catch (CoreApiException e) {             // RuntimeException 하위\n            saveFailureHistory(req, e);\n            throw e;\n        }\n    }\n\n    @Transactional(propagation = Propagation.REQUIRES_NEW)\n    public void saveFailureHistory(TransferRequest req, Exception e) {\n        failureMapper.insert(req.getTxId(), e.getMessage());\n    }\n}\n\n[트랜잭션 DEBUG 로그 발췌, 실패 1건]\n10:02:11.104 Creating new transaction with name [com.bank.TransferService.transfer]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT\n10:02:11.131 ==> Preparing: INSERT INTO LEDGER_WITHDRAW ...\n10:02:16.140 ==> Preparing: INSERT INTO TRANSFER_FAILURE_HISTORY ...\n10:02:16.152 Initiating transaction rollback\n10:02:16.158 Rolling back JDBC transaction on Connection [HikariProxyConnection@5a1b]\n\n[조회 결과]\nSELECT COUNT(*) FROM TRANSFER_FAILURE_HISTORY WHERE REG_DT >= TRUNC(SYSDATE); → 0",
+    "question": "실패 이력이 남지 않는 원인을 로그 근거와 함께 설명하고, 수정안을 2개 이상 비교해 하나를 고르세요. 수정안이 커넥션 풀과 외부 호출 지연에 주는 영향, 그리고 수정이 맞는지 배포 전에 확인하는 방법도 쓰세요."
+  },
+  "rubric": [
+    {
+      "criterionId": "R1",
+      "sheetCriteria": [
+        "K1"
+      ],
+      "description": "saveFailureHistory가 같은 객체 내부 호출(self-invocation)이라 프록시를 거치지 않아 REQUIRES_NEW가 적용되지 않고, 이력 INSERT가 외부 트랜잭션에 묶여 함께 롤백됐다고 진단한다. 로그에 새 트랜잭션 생성(Suspending/Creating new transaction) 기록이 없다는 근거를 든다.",
+      "points": 30
+    },
+    {
+      "criterionId": "R2",
+      "sheetCriteria": [
+        "K8",
+        "K2"
+      ],
+      "description": "수정안 2개 이상(별도 빈 분리, TransactionTemplate 등 프로그래밍 방식, AspectJ 모드, 실패 정보를 반환받아 트랜잭션 밖에서 기록 등)을 비교하고 선택 근거를 댄다. 예외를 삼키지 않고 다시 던져 본 거래는 롤백되어야 함을 유지한다.",
+      "points": 25
+    },
+    {
+      "criterionId": "R3",
+      "sheetCriteria": [
+        "K4",
+        "K6"
+      ],
+      "description": "REQUIRES_NEW가 요청당 커넥션을 추가로 점유한다는 점과 풀 크기 20·동시 15건 조건에서의 위험을 따지고, 최대 5초 외부 호출이 트랜잭션 안에 있어 커넥션·잠금 점유가 길다는 점을 지적하며 경계 조정 여부를 판단한다.",
+      "points": 20
+    },
+    {
+      "criterionId": "R4",
+      "sheetCriteria": [
+        "K7"
+      ],
+      "description": "검증 방법을 구체적으로 제시한다: 트랜잭션 DEBUG 로그에서 새 트랜잭션 생성·별도 커밋 확인, 외부 호출 실패를 모의한 통합 테스트에서 원장은 롤백되고 이력은 남는지 DB로 확인, 동시 요청 부하에서 커넥션 대기 확인.",
+      "points": 25
+    }
+  ],
+  "answers": [
+    {
+      "label": "WEAK",
+      "expectedMin": 0,
+      "expectedMax": 35,
+      "text": "CoreApiException이 발생하면서 전체 트랜잭션이 롤백돼서 실패 이력도 같이 롤백된 것 같습니다. REQUIRES_NEW를 붙였는데도 안 된 걸 보면 Oracle에서 REQUIRES_NEW가 잘 지원이 안 되는 것 같습니다. catch 블록에서 throw e를 빼면 롤백이 안 되니까 이력이 남을 것입니다. 아니면 saveFailureHistory를 private으로 바꾸고 다시 테스트해 보겠습니다. 외부 호출 타임아웃도 5초는 길어서 3초로 줄이면 좋겠습니다."
+    },
+    {
+      "label": "MEDIUM",
+      "expectedMin": 50,
+      "expectedMax": 70,
+      "text": "원인은 self-invocation입니다. transfer()에서 saveFailureHistory()를 this로 호출하기 때문에 Spring 프록시를 거치지 않고, 그래서 REQUIRES_NEW가 적용되지 않습니다. 결국 이력 INSERT가 transfer의 트랜잭션 안에서 실행되고, CoreApiException이 RuntimeException이라 롤백될 때 같이 지워졌습니다. 로그에도 이력 INSERT 앞에 새 트랜잭션을 만든다는 줄이 없습니다. 수정은 saveFailureHistory를 FailureHistoryService라는 별도 빈으로 분리해 주입받아 호출하겠습니다. 그러면 프록시를 거치므로 REQUIRES_NEW가 적용되어 이력은 따로 커밋되고 원장은 롤백됩니다. 테스트 환경에서 실패를 내 보고 이력 테이블에 건이 남는지 확인하겠습니다."
+    },
+    {
+      "label": "STRONG",
+      "expectedMin": 80,
+      "expectedMax": 100,
+      "text": "원인: saveFailureHistory()는 같은 객체 안에서 this로 호출되는 self-invocation입니다. 기본 프록시 모드에서는 프록시를 거친 외부 호출만 가로채므로 REQUIRES_NEW가 무시되고, 이력 INSERT가 transfer()의 REQUIRED 트랜잭션에 그대로 참여합니다. 이후 CoreApiException(RuntimeException)을 다시 던져 롤백되면서 이력도 함께 사라졌습니다. 로그 근거로, 16.140의 이력 INSERT 앞에 기존 트랜잭션을 중단하고 새 트랜잭션을 만든다는 기록이 없고, 롤백은 16.158에 커넥션 하나(5a1b)에 대해서만 한 번 일어납니다.\n\n수정안 비교: (1) 이력 저장을 FailureHistoryService 별도 빈으로 분리해 REQUIRES_NEW 유지 — 변경이 작고 의도가 드러나지만 실패 순간 커넥션 2개를 씁니다. (2) TransactionTemplate으로 이력 저장 경계를 코드에서 직접 엶 — 같은 클래스에 둘 수 있지만 선언적 방식과 섞여 읽기 어렵습니다. (3) 구조 변경: transfer를 '출금 기록 트랜잭션 → 트랜잭션 밖 외부 호출 → 결과 반영(성공 또는 실패 이력) 트랜잭션'으로 나눔 — 외부 호출 동안 커넥션을 쥐지 않지만 중간 상태(출금 기록 후 결과 미반영)를 상태값과 재처리로 관리해야 합니다. 당장은 (1)을 적용하고 throw e는 유지해 원장은 롤백되게 합니다. (3)은 별도 과제로 제안합니다.\n\n영향: 현재도 외부 호출 최대 5초 동안 커넥션을 쥐고 있는데, (1)은 실패 시 커넥션을 하나 더 얻습니다. 풀 20에 동시 15건이면 실패가 몰릴 때 최대 30개가 필요할 수 있어 대기나 교착이 생길 수 있습니다. 그래서 풀 대기 시간 지표를 보고, 필요하면 풀 크기 조정이나 (3)으로 외부 호출을 트랜잭션 밖으로 빼는 것을 우선합니다.\n\n검증: ① 트랜잭션 매니저 DEBUG 로그에서 이력 저장 시 기존 트랜잭션 중단과 새 트랜잭션 생성·커밋이 찍히는지 봅니다. ② coreClient를 실패하도록 모의한 통합 테스트에서 LEDGER_WITHDRAW에는 건이 없고 TRANSFER_FAILURE_HISTORY에는 1건이 남는지 DB로 확인합니다. ③ 동시 15건 실패 부하 테스트로 커넥션 대기와 타임아웃이 없는지 확인한 뒤 배포합니다."
+    }
+  ]
+}

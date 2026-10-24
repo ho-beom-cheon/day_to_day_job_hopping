@@ -14,3 +14,9 @@ frontend/tsconfig.tsbuildinfo
 *.backup
 /backups/
 /pgdata/
+# Local tool state and QA artifacts are never shared through Git.
+/.chrome-dashboard-mobile/
+/.codex-remote-attachments/
+/.playwright-cli/
+/.local-backups/
+/output/

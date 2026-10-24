@@ -52,8 +52,9 @@ class SessionMigrationIT {
 
     @Test void migratesCleanPostgresAndPersistsSessionAttributes() {
         roundTrip(sessions);
-        assertThat(jdbc.queryForList("select version from flyway_schema_history where success = true order by installed_rank", String.class))
-                .containsExactly("1", "2", "3", "4", "5", "6");
+        var versions = jdbc.queryForList("select version from flyway_schema_history where success = true order by installed_rank", String.class);
+        assertThat(versions).hasSizeGreaterThanOrEqualTo(34)
+                .containsExactlyElementsOf(java.util.stream.IntStream.rangeClosed(1, versions.size()).mapToObj(Integer::toString).toList());
     }
 
     private <S extends Session> void roundTrip(SessionRepository<S> repository) {

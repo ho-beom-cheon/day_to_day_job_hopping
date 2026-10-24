@@ -1,0 +1,318 @@
+{
+  "code": "financial-backend",
+  "versionNo": 1,
+  "competencies": [
+    {
+      "code": "A1",
+      "area": "A",
+      "areaTitle": "트랜잭션·정합성",
+      "title": "트랜잭션 경계와 전파 (Spring 프록시·self-invocation·readOnly)",
+      "priority": "P1",
+      "targetLevel": 4
+    },
+    {
+      "code": "A2",
+      "area": "A",
+      "areaTitle": "트랜잭션·정합성",
+      "title": "격리 수준과 동시 갱신 (lost update, 낙관·비관 잠금)",
+      "priority": "P1",
+      "targetLevel": 4
+    },
+    {
+      "code": "A3",
+      "area": "A",
+      "areaTitle": "트랜잭션·정합성",
+      "title": "멱등성과 중복 요청 (재시도로 인한 이중 처리 방지)",
+      "priority": "P1",
+      "targetLevel": 4
+    },
+    {
+      "code": "A4",
+      "area": "A",
+      "areaTitle": "트랜잭션·정합성",
+      "title": "분산 처리의 정합성 대안 (outbox, 보상 처리)",
+      "priority": "P1",
+      "targetLevel": 4
+    },
+    {
+      "code": "A5",
+      "area": "A",
+      "areaTitle": "트랜잭션·정합성",
+      "title": "원장·잔액 설계 (거래 기록과 잔액, 음수 방지, 계정계 기본)",
+      "priority": "P1",
+      "targetLevel": 4
+    },
+    {
+      "code": "A6",
+      "area": "A",
+      "areaTitle": "트랜잭션·정합성",
+      "title": "정산·대사 (불일치 탐지, 기준 데이터, 마감)",
+      "priority": "P1",
+      "targetLevel": 4
+    },
+    {
+      "code": "B1",
+      "area": "B",
+      "areaTitle": "데이터·SQL",
+      "title": "인덱스 설계와 실행 계획 (Oracle 실행 계획, MyBatis 동적 SQL)",
+      "priority": "P1",
+      "targetLevel": 4
+    },
+    {
+      "code": "B2",
+      "area": "B",
+      "areaTitle": "데이터·SQL",
+      "title": "페이징과 대량 조회 (offset/keyset, 카운트 비용)",
+      "priority": "P2",
+      "targetLevel": 3
+    },
+    {
+      "code": "B3",
+      "area": "B",
+      "areaTitle": "데이터·SQL",
+      "title": "NULL·조인·집계의 정확성",
+      "priority": "P2",
+      "targetLevel": 3
+    },
+    {
+      "code": "B4",
+      "area": "B",
+      "areaTitle": "데이터·SQL",
+      "title": "무중단 스키마 변경과 데이터 이전",
+      "priority": "P2",
+      "targetLevel": 3
+    },
+    {
+      "code": "B5",
+      "area": "B",
+      "areaTitle": "데이터·SQL",
+      "title": "금액·시간 표현 (BigDecimal 반올림, 타임존, 영업일)",
+      "priority": "P1",
+      "targetLevel": 4
+    },
+    {
+      "code": "C1",
+      "area": "C",
+      "areaTitle": "외부 연계·배치",
+      "title": "외부 호출 실패 처리 (타임아웃, 재시도, 결과 불명)",
+      "priority": "P1",
+      "targetLevel": 4
+    },
+    {
+      "code": "C2",
+      "area": "C",
+      "areaTitle": "외부 연계·배치",
+      "title": "전문·API 연계 계약과 하위 호환 (고정 길이 전문, 인코딩, 필드 추가·변경)",
+      "priority": "P1",
+      "targetLevel": 4
+    },
+    {
+      "code": "C3",
+      "area": "C",
+      "areaTitle": "외부 연계·배치",
+      "title": "배치 재처리·재시작 (청크, 체크포인트, 중복 방지)",
+      "priority": "P1",
+      "targetLevel": 4
+    },
+    {
+      "code": "C4",
+      "area": "C",
+      "areaTitle": "외부 연계·배치",
+      "title": "메시징의 순서·중복 (at-least-once 소비)",
+      "priority": "P2",
+      "targetLevel": 3
+    },
+    {
+      "code": "C5",
+      "area": "C",
+      "areaTitle": "외부 연계·배치",
+      "title": "시스템 간 동기화와 정합성 확인",
+      "priority": "P2",
+      "targetLevel": 3
+    },
+    {
+      "code": "D1",
+      "area": "D",
+      "areaTitle": "Java/Spring 심화",
+      "title": "동시성과 공유 상태 (스레드 풀, 원자성)",
+      "priority": "P2",
+      "targetLevel": 3
+    },
+    {
+      "code": "D2",
+      "area": "D",
+      "areaTitle": "Java/Spring 심화",
+      "title": "JPA 영속성 컨텍스트, N+1, 지연 로딩 (MyBatis와 비교)",
+      "priority": "P2",
+      "targetLevel": 3
+    },
+    {
+      "code": "D3",
+      "area": "D",
+      "areaTitle": "Java/Spring 심화",
+      "title": "Spring 빈 생명주기·프록시·AOP 동작",
+      "priority": "P2",
+      "targetLevel": 3
+    },
+    {
+      "code": "D4",
+      "area": "D",
+      "areaTitle": "Java/Spring 심화",
+      "title": "JVM 메모리·GC와 장애 관찰",
+      "priority": "P3",
+      "targetLevel": 2
+    },
+    {
+      "code": "D5",
+      "area": "D",
+      "areaTitle": "Java/Spring 심화",
+      "title": "예외 설계와 오류 응답 계약",
+      "priority": "P2",
+      "targetLevel": 3
+    },
+    {
+      "code": "E1",
+      "area": "E",
+      "areaTitle": "운영·장애 대응",
+      "title": "로그·지표로 장애 원인 가설 세우기",
+      "priority": "P1",
+      "targetLevel": 4
+    },
+    {
+      "code": "E2",
+      "area": "E",
+      "areaTitle": "운영·장애 대응",
+      "title": "응답 지연·커넥션 풀 고갈 진단",
+      "priority": "P1",
+      "targetLevel": 4
+    },
+    {
+      "code": "E3",
+      "area": "E",
+      "areaTitle": "운영·장애 대응",
+      "title": "배포·롤백·기능 플래그",
+      "priority": "P3",
+      "targetLevel": 2
+    },
+    {
+      "code": "E4",
+      "area": "E",
+      "areaTitle": "운영·장애 대응",
+      "title": "감사 로그와 관측성 설계",
+      "priority": "P2",
+      "targetLevel": 3
+    },
+    {
+      "code": "F1",
+      "area": "F",
+      "areaTitle": "보안·통제",
+      "title": "인증·인가와 세션·토큰",
+      "priority": "P2",
+      "targetLevel": 3
+    },
+    {
+      "code": "F2",
+      "area": "F",
+      "areaTitle": "보안·통제",
+      "title": "개인정보 암호화·마스킹·보관",
+      "priority": "P2",
+      "targetLevel": 3
+    },
+    {
+      "code": "G1",
+      "area": "G",
+      "areaTitle": "테스트·품질",
+      "title": "회귀 테스트와 경계값 설계",
+      "priority": "P2",
+      "targetLevel": 3
+    },
+    {
+      "code": "G2",
+      "area": "G",
+      "areaTitle": "테스트·품질",
+      "title": "통합 테스트와 테스트 대역 선택",
+      "priority": "P3",
+      "targetLevel": 2
+    },
+    {
+      "code": "H1",
+      "area": "H",
+      "areaTitle": "금융 업무",
+      "title": "여신 흐름과 상태 전이 (신청→심사→승인→실행→상환→사후관리)",
+      "priority": "P1",
+      "targetLevel": 4
+    },
+    {
+      "code": "H2",
+      "area": "H",
+      "areaTitle": "금융 업무",
+      "title": "결제·이체의 상태와 실패 처리",
+      "priority": "P2",
+      "targetLevel": 3
+    },
+    {
+      "code": "H3",
+      "area": "H",
+      "areaTitle": "금융 업무",
+      "title": "보험 채널 업무와 데이터 흐름",
+      "priority": "P3",
+      "targetLevel": 2
+    },
+    {
+      "code": "H4",
+      "area": "H",
+      "areaTitle": "금융 업무",
+      "title": "신용정보·마이데이터 업무 흐름 (CB 조회, 정보 제공 동의, 전송 요구)",
+      "priority": "P2",
+      "targetLevel": 3
+    },
+    {
+      "code": "H5",
+      "area": "H",
+      "areaTitle": "금융 업무",
+      "title": "AML(자금세탁방지) 대응 개발 (고객 확인, 의심 거래 데이터)",
+      "priority": "P2",
+      "targetLevel": 3
+    },
+    {
+      "code": "I1",
+      "area": "I",
+      "areaTitle": "면접·경력",
+      "title": "경력 프로젝트 서술 (상황·판단·결과·검증)",
+      "priority": "P1",
+      "targetLevel": 4
+    },
+    {
+      "code": "I2",
+      "area": "I",
+      "areaTitle": "면접·경력",
+      "title": "기술 선택의 트레이드오프 설명",
+      "priority": "P1",
+      "targetLevel": 4
+    },
+    {
+      "code": "I3",
+      "area": "I",
+      "areaTitle": "면접·경력",
+      "title": "AI 개발 도구 활용과 견해",
+      "priority": "P2",
+      "targetLevel": 3
+    },
+    {
+      "code": "I4",
+      "area": "I",
+      "areaTitle": "면접·경력",
+      "title": "협업·리더십·갈등 사례 (중도 투입, 리더 대행, 의견 조율)",
+      "priority": "P1",
+      "targetLevel": 4
+    },
+    {
+      "code": "J1",
+      "area": "J",
+      "areaTitle": "알고리즘 분석",
+      "title": "자료구조·복잡도·경계값 판단 (코드 작성 없음)",
+      "priority": "P3",
+      "targetLevel": 2
+    }
+  ]
+}

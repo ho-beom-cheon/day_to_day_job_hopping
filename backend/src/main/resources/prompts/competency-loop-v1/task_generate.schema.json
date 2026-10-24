@@ -1,0 +1,101 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tasks"
+  ],
+  "properties": {
+    "tasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "title",
+          "situation",
+          "material",
+          "question",
+          "estimatedMinutes",
+          "rubric",
+          "modelAnswerPoints",
+          "reserveFollowups"
+        ],
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "situation": {
+            "type": "string"
+          },
+          "material": {
+            "type": "string"
+          },
+          "question": {
+            "type": "string"
+          },
+          "estimatedMinutes": {
+            "type": "integer"
+          },
+          "rubric": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "criterionId",
+                "sheetCriteria",
+                "description",
+                "points"
+              ],
+              "properties": {
+                "criterionId": {
+                  "type": "string"
+                },
+                "sheetCriteria": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                },
+                "points": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "modelAnswerPoints": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "reserveFollowups": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "question",
+                "checkPoints"
+              ],
+              "properties": {
+                "question": {
+                  "type": "string"
+                },
+                "checkPoints": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

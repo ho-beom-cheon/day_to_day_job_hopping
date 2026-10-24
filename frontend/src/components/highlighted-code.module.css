@@ -1,0 +1,30 @@
+.code {
+  --code-keyword: #8948b6;
+  --code-string: #a43c45;
+  --code-comment: #61748d;
+  --code-number: #965016;
+  --code-type: #145aa5;
+  --code-function: #116579;
+  --code-annotation: #9b4f16;
+  --code-property: #145aa5;
+}
+
+:global([data-theme="dark"]) .code {
+  --code-keyword: #c99aff;
+  --code-string: #ffad9e;
+  --code-comment: #aab9cd;
+  --code-number: #f4be82;
+  --code-type: #8fc6ff;
+  --code-function: #80d6e3;
+  --code-annotation: #f3bf7c;
+  --code-property: #8fc6ff;
+}
+
+.keyword { color: var(--code-keyword); }
+.string { color: var(--code-string); }
+.comment { color: var(--code-comment); }
+.number { color: var(--code-number); }
+.type { color: var(--code-type); }
+.function { color: var(--code-function); }
+.annotation { color: var(--code-annotation); }
+.property { color: var(--code-property); }

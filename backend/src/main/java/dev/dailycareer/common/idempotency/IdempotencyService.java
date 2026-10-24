@@ -45,6 +45,11 @@ public class IdempotencyService {
     }
 
     public StoredReply execute(long userId, String operationId, UUID key, JsonNode input, Supplier<StoredReply> work) {
+        return executeWithReplay(userId, operationId, key, input, work).reply();
+    }
+
+    public ExecutionResult executeWithReplay(long userId, String operationId, UUID key, JsonNode input,
+                                             Supplier<StoredReply> work) {
         if (userId <= 0 || operationId == null || !operationId.matches("[A-Z][A-Z0-9_]*-[0-9]{3}")) {
             throw new IllegalArgumentException("Expected an authenticated app user and a canonical API ID");
         }
@@ -54,7 +59,7 @@ public class IdempotencyService {
         return Objects.requireNonNull(transaction.execute(status -> executeLocked(userId, operationId, key, digest, work)));
     }
 
-    private StoredReply executeLocked(long userId, String operationId, UUID key, String digest, Supplier<StoredReply> work) {
+    private ExecutionResult executeLocked(long userId, String operationId, UUID key, String digest, Supplier<StoredReply> work) {
         long lockId = ByteBuffer.wrap(RequestFingerprint.sha256(userId + ":" + operationId + ":" + key)).getLong();
         // Nonblocking transaction lock also serializes the not-yet-inserted row case across app instances.
         if (!Boolean.TRUE.equals(jdbc.queryForObject("select pg_try_advisory_xact_lock(?)", Boolean.class, lockId))) {
@@ -74,7 +79,7 @@ public class IdempotencyService {
             if (existing.active()) {
                 if (!existing.digest().equals(digest)) throw new ApiException(ApiErrorCode.IDEMPOTENCY_KEY_REUSED);
                 if (!existing.state().equals("SUCCEEDED")) throw new ApiException(ApiErrorCode.REQUEST_IN_PROGRESS);
-                return read(existing);
+                return new ExecutionResult(read(existing), true);
             }
             id = existing.id();
             jdbc.update("""
@@ -93,7 +98,7 @@ public class IdempotencyService {
                 update daily_career.idempotency_record set status='SUCCEEDED', response_status=?, response_payload=?::jsonb,
                     updated_at=current_timestamp, revision=revision+1 where id=?
                 """, reply.status(), write(reply), id);
-        return reply;
+        return new ExecutionResult(reply, false);
     }
 
     /** Maintenance hook; scheduling belongs to the worker lifecycle. Never remove active or locked work. */
@@ -121,4 +126,5 @@ public class IdempotencyService {
     }
 
     private record Existing(long id, String digest, String state, Integer status, String payload, boolean active) {}
+    public record ExecutionResult(StoredReply reply, boolean reused) {}
 }

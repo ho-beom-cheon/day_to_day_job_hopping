@@ -2,7 +2,11 @@
 
 6개월 학습·시험·복습 서비스. Java 21 / Spring Boot / PostgreSQL / Next.js 기반.
 
-**집에서 이어서 작업할 때: [통합 작업 인수인계 문서](WORK_HANDOFF.md)** — 현재 상태, 실행 명령, 남은 검증과 다음 작업 순서.
+**이전 단계 인수인계: [통합 작업 인수인계 문서](WORK_HANDOFF.md)** — 2026-09-21까지의 구현 이력과 실행 절차.
+
+**현재 기준: [역량맵 + 매일 AI 과제 루프 설계](docs/competency-daily-loop-design-20261024.md)** — 2026-10-24 기존 학습 기능을 초기화하고(R0, 복구는 `legacy-before-reset` 태그와 DB 백업) S1 얇은 버전을 구현했다. 시작 화면은 [오늘 과제](http://localhost:8080/workspace)이고, 아래 단계별 문서는 초기화 이전 이력이다.
+
+**최신 점검: [2026-09-24 프로젝트 전체 점검과 통합 검증 단계](docs/project-audit-next-stage-20260924.md)** — 실제 실행·테스트 결과와 로그인 후 남은 사용자 흐름을 확인한다. 아래 단계별 문서는 각 시점의 이력이다.
 
 - [구현 계획](docs/implementation-plan.md)
 - [작업 1 완료: 설계 원본·소스 현황과 채택 기준](docs/project-stage1-assessment-20260920.md)
@@ -19,11 +23,10 @@
 - [실행 방법](docs/runtime.md)
 - [원본 설계 패키지](design-package/daily_career_codex_implementation_20260919_full/00_START_HERE/README.md)
 
-현재는 작업 1–8 완료 상태입니다. 문제 조회·제출·동기 규칙 채점·신고와 오답 목록·메모·해결·재개 API까지 구현했습니다. [작업 8 검증 결과](docs/problem-stage8-verification-20260921.md)에 일반 38개와 실제 PostgreSQL IT 52개, 총 90개 테스트 결과를 기록했습니다. 사용자 결정에 따라 운영 콘텐츠는 비어 있습니다. 작업 1–8의 번호와 범위는 유지하고 9단계 이후를 Backend/UI 사용자 흐름 중심으로 재구성했으며, 다음은 작업 9 Next.js 공통 기반입니다.
+작업 1–8 이후 공통 UI와 핵심 학습·시험·진척도·알림·외부 연동의 내부 구현을 진행했습니다. 승인된 개발용 과정은 운영 원고와 분리되어 있습니다. 최신 실행 상태와 완료·미검증 경계는 위 전체 점검을 따릅니다.
 공통 기반, Google OIDC, 커리큘럼·학습·일정·문제 Backend 운영 기능을 구현했습니다. 설계 차이는 [계약 자료 안내](docs/contracts/README.md)에 따라 계속 보완합니다.
 
-이번 요청의 **2단계(Docker 개발환경)** 결과는 [검증 보고서](docs/docker-development-stage2.md)에 기록합니다.
-집 PC에서 컨테이너 실행·DB 영속성·HMR 검증을 통과했고, 작업 2에서 관리 포트 오류를 수정해 일반 테스트 11개와 PostgreSQL IT 2개도 모두 통과했습니다. [최신 완료 보고서](docs/docker-stage2-completion-20260920.md), [이전 실행 기록](docs/docker-home-verification-20260920.md).
+초기 **2단계(Docker 개발환경)** 이력은 [검증 보고서](docs/docker-development-stage2.md)에 기록했습니다. 당시 집 PC에서 컨테이너 실행·DB 영속성·HMR과 관리 포트 수정을 검증했습니다. [당시 완료 보고서](docs/docker-stage2-completion-20260920.md), [이전 실행 기록](docs/docker-home-verification-20260920.md).
 
 ## 새 PC 개발환경 구축 (Phase 1 운영 기준 추가)
 

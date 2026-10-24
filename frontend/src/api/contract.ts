@@ -18,7 +18,6 @@ export type CurrentUserDto = {
   nickname: string;
   profileImageUrl: string | null;
   role: "USER" | "ADMIN";
-  curriculumId: Id | null;
   revision: number;
   joinedAt: string;
   updatedAt: string;
@@ -73,7 +72,7 @@ export function decodeCurrentUser(value: unknown): CurrentUserDto {
   return {
     userId: readId(user.userId), email: string(user.email, "email"), nickname: string(user.nickname, "nickname"),
     profileImageUrl: nullableString(user.profileImageUrl, "profileImageUrl"), role,
-    curriculumId: user.curriculumId === null ? null : readId(user.curriculumId), revision: integer(user.revision, "revision"),
+    revision: integer(user.revision, "revision"),
     joinedAt: string(user.joinedAt, "joinedAt"), updatedAt: string(user.updatedAt, "updatedAt"),
   };
 }

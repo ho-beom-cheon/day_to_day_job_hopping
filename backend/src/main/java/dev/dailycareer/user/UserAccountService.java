@@ -64,12 +64,8 @@ public class UserAccountService {
     public UserView current(long id) { return read(id, false); }
     private UserView locked(long id) { return read(id, true); }
     private UserView read(long id, boolean lock) {
-        var users = jdbc.query("""
-                select u.*, (select c.id from daily_career.user_curriculum c
-                   where c.user_id=u.id and c.status in ('PLANNED','ACTIVE','PAUSED','COMPLETED')
-                   order by (c.status in ('PLANNED','ACTIVE','PAUSED')) desc,c.created_at desc,c.id desc limit 1) as curriculum_id
-                from daily_career.app_user u where u.id=?
-                """ + (lock ? " for update of u" : ""), this::map, id);
+        var users = jdbc.query("select u.* from daily_career.app_user u where u.id=?"
+                + (lock ? " for update of u" : ""), this::map, id);
         if (users.isEmpty() || users.getFirst() == null) throw new ApiException(ApiErrorCode.AUTH_REQUIRED);
         return users.getFirst();
     }
@@ -79,8 +75,7 @@ public class UserAccountService {
         long revision = row.getLong("revision");
         if (!row.getString("status").equals("ACTIVE") || email == null || email.length() < 3
                 || nickname.isBlank() || nickname.codePointCount(0, nickname.length()) > 30 || revision > Integer.MAX_VALUE) return null;
-        return new UserView(row.getLong("id"), email, nickname, row.getString("profile_image_url"), "USER",
-                row.getObject("curriculum_id", Long.class), (int) revision,
+        return new UserView(row.getLong("id"), email, nickname, row.getString("profile_image_url"), "USER", (int) revision,
                 row.getObject("created_at", OffsetDateTime.class).withOffsetSameInstant(ZoneOffset.ofHours(9)),
                 row.getObject("updated_at", OffsetDateTime.class).withOffsetSameInstant(ZoneOffset.ofHours(9)));
     }

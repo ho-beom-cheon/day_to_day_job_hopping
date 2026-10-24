@@ -1,0 +1,70 @@
+.content {
+  min-width: 0;
+  max-width: 100%;
+  color: var(--app-ink);
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.9;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.compact { font-size: 0.9375rem; line-height: 1.8; }
+.content p { margin: 0.9em 0; white-space: pre-wrap; }
+.content > :first-child, .exampleBody > :first-child { margin-top: 0; }
+.content > :last-child, .exampleBody > :last-child { margin-bottom: 0; }
+.content h3 { margin: 1.5em 0 0.5em; font-size: 1em; font-weight: 700; line-height: 1.6; }
+.content strong { font-weight: 700; }
+.content ul, .content ol { margin: 0.9em 0; padding-left: 1.5em; }
+.content ul { list-style: disc; }
+.content ol { list-style: decimal; }
+.content li { margin: 0.35em 0; }
+.content hr { margin: 1.5em 0; border-color: var(--app-border); }
+.content :not(pre) > code {
+  padding: 0.1em 0.35em;
+  border: 1px solid var(--app-border);
+  border-radius: 0.35rem;
+  background: var(--app-bg);
+  font-size: 0.9em;
+  white-space: break-spaces;
+}
+.content code { font-family: Consolas, "Cascadia Code", "Courier New", monospace; }
+.codeBlock, .example {
+  min-width: 0;
+  max-width: 100%;
+  margin: 1.25em 0;
+  overflow: hidden;
+  border: 1px solid var(--app-border);
+  border-radius: 0.875rem;
+  background: var(--app-bg);
+}
+.caption {
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid var(--app-border);
+  background: var(--app-primary-soft);
+  color: var(--app-ink);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+.content pre {
+  max-width: 100%;
+  margin: 0;
+  padding: 1rem;
+  overflow-x: auto;
+  color: var(--app-ink);
+  font-size: 0.875rem;
+  line-height: 1.75;
+  tab-size: 4;
+  white-space: pre;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+.content pre:focus-visible { outline: 2px solid var(--app-primary); outline-offset: -3px; }
+.exampleBody { padding: 1rem; }
+.tableScroll { max-width: 100%; margin: 1.25em 0; overflow-x: auto; border: 1px solid var(--app-border); border-radius: 0.875rem; }
+.tableScroll table { min-width: 100%; border-collapse: collapse; font-size: 0.875rem; line-height: 1.6; }
+.tableScroll th, .tableScroll td { padding: 0.55rem 0.8rem; border-bottom: 1px solid var(--app-border); text-align: left; vertical-align: top; word-break: keep-all; overflow-wrap: normal; }
+.tableScroll th { background: var(--app-primary-soft); font-weight: 700; white-space: nowrap; }
+.tableScroll tr:last-child td { border-bottom: 0; }
+@media (min-width: 640px) { .content:not(.compact) { font-size: 1.0625rem; } }
