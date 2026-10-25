@@ -220,7 +220,7 @@ class DailyLoopIT {
 
         private static String task(String title) {
             return """
-                    {"title":"%s","situation":"상황","material":"로그 발췌","question":"원인과 수정 방향, 검증 방법을 설명하세요.","estimatedMinutes":20,
+                    {"title":"%s","situation":"상황","material":"로그 발췌","question":"원인과 수정 방향, 검증 방법을 설명하세요.","estimatedMinutes":10,
                      "rubric":[{"criterionId":"R1","sheetCriteria":["K1"],"description":"원인","points":25},
                                {"criterionId":"R2","sheetCriteria":["K2"],"description":"예외","points":25},
                                {"criterionId":"R3","sheetCriteria":["K3"],"description":"전파","points":25},

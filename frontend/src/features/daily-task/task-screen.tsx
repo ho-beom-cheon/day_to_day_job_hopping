@@ -58,8 +58,10 @@ function TaskBody({ task }: { task: DailyTask }) {
       <h2 className="text-lg font-black text-[#0a1837] dark:text-slate-50">상황</h2>
       <div className="mt-3"><QuestionContent body={task.task.situation}/></div>
       {task.task.material && <div className="mt-4 rounded-2xl bg-slate-50 p-4 dark:bg-[#151f2f]"><QuestionContent body={task.task.material}/></div>}
-      <h2 className="mt-6 text-lg font-black text-[#0a1837] dark:text-slate-50">질문</h2>
-      <div className="mt-2 font-semibold"><QuestionContent body={task.task.question}/></div>
+      <div className="mt-6 rounded-2xl border-l-4 border-blue-500 bg-blue-50 px-5 py-4 dark:border-blue-400 dark:bg-blue-500/10">
+        <h2 className="text-sm font-extrabold text-blue-700 dark:text-blue-300">질문</h2>
+        <div className="mt-1 text-[#0a1837] dark:text-slate-100"><QuestionContent body={task.task.question}/></div>
+      </div>
       {task.sheet && <details className="mt-6 rounded-2xl border border-slate-200 p-4 dark:border-slate-700" onToggle={event => { if ((event.target as HTMLDetailsElement).open) setSheetOpened(true); }}>
         <summary className="flex cursor-pointer items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-200"><BookOpen size={16}/>역량 시트 참고 (v{task.sheet.version} · {task.sheet.reviewLabel})</summary>
         <p className="mt-2 text-xs text-slate-500">펼쳐 보고 답하면 &quot;참고하며 답함&quot;으로 기록돼요.</p>
@@ -74,7 +76,7 @@ function TaskBody({ task }: { task: DailyTask }) {
     </section>}
 
     {main && <AnswerTurn task={task} turn={main} label="내 답" sheetOpened={sheetOpened} rows={10}
-      hint={task.format === "INTERVIEW" ? "면접에서 말하듯 상황 → 판단 → 결과 → 검증 순서로 써 보세요." : "원인 가설, 근거, 즉시 조치, 근본 수정안, 재발 방지 검증을 써 보세요."}/>}
+      hint={task.format === "INTERVIEW" ? "면접에서 말하듯 3~6문장이면 충분해요. 더 깊은 부분은 꼬리질문에서 이어서 물어봐요." : "질문이 묻는 것만 핵심 위주로 써 보세요. 빠진 부분은 꼬리질문에서 이어서 물어봐요."}/>}
 
     {task.status === "GRADING" && !followups.some(turn => turn.submitted) && <section className={panel}><p className="flex items-center gap-2 text-sm font-semibold text-slate-600 dark:text-slate-300"><Loader2 className="animate-spin" size={18}/>AI가 루브릭으로 채점하고 있어요.</p></section>}
 

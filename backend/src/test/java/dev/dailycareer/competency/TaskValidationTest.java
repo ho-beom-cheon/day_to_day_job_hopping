@@ -38,6 +38,14 @@ class TaskValidationTest {
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
+    @Test void rejectsLongQuestionsAndInterviewsThatTakeTooLong() throws Exception {
+        assertThatThrownBy(() -> TaskValidation.task(json, json.readTree(task("가".repeat(161), 30)), "CASE", CRITERIA))
+                .hasMessageContaining("too long");
+        assertThat(TaskValidation.task(json, json.readTree(task("가".repeat(160), 30)), "CASE", CRITERIA)).isNotNull();
+        assertThatThrownBy(() -> TaskValidation.task(json, json.readTree(task("성과를 설명하세요.", 30)), "INTERVIEW", CRITERIA))
+                .hasMessageContaining("minutes");
+    }
+
     @Test void gradingMustCoverEveryCriterionWithinItsPoints() throws Exception {
         var rubric = json.readTree(task("설명하세요.", 30)).path("rubric");
         var good = json.readTree("""

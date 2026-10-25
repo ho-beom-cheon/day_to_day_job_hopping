@@ -13,6 +13,8 @@ import java.util.regex.Pattern;
 /** Server checks on AI output (design §6.2). Failures throw IllegalArgumentException so the worker records a quality rejection. */
 final class TaskValidation {
     private static final Pattern CODE_WRITING = Pattern.compile("코드를\\s*(직접\\s*)?(작성|구현)|구현하(세요|시오|라)|작성하(세요|시오)[^.]*코드");
+    /** A question the learner reads in one go; deeper asks belong to follow-ups (prompt allows 120, slack for wording). */
+    static final int MAX_QUESTION_LENGTH = 160;
     private TaskValidation() {}
 
     record GeneratedTask(ObjectNode task, ArrayNode rubric, ArrayNode reserveFollowups, String fingerprint) {}
@@ -38,8 +40,10 @@ final class TaskValidation {
         String material = item.path("material").asText("");
         if (!"INTERVIEW".equals(format) && material.isBlank()) throw new IllegalArgumentException("Material required");
         if (CODE_WRITING.matcher(question).find()) throw new IllegalArgumentException("Code-writing tasks are excluded");
+        if (question.length() > MAX_QUESTION_LENGTH) throw new IllegalArgumentException("Question too long");
         int minutes = item.path("estimatedMinutes").asInt(-1);
-        if (minutes < 10 || minutes > 35) throw new IllegalArgumentException("Estimated minutes out of range");
+        boolean interview = "INTERVIEW".equals(format);
+        if (minutes < (interview ? 5 : 10) || minutes > (interview ? 15 : 25)) throw new IllegalArgumentException("Estimated minutes out of range");
         ArrayNode rubric = rubric(item.path("rubric"), sheetCriteria);
         ArrayNode reserve = json.createArrayNode();
         for (JsonNode followup : item.path("reserveFollowups")) {
